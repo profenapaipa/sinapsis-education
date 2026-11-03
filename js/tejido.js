@@ -39,7 +39,7 @@
   };
   // Contorno circular: el mismo logo, recortado por un círculo (no se inventa otra figura). El radio toca los bordes del cuadrado de 2 a 62.
   // En la versión "suelta" las fichas terminan algo separadas (SEP por paso desde el centro) y los hilos, flojos, se curvan (AMP).
-  const RADIO = 30.5; const RADIO_SUELTO = 32.8; const SEP = 2.2; const AMP = 1.7;
+  const RADIO = 30; const RADIO_SUELTO = 32.8; const SEP = 2.2; const AMP = 1.7;
   const DESPLAZA = [[2, -1], [18, -1], [24, 0], [40, 0], [46, 1], [62, 1]];   // cuánto se corre cada franja de la rejilla (en pasos de SEP)
   // Una coordenada de la rejilla compacta, pasada a la rejilla con las fichas separadas (sirve a lo largo de un hilo y de través).
   function suelta(s) {

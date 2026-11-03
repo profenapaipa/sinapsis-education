@@ -401,3 +401,15 @@ input[type="file"] { width: 100%; font: 400 1rem var(--fuente); color: var(--tin
 .uso-sticker { display: grid; place-items: center; height: 96px; border-radius: 10px; background: #F6F2EA; }
 .uso-sticker img { width: 72px; height: 72px; padding: 6px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 2px 6px rgba(26, 23, 20, .25); }
 @media (max-width: 640px) { .logo-heroe { grid-template-columns: 1fr; padding: 1.4rem; } }
+
+/* Elegir rol en Mi espacio: fichas compactas, una por hilo. */
+.rol-opciones { gap: 12px; }
+.rol-opcion { --c: var(--hilo-kinesis); display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; gap: .1rem .9rem; align-items: center; text-align: left; width: 100%; padding: .9rem 1rem; border-top: 4px solid var(--c); font: inherit; color: inherit; cursor: pointer; }
+.rol-opcion:nth-child(5n+2) { --c: var(--hilo-valeria); } .rol-opcion:nth-child(5n+3) { --c: var(--hilo-wisfox); } .rol-opcion:nth-child(5n+4) { --c: var(--hilo-mosaico); } .rol-opcion:nth-child(5n+5) { --c: var(--hilo-kinesis); }
+.rol-opcion .rol-icono { grid-row: 1 / span 2; width: 44px; height: 44px; margin: 0; background: var(--c); color: #FFFFFF; }
+.rol-opcion:nth-child(5n+3) .rol-icono { color: #1A1714; }
+.rol-opcion .rol-icono svg { width: 22px; height: 22px; }
+.rol-opcion strong { font: 800 1.05rem/1.2 var(--fuente); }
+.rol-opcion .suave { font-size: .9rem; line-height: 1.35; }
+.rol-opcion:hover { border-color: var(--c); }
+.rol-opcion:focus-visible { outline: 3px solid var(--c); outline-offset: 2px; }

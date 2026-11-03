@@ -27,7 +27,7 @@
     const enlace = (e) => h('a', { href: e.hash, class: e.cls, 'data-ruta': e.id }, e.icono(), e.etiqueta);
     // El botón de inicio es el único ícono del riel a color: los demás van en blanco y negro para que el logo tenga el protagonismo.
     const logoRiel = MT.tejido.logoColor('', { contorno: 'circulo' });
-    logoRiel.setAttribute('viewBox', '1.5 1.5 61 61');   // recorta el lienzo al disco del logo para que llene el círculo del botón
+    logoRiel.setAttribute('viewBox', '2 2 60 60');   // recorta el lienzo al disco del logo para que llene el círculo del botón
     document.getElementById('riel-logo').append(logoRiel);
     document.getElementById('riel-items').append(...ESPACIOS.filter((e) => !e.abajo).map(enlace));
     document.getElementById('riel-abajo').append(...ESPACIOS.filter((e) => e.abajo).map(enlace));

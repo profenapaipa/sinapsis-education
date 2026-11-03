@@ -439,8 +439,9 @@
   /* ------------------------------ Ruta principal ------------------------------ */
   function elegirRol(main) {
     const c = MT.comun.pagina(main, { etiqueta: 'Mi espacio', titulo: '¿Quién eres?', descripcion: 'Elige tu rol. Cada uno ve y hace cosas distintas, y todo lo que haces queda en este navegador.' });
-    c.append(h('div', { class: 'rejilla rejilla--3' }, MT.roles.lista.map((r) => h('button', { class: 'rol-tarjeta', type: 'button', onclick: () => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/mi'; } },
-      icono(r.icono), h('strong', null, r.nombre), h('span', null, r.lema)))));
+    // Cinco opciones compactas: una ficha por rol, con el color de uno de los hilos y un ícono pequeño. Cada una es un botón y se lee completa.
+    c.append(h('div', { class: 'rejilla rejilla--3 rol-opciones' }, MT.roles.lista.map((r) => h('button', { class: 'tarjeta rol-opcion', type: 'button', onclick: () => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/mi'; } },
+      h('span', { class: 'rol-icono' }, icono(r.icono)), h('strong', null, r.nombre), h('span', { class: 'suave' }, r.lema)))));
   }
 
   MT.router.registrar({
