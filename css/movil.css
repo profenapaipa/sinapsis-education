@@ -1,0 +1,80 @@
+/* movil.css: la experiencia en celular. Se carga la última de las hojas de la plataforma para ajustar, sin tocar el escritorio.
+
+   Por qué existe: casi todas las visitas llegan escaneando el QR del pendón con un celular, de pie, con una mano y con internet que
+   puede ir lento. La primera pantalla debe mostrar el logo, el nombre, el eslogan y UN botón claro sin desplazarse. No cambia ningún
+   texto: solo el orden visual, el tamaño y el espacio. Todo va dentro de media queries, así que en escritorio no cambia nada. */
+
+/* ---- Toque: sin espera ni zoom accidental al tocar dos veces, y los menús no arrastran la página de atrás ---- */
+a, button, summary, select, label, input[type="checkbox"], input[type="radio"] { touch-action: manipulation; }
+dialog, .menu-rol, .menu-portal, .menu-apariencia, .panel-ia, .vivo-ayuda__cuerpo, .tabla-scroll { overscroll-behavior: contain; }
+
+/* ---- Áreas seguras (iPhone con muesca): el contenido y la barra inferior no quedan bajo la muesca ni bajo la barra de gestos.
+   Funciona porque index.html declara viewport-fit=cover; sin muesca, env() vale 0 y no cambia nada. ---- */
+@supports (padding: max(0px)) {
+  .cuerpo { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+  @media (max-width: 860px) {
+    .cuerpo { padding-bottom: calc(5.6rem + env(safe-area-inset-bottom)); }
+    .riel { bottom: calc(.6rem + env(safe-area-inset-bottom)); left: calc(.6rem + env(safe-area-inset-left)); right: calc(.6rem + env(safe-area-inset-right)); }
+  }
+}
+
+/* ---- Barra inferior: objetivos de 48 px de alto y rótulos legibles (11,5 px en vez de 10,9) ---- */
+@media (max-width: 860px) {
+  .riel a { min-height: 48px; font-size: .72rem; }
+  .riel-items a { flex: 1 1 0; min-width: 0; }
+}
+
+/* ---- Modo amplio de los portales (botón «Pantalla completa» en celular, ver js/vivos.js) ---- */
+html[data-amplio] .franja, html[data-amplio] .barra-portales, html[data-amplio] .riel, html[data-amplio] .pie,
+html[data-amplio] .guion { display: none !important; }
+html[data-amplio] .cuerpo { padding-bottom: 0; }
+html[data-amplio] .vivos { height: 100dvh; min-height: 0; }
+html[data-amplio] .vivo-ayuda__cuerpo { top: 3.4rem; }
+
+/* ---- Celular en vertical y chico ---- */
+@media (max-width: 600px) {
+  /* La franja de demostración se lleva dos filas: texto más compacto y botones de 40 px en una fila que se envuelve poco. */
+  .franja { padding: .25rem .7rem .35rem; gap: .2rem .6rem; }
+  .franja p { font-size: .75rem; line-height: 1.3; font-weight: 600; }
+  .franja-acciones { gap: .3rem; }
+  /* 40 px siempre en celular: en base.css solo se pide con pointer: coarse, y un celular con ratón o emulado quedaría en 30 px. */
+  .franja .btn { padding: .1rem .65rem; min-height: 40px; }
+
+  /* La bienvenida: lo primero es el logo, el nombre, el eslogan y el botón de entrar. La explicación sigue justo debajo.
+     El orden visual cambia con flex; el orden del documento (y el de los lectores de pantalla) queda igual. */
+  .lienzo { padding: .9rem 0 1.4rem; gap: 1.2rem; }
+  .lienzo > div:first-child { display: flex; flex-direction: column; }
+  .lienzo .descriptor { order: 0; font-size: .72rem; letter-spacing: .1em; line-height: 1.35; margin-bottom: .6rem; }
+  .lienzo .marca-hero { order: 1; display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: center; gap: .5rem .9rem; margin-bottom: 1rem; }
+  .lienzo .marca-hero__logo { display: contents; }
+  .lienzo .marca-hero__logo > :first-child { grid-column: 1; grid-row: 1; width: 88px; }
+  .lienzo .marca-hero__controles { grid-column: 1 / -1; grid-row: 2; }
+  .lienzo .marca-hero > div:last-child { grid-column: 2; grid-row: 1; min-width: 0; }
+  .lienzo .marca-hero h1 { font-size: clamp(1.9rem, 9.5vw, 2.3rem); }
+  .lienzo .marca-hero__lema { font-size: 1.05rem; margin-top: .3rem; }
+  .lienzo .marca-hero__logo .btn { min-height: 40px; font-size: .85rem; padding: .1rem .8rem; }
+  .lienzo > div:first-child > .acciones { order: 2; margin: 0 0 1.1rem; flex-direction: column; align-items: stretch; gap: .5rem; }
+  .lienzo > div:first-child > .acciones .btn { justify-content: center; text-align: center; min-height: 48px; font-size: 1.05rem; }
+  .lienzo > div:first-child > .intro { order: 3; }
+  .lienzo > div:first-child > .hilos-leyenda { order: 4; }
+  .lienzo > div:first-child > .confianza { order: 5; }
+  .lienzo .intro { font-size: 1.05rem; line-height: 1.55; }
+
+  /* Texto de apoyo de los portales: 14 px como mínimo. */
+  .vivo-rescate { font-size: .875rem; }
+  .vivo-titulo { font-size: 1.05rem; }
+  .vivo-barra { gap: .3rem .5rem; }
+}
+
+/* ---- Celular de lado: poco alto. La barra inferior pasa a una sola línea baja y los portales pueden ser más bajos. ---- */
+@media (max-width: 950px) and (max-height: 520px) {
+  .riel { padding: .15rem; }
+  .riel a { flex-direction: row; gap: .4rem; min-height: 44px; width: auto; padding: .2rem .6rem; }
+  .riel a svg { width: 22px; height: 22px; }
+  .cuerpo { padding-bottom: 4rem; }
+  .vivos { min-height: 280px; height: calc(100dvh - var(--cabeza) - 4rem); }
+}
+@media (max-width: 950px) and (max-height: 520px) { html[data-amplio] .vivos { height: 100dvh; } }
+
+/* ---- Datos reducidos: las capturas de pantalla de la bienvenida (las imágenes más pesadas) no se piden. Los marcos dicen lo mismo con texto. ---- */
+@media (prefers-reduced-data: reduce) { .vitrina { display: none; } }

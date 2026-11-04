@@ -18,7 +18,7 @@
      comprueba que todo lo que carga index.html esté en la lista, así que un archivo nuevo sin registrar se detecta antes de publicar. */
 'use strict';
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const PREFIJO = 'mosaicotelar-';
 const CACHE = PREFIJO + VERSION;
 
@@ -43,6 +43,7 @@ const CASCARA = [
   'css/estilo-hilo.css',
   'css/estilo-piezas.css',
   'css/estilo-taller.css',
+  'css/movil.css',
   'css/base.css',
   'css/calmado.css',
   'css/fuentes.css',

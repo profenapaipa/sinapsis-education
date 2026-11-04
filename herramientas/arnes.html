@@ -1095,6 +1095,70 @@ async function flujoFrontend() {
   afirmar('frontend: sin errores de ejecución en estas pruebas', !(ventana().__errores && ventana().__errores.filter((e) => e !== 'prueba').length), ventana().__errores && ventana().__errores.join(' | '));
 }
 
+/* ===== Experiencia móvil: lo que llega por el QR del pendón. Se mide en el tamaño de cada celular, no solo a 390 ===== */
+async function flujoMovil() {
+  const D = () => doc();
+  const sinDesborde = () => D().documentElement.scrollWidth <= ventana().innerWidth + 1;
+  // Pantallas que una persona recorre desde el celular; las dos primeras son las que abre el QR y su primer paso.
+  const pantallas = ['#/', '#/guia/docente', '#/planes/formas', '#/mapa/conexiones', '#/valeria/chat', '#/portales/kinesis', '#/glosario', '#/piloto'];
+  for (const [ancho, alto] of [[320, 568], [360, 640], [390, 844]]) {
+    const malas = [];
+    for (const hs of pantallas) {
+      localStorage.clear(); await cargar(hs, ancho, alto); await espera(350);
+      if (!sinDesborde()) malas.push(hs + ' (' + D().documentElement.scrollWidth + ' px)');
+    }
+    afirmar(`móvil ${ancho}: ninguna de ${pantallas.length} pantallas se desborda en horizontal`, malas.length === 0, malas.join(' | '));
+  }
+
+  /* La primera pantalla: UN botón principal a la vista, sin desplazarse, y no tapado por la barra inferior */
+  for (const [ancho, alto] of [[320, 568], [360, 640], [375, 667], [390, 844]]) {
+    localStorage.clear(); await cargar('#/', ancho, alto); await espera(450);
+    const boton = [...D().querySelectorAll('main .lienzo a.btn')].find((b) => /Entrar con mi rol/.test(b.textContent));
+    const barra = D().querySelector('.riel'); const topeBarra = barra ? barra.getBoundingClientRect().top : alto;
+    const r = boton && boton.getBoundingClientRect(); const h1 = D().querySelector('main h1').getBoundingClientRect();
+    afirmar(`móvil ${ancho}x${alto}: en la primera pantalla se ven el nombre y el botón «Entrar con mi rol», sin desplazarse y sin quedar tras la barra inferior`,
+      !!r && h1.top >= 0 && h1.bottom <= topeBarra && r.top >= 0 && r.bottom <= topeBarra, r ? `botón ${Math.round(r.top)}-${Math.round(r.bottom)}, barra en ${Math.round(topeBarra)}` : 'sin botón');
+    if (ancho === 360) {
+      afirmar('móvil: el botón principal de la primera pantalla mide al menos 44 px de alto y el ancho de la columna', !!r && r.height >= 44 && r.width >= ancho - 48, r ? `${Math.round(r.width)}x${Math.round(r.height)}` : '');
+      const peques = [...D().querySelectorAll('.riel a, .franja .btn, .lienzo .btn, .barra-portales a')].filter(visible).filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.height < 40 || b.width < 44) && !e.matches('.riel-logo'); });
+      afirmar('móvil: la barra inferior, la franja, los botones de la bienvenida y las pestañas tienen objetivos de al menos 40 px de alto (la franja) y 44 de ancho', peques.length === 0, peques.map((e) => (e.className || e.tagName) + ' ' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height)).join(' | '));
+      const barraAlto = [...D().querySelectorAll('.riel a')].filter(visible).map((a) => a.getBoundingClientRect().height);
+      afirmar('móvil: cada acceso de la barra inferior mide al menos 44 px de alto', barraAlto.length > 0 && barraAlto.every((x) => x >= 44), barraAlto.map(Math.round).join());
+    }
+  }
+  localStorage.clear(); await cargar('#/', 360, 640); await espera(300);
+  const meta = (D().querySelector('meta[name="viewport"]') || {}).content || '';
+  afirmar('móvil: la meta viewport no bloquea el zoom (sin user-scalable=no ni maximum-scale) y declara viewport-fit=cover para las áreas seguras', !/user-scalable\s*=\s*(no|0)|maximum-scale/i.test(meta) && /viewport-fit=cover/.test(meta), meta);
+  let cssMovil = await fetch('../css/movil.css', { cache: 'no-store' }).then((r) => (r.ok ? r.text() : '')).catch(() => '');
+  if (!/safe-area-inset-bottom/.test(cssMovil)) cssMovil = await (await fetch('../css/mosaico.css', { cache: 'no-store' })).text();   // copia empaquetada
+  afirmar('móvil: la barra inferior respeta el área segura (usa env(safe-area-inset-bottom))', /\.riel \{[^}]*safe-area-inset-bottom/.test(cssMovil));
+
+  /* La tabla de Participar se desplaza dentro de su propio contenedor (no ensancha la página) */
+  await cargar('#/planes/formas', 320, 568); await espera(400);
+  const tabla = D().querySelector('.tabla-planes'); const envoltura = tabla && tabla.closest('.tabla-scroll');
+  afirmar('móvil 320: la tabla de formas de participar vive en un contenedor con desplazamiento propio y la página no se desborda', !!envoltura && ventana().getComputedStyle(envoltura).overflowX !== 'visible' && sinDesborde(), envoltura ? '' : 'sin contenedor');
+
+  /* El tamaño del texto de lectura */
+  await cargar('#/', 360, 640); await espera(300);
+  const intro = D().querySelector('.lienzo .intro'); const px = parseFloat(ventana().getComputedStyle(intro).fontSize);
+  afirmar('móvil: el párrafo de presentación mide al menos 16 px', px >= 16, px + ' px');
+
+  /* Modo amplio de los portales: el botón existe en un celular y deja el portal a pantalla completa */
+  await ir('#/portales/kinesis'); await espera(500);
+  const botonAmplio = [...D().querySelectorAll('.vivo-barra button')].find((b) => /Pantalla completa/.test(b.textContent));
+  afirmar('móvil: en el portal hay un botón «Pantalla completa» que además funciona como interruptor (aria-pressed)', !!botonAmplio && botonAmplio.hasAttribute('aria-pressed'));
+
+  /* Manifiesto instalable */
+  const mf = await (await fetch('../manifest.webmanifest', { cache: 'no-store' })).json();
+  const iconos = mf.icons || [];
+  afirmar('móvil: el manifiesto es instalable (nombre, start_url, scope, display standalone, colores y un ícono de 192 y otro de 512 px)',
+    !!mf.name && !!mf.short_name && mf.start_url === './' && mf.scope === './' && /standalone|fullscreen|minimal-ui/.test(mf.display) && !!mf.theme_color && !!mf.background_color
+    && iconos.some((i) => /192x192/.test(i.sizes)) && iconos.some((i) => /512x512/.test(i.sizes)), JSON.stringify(Object.keys(mf)));
+  const existen = await Promise.all(iconos.map(async (i) => (await fetch('../' + i.src, { method: 'HEAD' })).ok));
+  afirmar('móvil: todos los íconos del manifiesto existen', existen.every(Boolean), iconos.map((i, k) => i.src + ':' + existen[k]).join(' '));
+  localStorage.clear();
+}
+
 (async () => {
   try {
     for (const ancho of ANCHOS) for (const [rol, ruta] of RUTAS) {
@@ -1110,6 +1174,7 @@ async function flujoFrontend() {
   } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'recorrido: ' + String(e && e.stack || e); }
   try { await flujoDemostracion(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'demostración: ' + String(e && e.stack || e); }
   try { await flujoFrontend(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'frontend: ' + String(e && e.stack || e); }
+  try { await flujoMovil(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'móvil: ' + String(e && e.stack || e); }
   document.getElementById('resultado').textContent = JSON.stringify(salida);
   document.title = 'listo';
   // auditar.py escucha en /__resultado: así no hace falta ninguna espera fija.

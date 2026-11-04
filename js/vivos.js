@@ -152,10 +152,26 @@
           : h('span', { class: 'dividir' }, h('label', { for: 'dividir-con' }, 'Ver al lado'),
             h('select', { id: 'dividir-con', onchange: (e) => { if (e.target.value) { lado = e.target.value; refrescar(); } } },
               h('option', { value: '' }, 'Elegir portal…'), otros.map((o) => h('option', { value: o }, PORTALES[o].nombre)))),
-        document.fullscreenEnabled ? h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => { if (document.fullscreenElement) document.exitFullscreen(); else marcos.requestFullscreen().catch(() => {}); } }, 'Pantalla completa') : null,
+        document.fullscreenEnabled || esCelular() ? h('button', { class: 'btn btn--chico btn--suave', type: 'button', 'aria-pressed': String(esAmplio()), onclick: (e) => {
+          // En celular no se usa la pantalla completa del navegador: iPhone no la permite en un marco y en Android esconde el botón para volver.
+          if (esCelular()) { alternarAmplio(); e.currentTarget.setAttribute('aria-pressed', String(esAmplio())); return; }
+          if (document.fullscreenElement) document.exitFullscreen(); else marcos.requestFullscreen().catch(() => {}); } }, 'Pantalla completa') : null,
         url && activo !== 'valeria' ? h('a', { class: 'btn btn--chico btn--suave', href: url, target: '_blank', rel: 'noopener' }, 'Abrir aparte') : null),
     ].filter(Boolean));
   }
+
+  /* Modo amplio (celular): oculta la franja, las pestañas y la barra inferior para que el portal use toda la pantalla (QA-10: en un
+     iPhone SE el portal quedaba en 46 % del alto). Es una clase en <html>, no la API de pantalla completa: esa no existe en iPhone y en
+     Android quita el botón para volver. La barra del portal sigue a la vista y su botón "Pantalla completa" lo deshace; Escape también. */
+  const esCelular = () => window.matchMedia('(pointer: coarse) and (max-width: 1024px)').matches;
+  const esAmplio = () => document.documentElement.hasAttribute('data-amplio');
+  function alternarAmplio(forzar) {
+    const activar = forzar === undefined ? !esAmplio() : forzar;
+    document.documentElement.toggleAttribute('data-amplio', activar);
+    window.scrollTo(0, 0);
+    medirCabeza();
+  }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && esAmplio() && !document.querySelector('.vivo-ayuda[open]')) { alternarAmplio(false); pintarEncabezado(); } });
 
   // La altura del portal es "todo lo que queda bajo la franja y la barra de pestañas": se mide para no adivinar.
   function medirCabeza() {
@@ -194,7 +210,7 @@
     medirCabeza();
     refrescar();
   }
-  function ocultar() { if (raiz) raiz.hidden = true; if (MT.barra) MT.barra.actualizar(); }
+  function ocultar() { alternarAmplio(false); if (raiz) raiz.hidden = true; if (MT.barra) MT.barra.actualizar(); }
 
   window.addEventListener('resize', medirCabeza);
   // El desplegable de "qué te toca" se cierra al tocar fuera o con Escape.
