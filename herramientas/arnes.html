@@ -955,6 +955,141 @@ async function flujoDemostracion() {
   afirmar('demostración: sin errores de ejecución en estas pruebas', !(ventana().__errores && ventana().__errores.filter((e) => e !== 'prueba').length), ventana().__errores && ventana().__errores.join(' | '));
 }
 
+/* ===== Auditoría del frontend: accesibilidad (QA-04, 05, 06, 11, 23, 24, 26), seguridad del cliente (QA-13) y la base de los estilos ===== */
+async function flujoFrontend() {
+  const MTw = () => ventana().MT; const D = () => doc();
+  const tecla = (el, key) => el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
+  const textoCss = async (ruta) => (await (await fetch(ruta, { cache: 'no-store' })).text());
+
+  /* QA-04: "Saltar al contenido" no debe sacar a la persona de la pantalla en que está */
+  localStorage.clear();
+  await cargar('#/hoja/propuesta', 1280, 800); await espera(500);
+  const salto = D().querySelector('.saltar');
+  afirmar('QA-04: existe el enlace "Saltar al contenido" y es lo primero de la página', !!salto && D().body.querySelector('a, button') === salto);
+  salto.click(); await espera(200);
+  afirmar('QA-04: al usarlo desde Hoja de ruta la dirección NO cambia (antes iba a #app y pintaba la bienvenida)', ventana().location.hash === '#/hoja/propuesta', ventana().location.hash);
+  afirmar('QA-04: el foco queda en el contenido principal', D().activeElement === D().getElementById('app'), D().activeElement && D().activeElement.tagName);
+  afirmar('QA-04: la pantalla sigue siendo la misma (el h1 no cambió a la bienvenida)', !/^Mosaico Telar$/.test((D().querySelector('main h1') || {}).textContent || ''));
+
+  /* QA-05: el título de la pestaña distingue cada pantalla */
+  const hashes = ['#/portales/general', '#/portales/kinesis', '#/portales/wisfox', '#/portales/valeria', '#/guia/docente', '#/guia/estudiante', '#/planes/formas', '#/planes/acompanamiento',
+    '#/registro/lista', '#/registro/conversar', '#/hoja/propuesta', '#/hoja/arquitectura', '#/hoja/etapas', '#/mapa/conexiones', '#/mapa/distingue', '#/recorrido/camino', '#/recorrido/roles', '#/recorrido/datos', '#/valeria/chat', '#/valeria/conexion'];
+  const titulos = {};
+  for (const hs of hashes) { await ir(hs); await espera(120); titulos[hs] = D().title; }
+  const lista = Object.values(titulos);
+  const repetidos = [...new Set(lista.filter((t, i) => lista.indexOf(t) !== i))];
+  afirmar('QA-05: ninguna de las pantallas con secciones comparte título de pestaña con otra', repetidos.length === 0, repetidos.join(' | '));
+  afirmar('QA-05: todos los títulos terminan en "· Mosaico Telar" y ninguno queda vacío', lista.every((t) => / · Mosaico Telar$/.test(t)), lista.filter((t) => !/ · Mosaico Telar$/.test(t)).join(' | '));
+  await ir('#/'); await espera(200);
+  afirmar('QA-05: la bienvenida conserva el título "Mosaico Telar"', D().title === 'Mosaico Telar', D().title);
+
+  /* QA-06: formularios con tipo y autocompletado correctos, Enter que envía, error marcado */
+  await ir('#/registro/lista'); await espera(300);
+  const correoReg = D().querySelector('form.formulario--registro input[name="correo"]');
+  afirmar('QA-06: el correo del registro es type="email" con autocomplete="email" e inputmode="email"', !!correoReg && correoReg.type === 'email' && correoReg.autocomplete === 'email' && correoReg.inputMode === 'email', correoReg ? [correoReg.type, correoReg.autocomplete, correoReg.inputMode].join() : 'sin campo');
+  const guardados = [];
+  MTw().dlg.formulario({ titulo: 'Prueba de formulario', campos: [
+    { id: 'uno', etiqueta: 'Uno', requerido: true }, { id: 'mail', etiqueta: 'Correo', entrada: 'email', autocompletar: 'email' }, { id: 'texto', etiqueta: 'Texto largo', tipo: 'area' }],
+  onGuardar: async (v) => { guardados.push(v); } });
+  await espera(120);
+  let dlg = D().querySelector('dialog[open]');
+  const uno = dlg.querySelector('input[name="uno"]'); const area = dlg.querySelector('textarea');
+  afirmar('QA-06: un campo del diálogo puede declarar tipo y autocompletado (entrada / autocompletar)', dlg.querySelector('input[name="mail"]').type === 'email' && dlg.querySelector('input[name="mail"]').autocomplete === 'email');
+  tecla(uno, 'Enter'); await espera(120);
+  afirmar('QA-06c: Enter con el campo requerido vacío no guarda, marca el campo con aria-invalid y lo enfoca', guardados.length === 0 && uno.getAttribute('aria-invalid') === 'true' && D().activeElement === uno, `guardados ${guardados.length}, invalid ${uno.getAttribute('aria-invalid')}`);
+  uno.value = 'hecho'; uno.dispatchEvent(new Event('input', { bubbles: true }));
+  afirmar('QA-06c: al escribir de nuevo se quita la marca de error', !uno.hasAttribute('aria-invalid'));
+  tecla(area, 'Enter'); await espera(120);
+  afirmar('QA-06b: Enter dentro del área de texto NO envía (es un salto de línea)', guardados.length === 0 && !!D().querySelector('dialog[open]'));
+  tecla(uno, 'Enter'); await espera(200);
+  afirmar('QA-06b: Enter dentro de un campo de una línea envía el formulario y cierra el diálogo', guardados.length === 1 && guardados[0].uno === 'hecho' && !D().querySelector('dialog[open]'), `guardados ${guardados.length}`);
+
+  /* QA-11: impresión. No se puede imprimir desde el arnés, así que se toma la regla @media print de verdad y se aplica como hoja normal */
+  const hojas = [...D().styleSheets]; const reglasPrint = [];
+  hojas.forEach((h) => { try { [...h.cssRules].forEach((r) => { if (r.media && /print/.test(r.media.mediaText)) reglasPrint.push(...[...r.cssRules]); }); } catch (e) { /* hoja de otro origen */ } });
+  const selectores = reglasPrint.map((r) => r.selectorText || '').join(' | ');
+  afirmar('QA-11: hay reglas de impresión que fuerzan la paleta clara y muestran lo que el revelado deja en opacidad 0', /:root:root:root/.test(selectores) && /\.revela/.test(selectores), selectores.slice(0, 160));
+  D().documentElement.dataset.tema = 'oscuro';
+  const prueba = D().createElement('style'); prueba.id = 'prueba-impresion';
+  prueba.textContent = reglasPrint.filter((r) => r.type === 1 && !/display\s*:\s*none/.test(r.style.cssText)).map((r) => r.cssText).join('\n');
+  const antesFondo = ventana().getComputedStyle(D().documentElement).getPropertyValue('--papel').trim();
+  D().head.append(prueba);
+  const bloque = D().createElement('div'); bloque.className = 'revela'; bloque.textContent = 'x'; D().getElementById('app').append(bloque);
+  const despuesFondo = ventana().getComputedStyle(D().documentElement).getPropertyValue('--papel').trim();
+  afirmar('QA-11: con el tema oscuro, al imprimir la paleta vuelve a la clara (fondo blanco, no #141210)', antesFondo.toUpperCase() === '#141210' && despuesFondo.toUpperCase() === '#FFFFFF', antesFondo + ' -> ' + despuesFondo);
+  afirmar('QA-11: al imprimir, un bloque del revelado queda con opacidad 1 aunque no se haya desplazado a la vista', ventana().getComputedStyle(bloque).opacity === '1' && ventana().getComputedStyle(bloque).transform === 'none', ventana().getComputedStyle(bloque).opacity);
+  prueba.remove(); bloque.remove(); delete D().documentElement.dataset.tema;
+
+  /* QA-23: jerarquía de encabezados y regiones con nombre */
+  const salta = (raiz) => { const niveles = [...raiz.querySelectorAll('h1, h2, h3, h4, h5, h6')].filter(visible).map((x) => +x.tagName[1]); let mal = []; niveles.forEach((n, i) => { if (i === 0 ? n !== 1 : n > niveles[i - 1] + 1) mal.push(`h${niveles[i - 1] || 0}->h${n}`); }); return mal; };
+  await ir('#/mapa/conexiones'); await espera(400);
+  afirmar('QA-23: en el Mapa, antes de tocar un módulo, los encabezados bajan de a un nivel (sin h1 -> h3)', salta(D().querySelector('main')).length === 0, salta(D().querySelector('main')).join(', '));
+  const modulo = D().querySelector('main button.modulo'); if (modulo) { modulo.click(); await espera(250); }
+  afirmar('QA-23: en el Mapa, con un módulo elegido, tampoco hay saltos de nivel', salta(D().querySelector('main')).length === 0, salta(D().querySelector('main')).join(', '));
+  await ir('#/valeria/chat'); await espera(500);
+  const formChat = D().querySelector('main form.chat__form');
+  afirmar('QA-23: el formulario del chat de ValerIA tiene nombre accesible', !!formChat && !!formChat.getAttribute('aria-label'));
+  localStorage.setItem('mosaicotelar.v2', JSON.stringify({ rol: 'docente' }));
+  await cargar('#/mi/actividades', 1280, 800); await espera(500);
+  const lateral = D().querySelector('aside.lateral');
+  afirmar('QA-23: la región lateral de Mi espacio tiene nombre accesible', !!lateral && !!lateral.getAttribute('aria-label'));
+
+  /* QA-26: el inglés de la ruta de Inglés se marca con lang="en" */
+  const en = MTw().ui.esIngles;
+  afirmar('QA-26: esIngles reconoce una oración en inglés y no marca texto en español ni sin tilde', en('She is living with her aunt this year.') === true && en('The climate is getting warmer.') === true && en('Lo permanente y lo temporal') === false && en('Presente simple vs presente continuo') === false && en('Los verbos de estado no van en continuo') === false && en('¿Cuál oración es incorrecta?') === false);
+  localStorage.setItem('mosaicotelar.v2', JSON.stringify({ rol: 'estudiante' }));
+  await cargar('#/mi/ruta', 1280, 800); await espera(500);
+  const empezar = [...D().querySelectorAll('main button')].find((b) => /^(Empezar|Repasar)$/.test(b.textContent.trim()));
+  empezar.click(); await espera(400);
+  const leccionEl = D().querySelector('dialog[open] .leccion');
+  afirmar('QA-26: los ejemplos en cursiva en inglés de una lección llevan lang="en"', !!leccionEl && leccionEl.querySelectorAll('i[lang="en"]').length > 0, leccionEl ? 'sin ejemplos marcados' : 'sin lección');
+  afirmar('QA-26: el texto en español de la lección no se marca como inglés', !!leccionEl && [...leccionEl.querySelectorAll('[lang="en"]')].every((x) => !/[áéíóúñ]/i.test(x.textContent)));
+  const opciones = [...D().querySelectorAll('dialog[open] .opcion')];
+  const enunciado = (D().querySelector('dialog[open] .pregunta') || {}).textContent || '';
+  afirmar('QA-26: en una pregunta con frase en inglés, las opciones ("is boiling", "boils"...) llevan lang="en" y la frase también', opciones.length > 0 && opciones.every((o) => o.lang === 'en') && !!D().querySelector('dialog[open] .pregunta [lang="en"]'), `${enunciado} | ${opciones.map((o) => o.lang).join()}`);
+  D().querySelector('dialog[open] .dialogo__cab button').click(); await espera(150);
+
+  /* QA-24: objetivos táctiles de 44 px en pantallas táctiles */
+  let css = await textoCss('../css/base.css');
+  if (!/pointer: coarse/.test(css)) css = await textoCss('../css/mosaico.css');   // en la copia empaquetada (--dist) todas las hojas están en una
+  afirmar('QA-24: en pantallas táctiles (pointer: coarse) los botones chicos, los chips y los enlaces-botón llegan a 44 px', /@media \(pointer: coarse\)[\s\S]*\.btn--chico[\s\S]*min-height: 44px/.test(css));
+
+  /* QA-13: el marco solo puede apuntar a las dos rutas de los portales */
+  const idx = await (await fetch('../index.html', { cache: 'no-store' })).text();
+  const frame = ((idx.match(/frame-src ([^;]+)/) || [, ''])[1]).trim().split(/\s+/);
+  const portales = Object.values(MTw().config.portales);
+  afirmar('QA-13: frame-src de la política de seguridad lista solo las dos rutas de los portales, no todo el dominio', frame.length === 2 && portales.every((u) => frame.includes(u)), frame.join(' '));
+
+  /* Estilos de la página: base técnica, apagada */
+  localStorage.clear();
+  await cargar('#/', 1280, 800); await espera(400);
+  afirmar('estilos: la bandera MT.config.mostrarEstilos existe y está apagada', MTw().config.mostrarEstilos === false);
+  D().getElementById('btn-apariencia').click(); await espera(120);
+  afirmar('estilos: con la bandera apagada el menú de Apariencia no muestra ningún selector de estilo y <html> no lleva data-estilo', !D().getElementById('opcion-estilo') && !('estilo' in D().documentElement.dataset));
+  localStorage.setItem('mosaicotelar.apariencia', JSON.stringify({ estilo: 'piezas' }));
+  await cargar('#/', 1280, 800); await espera(400);
+  afirmar('estilos: aunque haya un valor guardado, con la bandera apagada el atributo se quita', !('estilo' in D().documentElement.dataset));
+  // Se enciende la bandera solo en esta prueba y se arma de nuevo el menú
+  MTw().config.mostrarEstilos = true;
+  const menu = D().getElementById('menu-apariencia'); menu.replaceChildren(); MTw().apariencia.llenarMenu(menu, {});
+  const radios = [...menu.querySelectorAll('#opcion-estilo input[type="radio"]')];
+  afirmar('estilos: con la bandera encendida hay un grupo "Estilo" con cuatro opciones (el de siempre, hilo, piezas, taller)', radios.map((r) => r.value).join() === ',hilo,piezas,taller' && !!menu.querySelector('#opcion-estilo legend'), radios.map((r) => r.value).join());
+  for (const v of ['hilo', 'piezas', 'taller']) {
+    radios.find((r) => r.value === v).click(); await espera(60);
+    afirmar(`estilos: elegir "${v}" pone data-estilo="${v}" en <html> y lo guarda`, D().documentElement.dataset.estilo === v && JSON.parse(localStorage.getItem('mosaicotelar.apariencia')).estilo === v);
+  }
+  radios.find((r) => r.value === '').click(); await espera(60);
+  afirmar('estilos: "El de siempre" quita el atributo', !('estilo' in D().documentElement.dataset));
+  const hojasEstilo = ['hilo', 'piezas', 'taller'].map((n) => `css/estilo-${n}.css`);
+  const enIndex = hojasEstilo.every((h) => idx.includes(`href="${h}"`));
+  const swTexto = await (await fetch('../sw.js', { cache: 'no-store' })).text();
+  afirmar('estilos: las tres hojas css/estilo-*.css existen, están enlazadas en index.html y registradas en sw.js', enIndex && (await Promise.all(hojasEstilo.map(async (h) => (await fetch('../' + h, { method: 'HEAD' })).ok))).every(Boolean) && hojasEstilo.every((h) => swTexto.includes(`'${h}'`)) || (idx.includes('css/mosaico.css') && swTexto.includes("'css/mosaico.css'")));
+  MTw().config.mostrarEstilos = false; MTw().apariencia.aplicar({});
+  localStorage.clear();
+
+  afirmar('frontend: sin errores de ejecución en estas pruebas', !(ventana().__errores && ventana().__errores.filter((e) => e !== 'prueba').length), ventana().__errores && ventana().__errores.join(' | '));
+}
+
 (async () => {
   try {
     for (const ancho of ANCHOS) for (const [rol, ruta] of RUTAS) {
@@ -969,6 +1104,7 @@ async function flujoDemostracion() {
     await flujo();
   } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'recorrido: ' + String(e && e.stack || e); }
   try { await flujoDemostracion(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'demostración: ' + String(e && e.stack || e); }
+  try { await flujoFrontend(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'frontend: ' + String(e && e.stack || e); }
   document.getElementById('resultado').textContent = JSON.stringify(salida);
   document.title = 'listo';
   // auditar.py escucha en /__resultado: así no hace falta ninguna espera fija.

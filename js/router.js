@@ -30,6 +30,19 @@
     });
   }
 
+  /* Título de la pestaña (QA-05, WCAG 2.4.2). Antes era solo el nombre de la sección, y cuatro portales o cinco guías compartían
+     el mismo. Ahora se antepone el título de la pantalla (su h1), que ya es texto público de la página: no se inventa ninguna palabra,
+     solo se repite lo que la persona ve. Si el h1 coincide con la sección, no se duplica. */
+  function titulo(def, main) {
+    if (def.titulo === 'Inicio') return 'Mosaico Telar';
+    const t = main.querySelector('h1') || main.querySelector('.vivos:not([hidden]) [role="heading"]');
+    const limpio = (x) => (x ? x.textContent.replace(/\s+/g, ' ').trim() : '');
+    // Las guías por rol y las pestañas de página (Roles y datos, Mapa...) comparten h1: lo que las distingue es la pestaña activa.
+    const pestana = limpio(main.querySelector('.pestanas-pagina [aria-current="page"]'));
+    const partes = [pestana, limpio(t), def.titulo].filter((x, i, a) => x && a.indexOf(x) === i);
+    return partes.join(' · ') + ' · Mosaico Telar';
+  }
+
   function render(opciones) {
     const op = Object.assign({ foco: true }, opciones);
     const { id, sub, def, subs } = actual();
@@ -50,7 +63,7 @@
       [...main.children].forEach((x) => { if (!x.hasAttribute('data-persistente')) x.remove(); });
       main.append(MT.ui.h('div', { class: 'contenedor' }, MT.ui.h('p', { class: 'aviso' }, 'Esta pantalla tuvo un problema. Vuelve al inicio e inténtalo otra vez.')));
     }
-    document.title = (def.titulo === 'Inicio' ? 'Mosaico Telar' : def.titulo + ' · Mosaico Telar');
+    document.title = titulo(def, main);
     marcarNavegacion(id);
     if (MT.glosario) MT.glosario.marcar(main);
     if (MT.tejido) MT.tejido.revelar(main);

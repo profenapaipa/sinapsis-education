@@ -78,7 +78,7 @@
 .mapa-col[data-hilo="valeria"] { --hilo-color: var(--hilo-valeria); }
 .mapa-col-cab { display: flex; align-items: center; gap: .6rem; margin-bottom: .2rem; }
 .mapa-col-cab svg { width: 34px; height: 34px; flex: none; color: var(--tinta); }
-.mapa-col-cab h3 { margin: 0; font-size: 1.15rem; }
+.mapa-col-cab h3, .mapa-col-cab h2 { margin: 0; font-size: 1.15rem; }
 .mapa-col > .suave { font-size: .85rem; margin-bottom: .7rem; }
 .modulos { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
 .modulo { width: 100%; text-align: left; cursor: pointer; font: 800 .92rem var(--fuente); color: var(--tinta); background: var(--lino); border: 2px solid transparent; border-radius: var(--radio-chico); padding: .55rem .75rem; display: flex; justify-content: space-between; align-items: center; gap: .5rem; min-height: 44px; transition: opacity .15s, border-color .15s; }
@@ -98,7 +98,7 @@
 .mapa-leyenda { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; margin: 1rem 0 0; font-size: .85rem; color: var(--tinta-suave); font-weight: 700; }
 .mapa-leyenda span { display: inline-flex; align-items: center; gap: .4rem; }
 .mapa-detalle { margin-top: 1.2rem; border-top: 4px solid var(--tinta); }
-.mapa-detalle h3 { font-family: var(--fuente-titulo); font-size: 1.5rem; font-weight: 700; }
+.mapa-detalle h3, .mapa-detalle h2.titulo-chico { font-family: var(--fuente-titulo); font-size: 1.5rem; font-weight: 700; }
 .mapa-detalle .rejilla { margin-top: .8rem; }
 .mapa-conexiones { list-style: none; padding: 0; margin: .4rem 0 0; }
 .mapa-conexiones li { padding: .3rem 0; border-bottom: 1px solid var(--linea); font-size: .92rem; }

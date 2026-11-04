@@ -1,0 +1,18 @@
+/* estilo-hilo.css: la capa visual del estilo "Hilo" (html[data-estilo="hilo"]).
+
+   Estado: ESTRUCTURA LISTA, SIN CAPA VISUAL. Mientras MT.config.mostrarEstilos sea false, el atributo no se aplica y este archivo no
+   hace nada. Cuando otro agente le ponga reglas, estas son las condiciones del contrato:
+   1. Todo va bajo html[data-estilo="hilo"], nunca suelto: así un estilo no se mezcla con otro ni con el sitio de siempre.
+   2. Se cambian primero las variables de css/tokens.css (--tinta, --papel, --lino, --linea, --radio, --sombra, --trama-fondo, --e-vivo...).
+      Los componentes ya las leen; así el tema claro y el oscuro siguen funcionando. Si hace falta un valor distinto por tema, repetir
+      la regla con html[data-estilo="hilo"][data-tema="oscuro"] y dentro de @media (prefers-color-scheme: dark) para el tema del sistema.
+   3. No se tocan la estructura HTML ni los textos. Solo apariencia.
+   4. Todo movimiento nuevo debe quedar quieto con html[data-movimiento="calmado"] y con @media (prefers-reduced-motion: reduce)
+      (css/calmado.css ya acorta toda animación y transición a una milésima de segundo con esos dos casos; no usar !important para ganarle).
+   5. No animar color de fondo ni de texto en botones (la auditoría mide a mitad de transición y falla el contraste).
+   6. Cada estilo debe pasar `python herramientas/auditar.py` (contraste, desbordes, tamaños) con el atributo puesto; el arnés tiene una
+      prueba que lo recorre con los tres valores cuando existan reglas.
+   7. Solo recursos propios (la política de seguridad solo permite 'self'): sin fuentes ni imágenes de terceros.
+   Referencia visual: PROPUESTA_DIRECCION_DE_ARTE (carpeta privada) y la sección de Identidad del sitio. */
+
+/* html[data-estilo="hilo"] { ... } */

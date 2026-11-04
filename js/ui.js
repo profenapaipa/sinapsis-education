@@ -53,13 +53,44 @@
   /* Las lecciones de Inglés traen un poco de HTML (negrillas, listas). Se analiza fuera del documento y solo
      se copian las etiquetas de esta lista, sin ningún atributo: nada de scripts, enlaces ni imágenes. */
   const PERMITIDAS = new Set(['H4', 'P', 'UL', 'OL', 'LI', 'B', 'I', 'STRONG', 'EM', 'BR']);
+
+  /* ¿Este texto está en inglés? (QA-26). La ruta de Inglés mezcla español con ejemplos en inglés, y sin lang="en" un lector de pantalla
+     los pronuncia con acento español. No hay marca en los datos, así que se decide por las palabras: hay que ver al menos dos palabras
+     funcionales del inglés y ninguna del español ni letras con tilde. Es una heurística conservadora: ante la duda no marca, y un
+     texto sin marcar se lee como antes. */
+  const EN = new Set('the is are am was were a an to of in on at for with and or i you he she it we they my your his her this that do does did have has be been not can will would should could there their what who how why when where which because if but so than then them these those our us me him'.split(' '));
+  const ES = new Set('el la los las de del que y en un una es son por con para se no lo al como más pero su sus qué cuál cómo cuando donde porque también si ya muy sin sobre entre hay está están ser fue era'.split(' '));
+  function esIngles(texto, permisivo) {
+    const t = String(texto || '').toLowerCase();
+    if (/[áéíóúñ¿¡]/.test(t)) return false;
+    const palabras = t.match(/[a-z']+/g) || [];
+    if (palabras.some((w) => ES.has(w))) return false;
+    // permisivo: para una frase citada con su espacio en blanco («Water ___ at 100 degrees.»), basta una palabra del inglés.
+    if (permisivo) return palabras.some((w) => EN.has(w));
+    return palabras.filter((w) => EN.has(w)).length >= 2 || (palabras.length >= 1 && palabras.length <= 3 && palabras.every((w) => EN.has(w)));
+  }
+  // Parte un enunciado "¿Cuál es correcta? «She ___ happy.»" y envuelve en lang="en" lo que va entre comillas angulares y es inglés.
+  function conIdiomas(texto) {
+    const frag = document.createDocumentFragment();
+    String(texto).split(/(«[^»]*»)/).forEach((parte) => {
+      if (!parte) return;
+      if (/^«/.test(parte) && esIngles(parte, /___/.test(parte))) { const sp = document.createElement('span'); sp.lang = 'en'; sp.textContent = parte; frag.append(sp); }
+      else frag.append(document.createTextNode(parte));
+    });
+    return frag;
+  }
   function htmlSeguro(cadena) {
     const doc = new DOMParser().parseFromString('<body>' + String(cadena) + '</body>', 'text/html');
     const copiar = (nodo, destino) => {
       for (const n of nodo.childNodes) {
         if (n.nodeType === 3) destino.append(document.createTextNode(n.textContent));
         else if (n.nodeType === 1) {
-          if (PERMITIDAS.has(n.tagName)) { const nuevo = document.createElement(n.tagName.toLowerCase()); copiar(n, nuevo); destino.append(nuevo); }
+          if (PERMITIDAS.has(n.tagName)) {
+            const nuevo = document.createElement(n.tagName.toLowerCase()); copiar(n, nuevo);
+            // Los ejemplos en cursiva de las lecciones de Inglés se marcan con su idioma (el único atributo que se agrega; lo decide esIngles).
+            if (n.tagName === 'I' && esIngles(n.textContent)) nuevo.lang = 'en';
+            destino.append(nuevo);
+          }
           else copiar(n, destino);
         }
       }
@@ -148,5 +179,5 @@
   const lockup = (clase) => h('span', { class: 'logo-lockup ' + (clase || '') }, marca('mosaico', 'logo-simbolo'), h('span', { class: 'logo-nombre' }, 'Mosaico Telar'));
   const icono = (nombre) => svg(ICONOS[nombre]);
 
-  MT.ui = { h, ricoTexto, htmlSeguro, svg, telar, marca, lockup, icono, HILOS };
+  MT.ui = { h, ricoTexto, htmlSeguro, esIngles, conIdiomas, svg, telar, marca, lockup, icono, HILOS };
 })(window.MT = window.MT || {});

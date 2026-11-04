@@ -21,8 +21,6 @@
     { id: 'identidad', hash: '#/identidad', etiqueta: 'Identidad', cls: 'e-marca', icono: () => icono('identidad'), abajo: true },
   ];
 
-  function decorativo(svg) { svg.removeAttribute('role'); svg.removeAttribute('aria-label'); svg.setAttribute('aria-hidden', 'true'); return svg; }
-
   function construirNavegacion() {
     const enlace = (e) => h('a', { href: e.hash, class: e.cls, 'data-ruta': e.id }, e.icono(), e.etiqueta);
     // El botón de inicio es el único ícono del riel a color: los demás van en blanco y negro para que el logo tenga el protagonismo.
@@ -38,19 +36,21 @@
      este navegador y un script en <head> la aplica antes de pintar, para evitar el destello. */
   const CLAVE_APAR = 'mosaicotelar.apariencia';
   function leerApariencia() { try { return JSON.parse(localStorage.getItem(CLAVE_APAR) || '{}'); } catch (e) { return {}; } }
+  // Los tres estilos de la página. Cada uno es una capa visual en css/estilo-<nombre>.css que se activa con html[data-estilo="<nombre>"].
+  const ESTILOS = ['hilo', 'piezas', 'taller'];
   function aplicarApariencia(a) {
     const r = document.documentElement;
     if (a.tema === 'claro' || a.tema === 'oscuro') r.dataset.tema = a.tema; else delete r.dataset.tema;
     if (a.texto === 'grande') r.dataset.texto = 'grande'; else delete r.dataset.texto;
     // El nombre del atributo lo define animacion.css (marca); las reglas de reducción están allí y en css/calmado.css.
     if (a.movimiento === 'calmado') r.dataset.movimiento = 'calmado'; else delete r.dataset.movimiento;
+    // Con la bandera apagada el atributo no existe, aunque haya quedado un valor guardado de una prueba anterior.
+    if (MT.config.mostrarEstilos && ESTILOS.includes(a.estilo)) r.dataset.estilo = a.estilo; else delete r.dataset.estilo;
     try { localStorage.setItem(CLAVE_APAR, JSON.stringify(a)); } catch (e) { /* sin almacenamiento */ }
   }
 
-  function construirApariencia() {
-    const boton = document.getElementById('btn-apariencia');
-    const menu = document.getElementById('menu-apariencia');
-    const a = leerApariencia();
+  // Llena el menú de Apariencia. Aparte de construirApariencia para poder armarlo de nuevo en las pruebas (con la bandera de estilos encendida).
+  function llenarMenu(menu, a) {
     const radio = (valor, texto) => h('label', { class: 'casilla' },
       h('input', { type: 'radio', name: 'tema', value: valor, checked: (a.tema || 'sistema') === valor,
         onchange: () => { a.tema = valor; aplicarApariencia(a); } }), texto);
@@ -62,13 +62,38 @@
         onchange: (e) => { a.movimiento = e.target.checked ? 'calmado' : 'normal'; aplicarApariencia(a); } }), MT.mensajes.calmado.etiqueta),
       h('p', { class: 'suave menu-apariencia__ayuda', id: 'ayuda-calmado' }, MT.mensajes.calmado.ayuda,
         window.matchMedia('(prefers-reduced-motion: reduce)').matches ? ' ' + MT.mensajes.calmado.sistema : ''));
+    if (MT.config.mostrarEstilos) {
+      const E = MT.mensajes.estilos;
+      const estilo = (valor, texto) => h('label', { class: 'casilla' },
+        h('input', { type: 'radio', name: 'estilo', value: valor, checked: (ESTILOS.includes(a.estilo) ? a.estilo : '') === valor,
+          onchange: () => { a.estilo = valor; aplicarApariencia(a); } }), texto);
+      menu.append(h('fieldset', { id: 'opcion-estilo' }, h('legend', null, E.leyenda), estilo('', E.sitio), ESTILOS.map((e) => estilo(e, E[e]))));
+    }
+  }
+
+  function construirApariencia() {
+    const boton = document.getElementById('btn-apariencia');
+    const menu = document.getElementById('menu-apariencia');
+    llenarMenu(menu, leerApariencia());
     const cerrar = () => { menu.hidden = true; boton.setAttribute('aria-expanded', 'false'); };
     boton.addEventListener('click', () => { const abre = menu.hidden; menu.hidden = !abre; boton.setAttribute('aria-expanded', String(abre)); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !menu.hidden) { cerrar(); boton.focus(); } });
     document.addEventListener('click', (e) => { if (!menu.hidden && !menu.contains(e.target) && !boton.contains(e.target)) cerrar(); });
   }
 
+  /* "Saltar al contenido" (QA-04). Con href="#app" el navegador cambiaba la dirección a "#app" y el enrutador, que no conoce esa ruta,
+     pintaba la bienvenida: quien saltaba desde cualquier otra pantalla terminaba en otra página. Aquí se cancela el cambio de dirección
+     y solo se mueve el foco al contenido, que es lo que promete el enlace. El href queda por si el script no corre (sin JS no hay enrutador). */
+  function conectarSaltar() {
+    const enlace = document.querySelector('.saltar'); const main = document.getElementById('app');
+    if (!enlace || !main) return;
+    enlace.addEventListener('click', (e) => { e.preventDefault(); main.focus({ preventScroll: true }); MT.movimiento.desplazar(main); });
+  }
+
+  MT.apariencia = { llenarMenu, aplicar: aplicarApariencia, leer: leerApariencia, ESTILOS };
+  if (!MT.config.mostrarEstilos) delete document.documentElement.dataset.estilo;
   construirNavegacion();
+  conectarSaltar();
   construirApariencia();
   MT.vivos.iniciar(document.getElementById('app'));
   MT.barra.construir();

@@ -359,13 +359,15 @@
       const p = preguntas[i]; let respondida = false;
       const retro = h('div', { class: 'retro', 'aria-live': 'polite' });
       const sig = h('button', { class: 'btn btn--chico', type: 'button', hidden: true, onclick: () => { i += 1; pintar(); } }, i + 1 === preguntas.length ? 'Ver resultado' : 'Siguiente');
-      const opciones = p.o.map((o, j) => h('button', { class: 'opcion', type: 'button', onclick: (e) => {
+      // Si el enunciado cita una frase en inglés (con su espacio en blanco), las opciones también lo están, aunque sean una sola palabra ("eats").
+      const enIngles = /«[^»]*___[^»]*»/.test(p.q) && MT.ui.esIngles((p.q.match(/«[^»]*»/) || [''])[0], true);
+      const opciones = p.o.map((o, j) => h('button', { class: 'opcion', type: 'button', lang: enIngles || MT.ui.esIngles(o) ? 'en' : null, onclick: (e) => {
         if (respondida) return; respondida = true;
         const ok = j === p.a; if (ok) aciertos += 1;
         opciones.forEach((b, k) => { b.disabled = true; if (k === p.a) b.classList.add('correcta'); else if (k === j) b.classList.add('incorrecta'); });
         retro.replaceChildren(h('strong', null, ok ? 'Correcto. ' : 'No es esa. '), p.why || ''); sig.hidden = false; sig.focus();
       } }, o));
-      zona.replaceChildren(h('p', { class: 'etiqueta' }, `${titulo} · Pregunta ${i + 1} de ${preguntas.length}`), h('p', { class: 'pregunta' }, p.q), h('div', { class: 'opciones' }, opciones), retro, sig);
+      zona.replaceChildren(h('p', { class: 'etiqueta' }, `${titulo} · Pregunta ${i + 1} de ${preguntas.length}`), h('p', { class: 'pregunta' }, MT.ui.conIdiomas(p.q)), h('div', { class: 'opciones' }, opciones), retro, sig);
     };
     pintar();
   }

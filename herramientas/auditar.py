@@ -4,6 +4,7 @@ auditar.py: prueba Mosaico Telar en un navegador real.
 
     python herramientas/auditar.py            # todo
     python herramientas/auditar.py --enlaces  # además, comprueba que los enlaces externos respondan
+    python herramientas/auditar.py --dist     # prueba la copia empaquetada (herramientas/empaquetar.py) con el mismo arnés
 
 Por qué existe: los fallos de una página como esta (desbordes en el celular, texto que no se
 lee en el tema oscuro, un botón que no hace nada) no se ven leyendo el código. Se ven midiendo.
@@ -57,21 +58,22 @@ def encontrar_navegador():
     return None
 
 
-def revisar_referencias():
+def revisar_referencias(raiz=None):
     """Cada src y href local de index.html, y cada url() de las hojas de estilo, debe existir."""
+    raiz = raiz or RAIZ
     fallos = []
-    with open(os.path.join(RAIZ, 'index.html'), encoding='utf-8') as f:
+    with open(os.path.join(raiz, 'index.html'), encoding='utf-8') as f:
         texto = f.read()
     refs = re.findall(r'(?:src|href)="([^"#?:]+)"', texto)
     for css in re.findall(r'href="(css/[^"]+)"', texto):
-        with open(os.path.join(RAIZ, css), encoding='utf-8') as f:
+        with open(os.path.join(raiz, css), encoding='utf-8') as f:
             base = os.path.dirname(css)
             refs += [os.path.normpath(os.path.join(base, u)).replace('\\', '/')
                      for u in re.findall(r'url\("?([^")]+)"?\)', f.read())]
     for ref in sorted(set(refs)):
         if ref.startswith('data:') or 'data:image' in ref:
             continue  # imágenes incrustadas en el propio CSS
-        if not os.path.exists(os.path.join(RAIZ, ref)):
+        if not os.path.exists(os.path.join(raiz, ref)):
             fallos.append('falta el archivo ' + ref)
     return fallos
 
@@ -99,9 +101,9 @@ class Silencioso(SimpleHTTPRequestHandler):
         self.end_headers()
 
 
-def servir():
+def servir(raiz=None):
     puerto = puerto_libre()
-    servidor = ThreadingHTTPServer(('127.0.0.1', puerto), partial(Silencioso, directory=RAIZ))
+    servidor = ThreadingHTTPServer(('127.0.0.1', puerto), partial(Silencioso, directory=raiz or RAIZ))
     threading.Thread(target=servidor.serve_forever, daemon=True).start()
     return servidor, puerto
 
@@ -158,7 +160,16 @@ def main():
     problemas = 0
     print('Mosaico Telar: auditoría\n')
 
-    refs = revisar_referencias()
+    # --dist: se arma la copia empaquetada en una carpeta temporal (con el arnés dentro) y se prueba esa, no la de la raíz.
+    raiz = RAIZ
+    if '--dist' in sys.argv:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import empaquetar
+        raiz = os.path.join(tempfile.mkdtemp(prefix='mt_dist_'), 'sitio')
+        medidas = empaquetar.construir(raiz, con_pruebas=True)
+        print(f"Copia empaquetada: {medidas['archivos_de_codigo_antes']} archivos de código -> {medidas['archivos_de_codigo_despues']}\n")
+
+    refs = revisar_referencias(raiz)
     print('1. Archivos referenciados:', 'todos existen' if not refs else '')
     for r in refs:
         print('   FALLA', r)
@@ -169,7 +180,7 @@ def main():
         print('\nNo encontré Chrome ni Edge: no puedo medir en un navegador.')
         return 1
 
-    servidor, puerto = servir()
+    servidor, puerto = servir(raiz)
     try:
         datos = correr_arnes(navegador, puerto)
     finally:

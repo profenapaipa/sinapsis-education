@@ -103,7 +103,7 @@
     const chips = h('div', { class: 'chat__sugerencias' });
     const campo = h('textarea', { rows: '2', maxlength: '300', 'aria-label': 'Escribe tu mensaje para ValerIA', placeholder: 'Escribe aquí lo que necesitas…' });
     const boton = h('button', { class: 'btn', type: 'submit' }, 'Enviar');
-    const form = h('form', { class: 'chat__form', onsubmit: (e) => { e.preventDefault(); mandar(campo.value); } }, campo, boton);
+    const form = h('form', { class: 'chat__form', 'aria-label': 'Mensaje para ValerIA', onsubmit: (e) => { e.preventDefault(); mandar(campo.value); } }, campo, boton);
     campo.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); mandar(campo.value); } });
 
     async function mandar(texto, tarea) {

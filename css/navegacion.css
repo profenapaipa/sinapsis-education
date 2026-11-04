@@ -70,6 +70,19 @@
   body { background: #fff; color: #000; }
   .tarjeta { box-shadow: none; break-inside: avoid; border-color: #999; }
   a { color: #000; text-decoration: none; }
+
+  /* QA-11. (a) Con el sistema en tema oscuro, las tarjetas se imprimían con fondo casi negro y texto negro: en papel siempre va la paleta
+     clara, sea cual sea el tema de la pantalla. Se repite el selector de raíz tres veces para ganarle en especificidad a los dos bloques
+     del tema oscuro de tokens.css sin tocar ese archivo. (b) El revelado de secciones deja en opacidad 0 lo que no se desplazó a la
+     vista: en papel todo debe salir. */
+  :root:root:root {
+    --tinta: #1A1714; --tinta-suave: #57514A; --papel: #FFFFFF; --lino: #F6F2EA; --hundido: #EFE9DD; --linea: #B9B2A4; --linea-fuerte: #1A1714;
+    --verde: #1B7F56; --verde-texto: #166A47; --verde-suave: #E3F1EA; --sobre-verde: #FFFFFF;
+    --ambar-texto: #7A4E0E; --ambar-suave: #FBEFD8; --azul: #2B4FA3; --azul-suave: #E6ECF8; --ok-texto: #1D4A35; --ok-suave: #E3F1EA;
+    --sombra: none; --trama-fondo: none; --logo-fondo: #FFFFFF;
+  }
+  html body .revela { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .panel-ia, #progreso-hilos, .avisos, .aviso-conexion, .saltar { display: none !important; }
 }
 
 .marca-hero__controles { display: flex; gap: .4rem; flex-wrap: wrap; }

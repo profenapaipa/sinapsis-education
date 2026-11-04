@@ -116,7 +116,7 @@
 
     function pintarDetalle() {
       if (!sel) {
-        detalle.replaceChildren(h('p', { class: 'etiqueta' }, 'Cómo se lee'), h('h3', null, 'Toca un módulo'),
+        detalle.replaceChildren(h('p', { class: 'etiqueta' }, 'Cómo se lee'), h('h2', { class: 'titulo-chico' }, 'Toca un módulo'),
           h('p', null, 'Verás qué hace, quién lo usa y qué recibe y entrega. Las flechas dicen qué viaja de un módulo a otro. Elige un rol arriba para atenuar lo que no toca.'));
         return;
       }
@@ -125,7 +125,7 @@
       const sale = ARISTAS.filter((a) => a[0] === sel).map((a) => `${MODULOS[a[1]].nombre}: ${a[2]}`);
       const [txt, clase] = ESTADOS[m.estado];
       detalle.replaceChildren(
-        h('p', { class: 'etiqueta' }, HILOS.find((x) => x.id === m.hilo).nombre), h('h3', null, m.nombre),
+        h('p', { class: 'etiqueta' }, HILOS.find((x) => x.id === m.hilo).nombre), h('h2', { class: 'titulo-chico' }, m.nombre),
         h('span', { class: 'sello sello--' + clase }, txt), h('p', { style: 'margin-top:.6rem' }, m.que),
         h('div', { class: 'rejilla rejilla--3' },
           h('div', null, h('h3', null, 'Quién lo usa'), m.roles.length ? h('p', null, m.roles.map(nombreRol).join(', ')) : h('p', { class: 'suave' }, 'Nadie todavía.')),
@@ -149,7 +149,7 @@
         onclick: (e) => { rol = r.id; sel = null; chips.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', 'false')); e.currentTarget.setAttribute('aria-pressed', 'true'); actualizar(); } }, r.nombre)));
 
     const columnas = HILOS.map((hilo) => h('section', { class: 'mapa-col', 'data-hilo': hilo.id, 'aria-label': hilo.nombre },
-      h('div', { class: 'mapa-col-cab' }, marca(hilo.id, 'marca-col'), h('h3', null, hilo.nombre)), h('p', { class: 'suave' }, hilo.dice),
+      h('div', { class: 'mapa-col-cab' }, marca(hilo.id, 'marca-col'), h('h2', { class: 'titulo-chico' }, hilo.nombre)), h('p', { class: 'suave' }, hilo.dice),
       h('ul', { class: 'modulos' }, hilo.orden.map((id) => {
         const m = MODULOS[id];
         const b = h('button', { class: 'modulo', type: 'button', 'aria-pressed': 'false', 'aria-label': `${m.nombre}. ${ESTADOS[m.estado][0]}`,

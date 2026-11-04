@@ -15,7 +15,7 @@
         ? h('button', { class: 'nav-pro', type: 'button', 'aria-label': `${t.etiqueta}: próximamente`, onclick: () => MT.plan.abrirPro(t.pro) }, icono(t.icono), t.etiqueta, MT.plan.candadoSvg(), MT.plan.etiquetaPro())
         : h('a', { href: t.href || `#/${ruta}/${t.id}`, 'aria-current': t.id === sub ? 'page' : null },
           icono(t.icono), t.etiqueta, t.nuevo ? h('span', { class: 'nuevo' }, t.nuevo) : null))));
-    const lateral = h('aside', { class: 'lateral' }, h('div', { class: 'lateral-panel' },
+    const lateral = h('aside', { class: 'lateral', 'aria-label': nombre }, h('div', { class: 'lateral-panel' },
       h('a', { class: 'lockup', href: '#/' + ruta, 'aria-label': nombre + ', inicio' }, marca(nombreMarca),
         h('span', null, h('b', null, nombre), h('small', null, descripcion))),
       nav,

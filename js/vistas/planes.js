@@ -110,9 +110,9 @@
     const c = pagina(main, { etiqueta: 'Participar', titulo: tipo === 'conversar' ? 'Conversemos sobre tu colegio' : 'Deja tu correo',
       descripcion: tipo === 'conversar' ? 'Cuéntanos quién eres y qué necesitas. Te escribiremos cuando podamos acompañar un primer piloto.' : 'Solo te pedimos un correo. Te avisaremos cuando abramos el espacio compartido, y mientras tanto la demostración completa está abierta.' });
     c.append(MT.plan.avisoConstruccion());
-    const correo = MT.dlg.campo({ id: 'correo', etiqueta: 'Tu correo', max: 120, valor: (MT.plan.cuenta() || {}).correo || '', ayuda: 'No pedimos tu nombre ni el de ningún estudiante.' });
+    const correo = MT.dlg.campo({ id: 'correo', etiqueta: 'Tu correo', entrada: 'email', autocompletar: 'email', max: 120, valor: (MT.plan.cuenta() || {}).correo || '', ayuda: 'No pedimos tu nombre ni el de ningún estudiante.' });
     const rol = MT.dlg.campo({ id: 'rol', etiqueta: 'Tu rol', tipo: 'select', valor: st.obtener().rol || 'docente', opciones: [...MT.roles.lista.map((r) => ({ valor: r.id, texto: r.nombre })), { valor: 'directivo', texto: 'Rectoría o directivo' }, { valor: 'aliado', texto: 'Aliado, fundación o secretaría' }] });
-    const inst = MT.dlg.campo({ id: 'institucion', etiqueta: 'Colegio u organización (opcional)', max: 100 });
+    const inst = MT.dlg.campo({ id: 'institucion', etiqueta: 'Colegio u organización (opcional)', autocompletar: 'organization', max: 100 });
     const msg = tipo === 'conversar' ? MT.dlg.campo({ id: 'mensaje', etiqueta: 'Qué te gustaría contarnos (opcional)', tipo: 'area', filas: 3, max: 500, ayuda: 'Por ejemplo: cuántos cursos, qué rol usaría la plataforma y qué te inquieta.' }) : null;
     const consent = h('label', { class: 'casilla casilla--consent' }, h('input', { type: 'checkbox', id: 'consentimiento' }),
       h('span', null, 'Autorizo el tratamiento de mi correo para que me contacten sobre Mosaico Telar. Puedo pedir que lo borren cuando quiera.'));
@@ -125,11 +125,15 @@
       error, correo.el, rol.el, inst.el, msg ? msg.el : null, consent, boton,
       h('p', { class: 'suave' }, 'Tu correo se usa solo para escribirte sobre Mosaico Telar. No lo compartimos ni lo usamos para otra cosa.'));
     f.addEventListener('submit', async (e) => {
-      e.preventDefault(); error.hidden = true; boton.disabled = true;
+      e.preventDefault(); error.hidden = true; boton.disabled = true; correo.marcar(false);
       try {
         const r = await MT.plan.registrar({ correo: correo.leer(), rol: rol.leer(), institucion: inst.leer(), mensaje: msg ? msg.leer() : '', plan, consentimiento: consent.querySelector('input').checked });
         exito(c, f, r, tipo);
-      } catch (err) { error.hidden = false; error.textContent = err.message; boton.disabled = false; }
+      } catch (err) {
+        error.hidden = false; error.textContent = err.message; boton.disabled = false;
+        // QA-06c: si el problema es el correo, se marca el campo y se enfoca, para que no haya que buscarlo.
+        if (/correo válido/i.test(err.message)) { correo.marcar(true); correo.enfocar(); }
+      }
     });
     c.append(f);
     c.append(h('p', { class: 'suave' }, 'Antes de escribirnos puedes ', h('a', { href: '#/planes' }, 'ver las formas de participar'), ' o ', h('a', { href: '#/guia' }, 'entrar a la demostración'), '.'));

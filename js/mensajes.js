@@ -68,6 +68,17 @@
       sistema: 'Tu sistema ya pide menos movimiento; esta opción lo mantiene aunque lo cambies.',
     },
 
+    /* Selector de estilo de la página en Apariencia. Está apagado (MT.config.mostrarEstilos = false), así que nadie lo ve todavía.
+       Estos nombres son de trabajo: los define el dueño antes de encender el selector. */
+    estilos: {
+      aprobado: false,
+      leyenda: 'Estilo de la página',
+      sitio: 'El de siempre',
+      hilo: 'Hilo',
+      piezas: 'Piezas',
+      taller: 'Taller',
+    },
+
     // Los textos de la red de seguridad contra pantalla en blanco viven en js/red-de-seguridad.js: ese archivo no puede depender de este.
 
     /* El guion: un recorrido por los cinco roles siguiendo un ajuste, de principio a fin. Cada paso lleva a la pantalla donde ocurre

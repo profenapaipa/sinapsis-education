@@ -46,8 +46,8 @@
             h('li', null, 'Privacidad en la información de cada persona: cada rol ve solo lo que le corresponde.'),
             h('li', null, 'Funciona sin instalar nada'))),
         h('div', { class: 'vitrina' },
-          h('div', { class: 'dispositivo dispositivo--a' }, h('img', { src: 'assets/capturas/docente.jpg', alt: 'El espacio del docente: sus estudiantes, el siguiente paso y las actividades planeadas con DUA', width: '1280', height: '800' }), h('span', { class: 'dispositivo-rotulo' }, 'Espacio del docente')),
-          h('div', { class: 'dispositivo dispositivo--b' }, h('img', { src: 'assets/capturas/estudiante.jpg', alt: 'El espacio del estudiante: su actividad del día con el quiz, sus puntos y sus logros', width: '1280', height: '800' }), h('span', { class: 'dispositivo-rotulo' }, 'Espacio del estudiante')))));
+          h('div', { class: 'dispositivo dispositivo--a' }, h('img', { src: 'assets/capturas/docente.jpg', alt: 'El espacio del docente: sus estudiantes, el siguiente paso y las actividades planeadas con DUA', width: '1280', height: '800', loading: 'lazy', decoding: 'async' }), h('span', { class: 'dispositivo-rotulo' }, 'Espacio del docente')),
+          h('div', { class: 'dispositivo dispositivo--b' }, h('img', { src: 'assets/capturas/estudiante.jpg', alt: 'El espacio del estudiante: su actividad del día con el quiz, sus puntos y sus logros', width: '1280', height: '800', loading: 'lazy', decoding: 'async' }), h('span', { class: 'dispositivo-rotulo' }, 'Espacio del estudiante')))));
 
       if (s.rol) {
         const r = MT.roles.por(s.rol);

@@ -8,6 +8,10 @@
   'use strict';
   MT.config = {
     contacto: '',
+    /* Estilo de la página (data-estilo en <html>: "hilo", "piezas" o "taller"). Apagado: no hay selector en Apariencia y el atributo no se
+       aplica, así que el sitio se ve exactamente como hoy. Se enciende (true) cuando el dueño elija y existan las capas visuales de
+       css/estilo-hilo.css, css/estilo-piezas.css y css/estilo-taller.css. */
+    mostrarEstilos: false,
     // Dirección del servidor (por ejemplo https://api.ejemplo.co). Vacía: el registro se reserva en este dispositivo.
     api: '',        // al configurarla, agrega su dirección a connect-src en la política de seguridad de index.html
     portales: {

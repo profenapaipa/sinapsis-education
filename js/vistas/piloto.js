@@ -22,7 +22,7 @@
       return;
     }
     const campos = [
-      { id: 'org', etiqueta: 'Colegio u organización', max: 100, requerido: true },
+      { id: 'org', etiqueta: 'Colegio u organización', autocompletar: 'organization', max: 100, requerido: true },
       { id: 'quien', etiqueta: 'Tu rol (rectoría, coordinación, orientación, docente, familia, aliado)', max: 80, requerido: true },
       { id: 'texto', etiqueta: 'Cuéntanos qué necesitan', tipo: 'area', filas: 4, max: 800, requerido: true },
     ].map(MT.dlg.campo);

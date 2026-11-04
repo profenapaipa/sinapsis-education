@@ -15,6 +15,8 @@ img, svg { max-width: 100%; }
 h1, h2, h3 { line-height: 1.12; margin: 0 0 .5rem; }
 h1, h2 { font-family: var(--fuente-titulo); font-weight: 700; letter-spacing: -.015em; }
 h3 { font-family: var(--fuente); font-weight: 800; font-size: 1.1rem; }
+/* Un h2 con el aspecto de un h3: para que la jerarquía de encabezados no salte de h1 a h3 (QA-23) sin cambiar cómo se ve. */
+.titulo-chico { font-family: var(--fuente); font-weight: 800; font-size: 1.1rem; letter-spacing: normal; }
 h1 { font-size: clamp(2.1rem, 5vw, 3.1rem); }
 h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); }
 p { margin: 0 0 .85rem; }
@@ -62,7 +64,7 @@ a:hover { text-decoration-thickness: 2px; }
 
 /* Formularios */
 label { font-weight: 800; display: block; margin-bottom: .25rem; }
-input[type="text"], select, textarea {
+input[type="text"], input[type="email"], input[type="tel"], input[type="url"], select, textarea {
   width: 100%; font: 400 1rem var(--fuente); color: var(--tinta); background: var(--papel);
   border: 2px solid var(--linea); border-radius: var(--radio-chico); padding: .6rem .8rem;
 }
@@ -86,3 +88,12 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { border-color
   .rejilla--2, .rejilla--3, .rejilla--4, .rejilla--5, .rejilla--aside, .rejilla--chat { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .medidor > span { transition: none; } }
+
+/* QA-24: en pantallas táctiles (tableta en el aula, celular) los controles pequeños llegan a 44 px, el tamaño cómodo para un dedo.
+   Se condiciona a pointer: coarse para no agrandar nada en el computador con ratón, donde la densidad actual está bien. La franja
+   superior queda en 40 px: a 44 ocuparía demasiado alto del portal en un celular (QA-10). */
+@media (pointer: coarse) {
+  .btn--chico, .chip-plan, .enlace-boton { min-height: 44px; }
+  .franja .btn { min-height: 40px; }
+  .menu-portal__secciones a { min-height: 44px; }
+}
