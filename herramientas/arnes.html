@@ -843,7 +843,12 @@ async function flujoDemostracion() {
   const urlsPortales = Object.values(ventana().MT ? ventana().MT.config.portales : (MTw() || ventana().MT).config.portales);
   afirmar('sin red: la política deja comprobar (sondear) solo las dos rutas de los portales, no todo el dominio', urlsPortales.every((u) => connect.split(/\s+/).includes(u)) && !/\*|https:\/\/[^\/\s]+(?=\s|$)/.test(connect), connect);
   afirmar('sin red: la página enlaza el manifiesto', /<link rel="manifest" href="manifest\.webmanifest">/.test(idx));
-  afirmar('sin red: la red de seguridad se carga antes que el resto de los scripts', idx.indexOf('js/red-de-seguridad.js') > 0 && idx.indexOf('js/red-de-seguridad.js') < idx.indexOf('js/tema.js') && idx.indexOf('js/tema.js') < idx.indexOf('js/ui.js'));
+  // En la copia empaquetada (empaquetar.py) los dos scripts del head van unidos en js/inicio.js, con la red de seguridad primero.
+  const jsInicioUnido = idx.includes('js/inicio.js') ? ((await texto('../js/inicio.js')) || '') : '';
+  const ordenOk = jsInicioUnido
+    ? idx.indexOf('js/inicio.js') > 0 && idx.indexOf('js/inicio.js') < idx.indexOf('js/mosaico.js') && jsInicioUnido.indexOf('red-de-seguridad') >= 0 && jsInicioUnido.indexOf('red-de-seguridad') < jsInicioUnido.indexOf('mosaicotelar.apariencia')
+    : idx.indexOf('js/red-de-seguridad.js') > 0 && idx.indexOf('js/red-de-seguridad.js') < idx.indexOf('js/tema.js') && idx.indexOf('js/tema.js') < idx.indexOf('js/ui.js');
+  afirmar('sin red: la red de seguridad se carga antes que el resto de los scripts', ordenOk);
   // El worker se registra de verdad (http en 127.0.0.1 cuenta como contexto seguro) y guarda la cáscara
   await cargar('#/', 1280, 800);
   const reg = await Promise.race([ventana().navigator.serviceWorker.ready, espera(8000).then(() => null)]);
