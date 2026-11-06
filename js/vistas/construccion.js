@@ -28,7 +28,7 @@
       c('Un recorrido automático por cada rol que señala lo que desconcierta a quien llega.', 'Observar cómo se comporta en computadores y pantallas reales.', 'Probar en un celular real.', null),
       c('Un sitio sin dependencias externas y con una política de seguridad estricta.', '', 'Decidir dónde vivirá el servidor.', ['#/hoja/arquitectura', 'Ver la arquitectura']),
       c('La arquitectura capa por capa, con lo que hay hoy y lo siguiente, y un servidor diseñado y con pruebas.', '', 'Un modelo de datos común y un solo inicio de sesión para los tres portales.', ['#/hoja/arquitectura', 'Ver la arquitectura']),
-      c('Una plataforma publicada, con auditoría automática de pantallas, temas, contraste y recorrido completo.', 'Congelar la versión antes del pilotaje.', 'El servidor conectado y ValerIA con un modelo de lenguaje.', ['#/mi', 'Entrar a Mi espacio']),
+      c('Una plataforma publicada, con auditoría automática de pantallas, temas, contraste y recorrido completo.', 'Congelar la versión antes del pilotaje.', 'El servidor conectado y Niky con un modelo de lenguaje.', ['#/mi', 'Entrar a Mi espacio']),
       c('Una auditoría automática en cada cambio.', 'Probar en los computadores y con el proyector.', 'Una revisión de seguridad independiente antes de usar datos reales.', ['#/hoja/arquitectura', 'Ver la arquitectura']),
     ],
     Jurídica: [

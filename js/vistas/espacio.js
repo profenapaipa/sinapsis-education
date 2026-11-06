@@ -195,7 +195,7 @@
             h('button', { class: 'btn btn--chico', type: 'button', onclick: () => { location.hash = '#/mi/ajustes'; MT.ajusteNuevo = a.id; } }, 'Ajustar a un estudiante'),
             h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => formQuiz(a) }, 'Editar quiz'),
             h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => formActividad(a) }, 'Editar'),
-            h('button', { class: 'btn btn--chico btn--suave', type: 'button', 'aria-label': 'Pedir ideas a ValerIA para ' + a.titulo, onclick: () => MT.ia.panel.abrir({ texto: `Necesito ideas para una actividad de ${a.asignatura} sobre ${a.tema || a.titulo}.`, tarea: 'disenar' }) }, 'Pedir ideas a ValerIA'),
+            h('button', { class: 'btn btn--chico btn--suave', type: 'button', 'aria-label': 'Pedir ideas a Niky para ' + a.titulo, onclick: () => MT.ia.panel.abrir({ texto: `Necesito ideas para una actividad de ${a.asignatura} sobre ${a.tema || a.titulo}.`, tarea: 'disenar' }) }, 'Pedir ideas a Niky'),
             h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: async () => { if (await dlg.confirmar(`¿Borrar “${a.titulo}” y sus ajustes?`, 'Sí, borrar')) { MT.store.cambiar((s) => { s.actividades = s.actividades.filter((x) => x.id !== a.id); s.ajustes = s.ajustes.filter((x) => x.actividad !== a.id); }); dlg.toast('Actividad borrada.'); } } }, 'Borrar')))))
           : sinFoco('Todavía no hay actividades. Crea la primera.')));
     };

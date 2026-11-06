@@ -1,6 +1,6 @@
 /* portales.js: la vista general de los tres portales y la guía de inicio rápido de cada rol.
 
-   Los portales en sí (Kinesis, ValerIA, Wisfox) viven en las pestañas de arriba y en js/vivos.js: aquí solo está la página
+   Los portales en sí (Kinesis, Niky, Wisfox) viven en las pestañas de arriba y en js/vivos.js: aquí solo está la página
    que los explica en paralelo y la guía paso a paso. Los datos de qué hace cada portal y cada rol están en js/guias.js. */
 (function (MT) {
   'use strict';
@@ -27,7 +27,7 @@
 
   function vistaPortales(main) {
     const c = pagina(main, { etiqueta: 'Portales', titulo: 'Tres portales, una sola plataforma',
-      descripcion: 'Kinesis, ValerIA y Wisfox trabajan en paralelo y se pasan el trabajo entre sí. Están siempre en las pestañas de arriba: puedes tener varios abiertos y volver a cada uno sin perder lo que hacías.' });
+      descripcion: 'Kinesis, Niky y Wisfox trabajan en paralelo y se pasan el trabajo entre sí. Están siempre en las pestañas de arriba: puedes tener varios abiertos y volver a cada uno sin perder lo que hacías.' });
 
     c.append(h('div', { class: 'rejilla rejilla--3 portales' }, ORDEN.map((id) => { const p = PORTALES[id]; return h('article', { class: 'tarjeta portal', 'data-espacio': id },
       h('div', { class: 'proyecto-cab' }, marca(id), h('div', null, h('h2', null, p.nombre), h('small', null, p.rotulo))),
@@ -54,7 +54,7 @@
       h('div', { class: 'rejilla rejilla--4' }, [
         ['Un rol, un camino', 'Eliges quién eres una vez y cada portal te muestra lo tuyo.'],
         ['Los mismos datos', 'Un ajuste aprobado en Kinesis es el que ve el estudiante en Wisfox.'],
-        ['Una guía común', 'ValerIA ayuda en los dos portales y nunca recibe información clínica.'],
+        ['Una guía común', 'Niky ayuda en los dos portales y nunca recibe información clínica.'],
         ['Una sola identidad', 'Mismo diseño, mismas reglas de privacidad y mismo lenguaje.'],
       ].map(([t, p]) => h('div', { class: 'tarjeta tarjeta--borde' }, h('h3', null, t), h('p', null, p)))),
       h('p', { class: 'aviso', style: 'margin-top:1rem' }, 'Hoy, “Mi espacio” reúne el trabajo de los tres portales en una sola pantalla, con todo conectado. Kinesis y Wisfox originales siguen siendo aplicaciones de sus equipos, con sus propios datos: compartir los datos entre ellas es el trabajo del servidor central de la hoja de ruta.'),

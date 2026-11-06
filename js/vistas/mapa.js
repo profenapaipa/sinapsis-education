@@ -20,7 +20,7 @@
 
   const HILOS = [
     { id: 'kinesis', nombre: 'Kinesis', dice: 'El aula: docentes, orientación, familias', orden: ['admin', 'perfiles', 'planeacion', 'ajustes', 'aprobacion', 'familia'] },
-    { id: 'valeria', nombre: 'IA ValerIA', dice: 'La guía de los dos', orden: ['asistente', 'voz'] },
+    { id: 'valeria', nombre: 'IA Niky', dice: 'La guía de los dos', orden: ['asistente', 'voz'] },
     { id: 'wisfox', nombre: 'Wisfox', dice: 'El estudiante: aprender a su ritmo', orden: ['tutora', 'notas', 'logros', 'quizes', 'rutas'] },
   ];
 
@@ -40,9 +40,9 @@
     asistente: { hilo: 'valeria', nombre: 'Asistente que propone', estado: 'simulado', roles: ['docente', 'estudiante'], ir: ['docente', 'actividades'],
       que: 'Propone una actividad con DUA al docente y explica dudas al estudiante. Propone; decide quien enseña. Hoy responde con textos de ejemplo.' },
     voz: { hilo: 'valeria', nombre: 'Voz y análisis de fuentes', estado: 'viene', roles: [], ir: null,
-      que: 'La visión de ValerIA: hablar y leer las fuentes del colegio. Es un concepto todavía, y no se promete como si existiera.' },
+      que: 'La visión de Niky: hablar y leer las fuentes del colegio. Es un concepto todavía, y no se promete como si existiera.' },
     tutora: { hilo: 'wisfox', nombre: 'Tutora de IA', estado: 'simulado', roles: ['estudiante'], ir: ['estudiante', 'resumen'],
-      que: 'El chat de apoyo del estudiante. Es la misma guía que ayuda al docente: ValerIA.' },
+      que: 'El chat de apoyo del estudiante. Es la misma guía que ayuda al docente: Niky.' },
     notas: { hilo: 'wisfox', nombre: 'Notas y recursos', estado: 'funciona', roles: ['estudiante'], ir: ['docente', 'notas'],
       que: 'El estudiante guarda notas y encuentra recursos de estudio.' },
     logros: { hilo: 'wisfox', nombre: 'Logros, XP y misiones', estado: 'funciona', roles: ['estudiante'], ir: ['estudiante', 'logros'],
@@ -159,13 +159,13 @@
       }))));
 
     cont.append(svg, h('div', { class: 'mapa-cols' }, columnas));
-    // La columna de ValerIA queda en el medio y centrada: es la guía que cruza a las otras dos.
+    // La columna de Niky queda en el medio y centrada: es la guía que cruza a las otras dos.
     cont.querySelector('[data-hilo="valeria"]').style.alignSelf = 'center';
 
     const leyenda = h('div', { class: 'mapa-leyenda' }, Object.entries(ESTADOS).map(([k, [t]]) => h('span', null, h('i', { class: 'punto punto--' + k }), t)));
     c.append(h('div', { class: 'tarjeta tarjeta--plana', style: 'margin-bottom:1rem' }, h('h2', null, 'Cómo leer este mapa'),
       h('ol', { class: 'como-leer' },
-        h('li', null, h('strong', null, 'Tres columnas, tres portales. '), 'Kinesis (el aula), ValerIA (la guía) y Wisfox (el estudiante) trabajan en paralelo. Cada recuadro es una función.'),
+        h('li', null, h('strong', null, 'Tres columnas, tres portales. '), 'Kinesis (el aula), Niky (la guía) y Wisfox (el estudiante) trabajan en paralelo. Cada recuadro es una función.'),
         h('li', null, h('strong', null, 'Las flechas son trabajo que pasa de una función a otra. '), 'Por ejemplo: el docente ajusta (Ajustes) y eso viaja a Aprobación; al aprobarse, viaja a la Familia y a las Rutas del estudiante.'),
         h('li', null, h('strong', null, 'Toca un recuadro '), 'para ver qué hace, quién lo usa y qué recibe y entrega, y ábrelo en la plataforma.'),
         h('li', null, h('strong', null, 'Elige un rol arriba '), 'y se atenúa lo que no usa: es la manera más rápida de ver tu parte.')),
@@ -186,9 +186,9 @@
     ['Para todos y para cada quien', 'El DUA es la base: la clase se piensa para todos desde el diseño, y el ajuste individual acompaña lo que el diseño no alcanza.'],
     ['Quien enseña decide', 'Las herramientas proponen y explican; la docencia y el equipo de orientación deciden. La tecnología media, no sustituye.'],
     ['Cuidado de la información', 'Lo clínico queda aparte y solo lo ve orientación. La inteligencia artificial nunca lo recibe, y cada rol ve únicamente lo que necesita.'],
-    ['Tres portales, un tejido', 'Kinesis, ValerIA y Wisfox nacieron como proyectos de estudiantes y hoy se encuentran en una misma plataforma, con una identidad común. Que compartan también sus datos es parte de lo que estamos construyendo.'],
+    ['Tres portales, un tejido', 'Kinesis, Niky y Wisfox nacieron como proyectos de estudiantes y hoy se encuentran en una misma plataforma, con una identidad común. Que compartan también sus datos es parte de lo que estamos construyendo.'],
   ];
-  const EN_CONSTRUCCION = ['Un servidor con cuentas, para compartir el trabajo entre personas y dispositivos', 'ValerIA conectada a un modelo de lenguaje', 'El documento del PIAR en el formato oficial', 'Más materias en la ruta del estudiante'];
+  const EN_CONSTRUCCION = ['Un servidor con cuentas, para compartir el trabajo entre personas y dispositivos', 'Conexión de Niky a un modelo de lenguaje', 'El documento del PIAR en el formato oficial', 'Más materias en la ruta del estudiante'];
 
   function distingue(c) {
     c.append(h('div', { class: 'rejilla rejilla--3 diferencial' }, DISTINGUE.map(([t, p]) => h('div', { class: 'tarjeta tarjeta--borde' }, h('h2', { class: 'h3' }, t), h('p', null, p)))));

@@ -21,7 +21,7 @@
     { nombre: 'Apoyo', que: 'Lo que le sirve a un estudiante para aprender, por ejemplo más tiempo o imágenes junto al texto. En Mosaico Telar un apoyo se describe siempre sin diagnóstico.' },
     { nombre: 'Información clínica', que: 'Datos de salud o un diagnóstico. En Mosaico Telar solo existe como archivos que ve únicamente orientación: ni docentes, ni familias, ni coordinación, ni la inteligencia artificial la reciben.' },
     { nombre: 'Mínimo privilegio', que: 'La regla de que cada rol ve solo lo que necesita para hacer su trabajo y nada más. Por eso coordinación administra el colegio pero no ve los apoyos de los estudiantes.' },
-    { nombre: 'Portal', que: 'Cada una de las tres partes de la plataforma: Kinesis (el aula), ValerIA (la guía) y Wisfox (el estudiante).' },
+    { nombre: 'Portal', que: 'Cada una de las tres partes de la plataforma: Kinesis (el aula), Niky (la guía) y Wisfox (el estudiante).' },
   ];
 
   // Se marcan al primer uso las siglas y también las palabras clave del eje narrativo (neurodiversidad, neurodivergencia, neurodesarrollo).

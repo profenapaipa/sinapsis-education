@@ -46,7 +46,7 @@
     ['Servidor (backend)', 'No hay. Lo creado se guarda en el navegador de quien lo crea.', 'API con cuentas, roles y registro de quién hizo qué.', 'e'],
     ['Base de datos', 'El navegador (localStorage).', 'Base de datos con copia de seguridad y cifrado, una por colegio.', 'e'],
     ['Archivos', 'El navegador (IndexedDB), con validación de formato y de contenido.', 'Almacenamiento con permisos, revisión de virus y vencimiento.', 'e'],
-    ['ValerIA (IA)', 'Textos de ejemplo. El agente está definido (personalidad, límites y voz) y corre en un servicio aparte.', 'Un servicio intermedio que guarda la clave, filtra los datos y limita el uso.', 'aviso'],
+    ['Niky (IA)', 'Textos de ejemplo. El agente está definido (personalidad, límites y voz) y corre en un servicio aparte.', 'Un servicio intermedio que guarda la clave, filtra los datos y limita el uso.', 'aviso'],
     ['Seguridad y privacidad', 'Los permisos por rol se aplican en pantalla.', 'Los permisos se hacen cumplir en el servidor, que es el único lugar donde de verdad se garantizan.', 'e'],
   ];
   const ETIQ = { ok: 'Disponible', aviso: 'Parcial', e: 'Por construir' };
@@ -62,7 +62,7 @@
 
   const ETAPAS = [
     ['Disponible hoy', 'ok', 'Cinco espacios por rol con crear, editar y borrar: estudiantes, actividades con DUA y quiz, ajustes con aprobación, notas, cursos y categorías. Archivos con permisos por rol. Ruta de Inglés de grado 8.° con quizes explicados. Progreso, puntos y logros. Guía de inicio rápido por rol y acceso a los tres portales.'],
-    ['Con respuestas de ejemplo', 'aviso', 'ValerIA ya tiene su lugar en cada espacio y responde con textos preparados. Se conecta a un modelo de lenguaje sin cambiar nada más.'],
+    ['Con respuestas de ejemplo', 'aviso', 'Niky ya tiene su lugar en cada espacio y responde con textos preparados. Se conecta a un modelo de lenguaje sin cambiar nada más.'],
     ['En desarrollo', 'e', 'Servidor con cuentas y base de datos para compartir entre dispositivos y personas. Un solo inicio de sesión para los tres portales. Documento PIAR en el formato oficial. Más materias en la ruta del estudiante.'],
     ['Antes de usar datos reales', 'e', 'Política de tratamiento de datos, autorización de las familias, contrato con el colegio, cifrado y revisión de seguridad independiente.'],
   ];

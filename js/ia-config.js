@@ -1,8 +1,8 @@
-/* ia-config.js: el único archivo que se toca para conectar ValerIA.
+/* ia-config.js: el único archivo que se toca para conectar Niky.
 
    proveedor:
      'auto'      (por defecto) Pregunta a /api/estado del mismo sitio. Si responde que hay IA,
-                 usa el servidor; si no, ValerIA responde con textos de ejemplo.
+                 usa el servidor; si no, Niky responde con textos de ejemplo.
      'simulado'  Siempre textos de ejemplo. Sirve para ensayar sin conexión.
      'servidor'  Igual que 'auto' pero sin la opción de volver a simulado al detectar.
 

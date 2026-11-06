@@ -2,11 +2,11 @@
 
    Qué hay aquí:
    - flujo(): el diagrama. Wisfox se centra en el estudiante (material didáctico interactivo que parte de las mallas curriculares de
-     la institución); Kinesis, en el docente, que media la personalización del aprendizaje; ValerIA es un agente que interactúa con
+     la institución); Kinesis, en el docente, que media la personalización del aprendizaje; Niky es un agente que interactúa con
      todo el ecosistema y entrega la información a las personas, que la procesan y deciden. La IA es una herramienta de agentividad:
      ninguna flecha termina en ella. Su hilo azul cruza por encima de un hilo y por debajo de otro, como los hilos del logo.
    - separador(), vacio(portal) y pieza(portal): los motivos para separar secciones, para estados vacíos y para tarjetas de portal.
-     Cada portal conserva su tesela (cuadrado Kinesis, hexágono Wisfox, círculo ValerIA) y su hilo.
+     Cada portal conserva su tesela (cuadrado Kinesis, hexágono Wisfox, círculo Niky) y su hilo.
 
    Los textos del diagrama viven aparte, en TEXTOS_FLUJO, para poder cambiarlos sin tocar el dibujo. Los que dicen "[borrador]"
    esperan la redacción aprobada. Lo que existe hoy va en trazo continuo y lo que es dirección del proyecto, punteado; además cada
@@ -20,17 +20,17 @@
     malla: ['[borrador] Malla curricular', 'de la institución'],
     wisfox: ['[borrador] Estudiante', 'Material interactivo'],
     kinesis: ['[borrador] Docente', 'Media la personalización'],
-    valeria: ['[borrador] ValerIA: agente', 'Herramienta de agentividad', 'Propone; la persona decide'],
+    valeria: ['[borrador] Niky: agente', 'Herramienta de agentividad', 'Propone; la persona decide'],
     personas: ['[borrador] Personas', 'procesan y deciden'],
     leyendaHoy: '[borrador] Existe hoy',
     leyendaCamino: '[borrador] En desarrollo',
-    alt: '[borrador] Diagrama del flujo entre los tres portales. La malla curricular de la institución alimenta a Wisfox, centrado en el estudiante. Kinesis se centra en el docente, que media la personalización del aprendizaje. El hilo de ValerIA cruza el tejido y lleva la información a las personas, que la procesan y deciden.',
+    alt: '[borrador] Diagrama del flujo entre los tres portales. La malla curricular de la institución alimenta a Wisfox, centrado en el estudiante. Kinesis se centra en el docente, que media la personalización del aprendizaje. El hilo de Niky cruza el tejido y lleva la información a las personas, que la procesan y deciden.',
     // La lista equivalente para lectores de pantalla: el mismo recorrido, paso a paso.
     lista: [
       '[borrador] La malla curricular de la institución es el punto de partida y alimenta a Wisfox. Existe hoy, con una malla cargada.',
       '[borrador] Wisfox se centra en el estudiante: material didáctico interactivo. Existe hoy como demostración.',
       '[borrador] Kinesis se centra en el docente, que media toda la personalización del aprendizaje. Existe hoy como demostración.',
-      '[borrador] ValerIA es el agente que interactúa con la plataforma, las personas y la información. Hoy responde con ejemplos.',
+      '[borrador] Niky es el agente que interactúa con la plataforma, las personas y la información. Hoy responde con ejemplos.',
       '[borrador] La información llega a las personas, que la procesan y deciden. En desarrollo: el servidor aún no está conectado.',
     ],
   };
@@ -57,7 +57,7 @@
       ${tesela('kinesis', 271, 190, 68)}${lineas(T.kinesis, 271, 242, 'flujo__texto')}
       <!-- Wisfox y Kinesis se tejen entre sí: dos hilos, el del estudiante y el del docente -->
       <path class="flujo__hilo flujo__hilo--wisfox" d="M126 184H236"/>
-      <!-- El hilo de ValerIA pasa por encima del hilo ámbar y por debajo del verde, como en el logo -->
+      <!-- El hilo de Niky pasa por encima del hilo ámbar y por debajo del verde, como en el logo -->
       ${funda('M180 300V176')}<path class="flujo__hilo flujo__hilo--valeria" d="M180 300V176"/>
       ${funda('M126 198H236')}<path class="flujo__hilo flujo__hilo--kinesis" d="M126 198H236"/>
       <!-- La información sube hacia las personas, en trazo punteado: es la dirección del proyecto -->

@@ -1,4 +1,4 @@
-/* portales-vivos.css: Kinesis, ValerIA y Wisfox a panel completo.
+/* portales-vivos.css: Kinesis, Niky y Wisfox a panel completo.
 
    Lo que hay dentro de cada portal es mucha información, así que el portal ocupa TODO el espacio que queda bajo la barra de
    pestañas. Arriba queda una sola barra de herramientas delgada; la explicación de qué te toca hacer ahí está en un
@@ -71,7 +71,7 @@
   .vivo-marcos--2 { grid-template-columns: 1fr; }
   .dividir { display: none; }
   .vivo-badge { display: none; }
-  /* La pestaña de ValerIA ya está arriba: el botón de la franja sobra en el celular y le quita una fila al portal. */
+  /* La pestaña de Niky ya está arriba: el botón de la franja sobra en el celular y le quita una fila al portal. */
   #btn-ia { display: none; }
   /* En el celular el desplegable se ancla a los bordes de la pantalla: pegado a su botón se saldría por la derecha. */
   .vivo-ayuda { position: static; }

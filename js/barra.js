@@ -1,6 +1,6 @@
 /* barra.js: lo que está siempre a la vista arriba, en cualquier pantalla.
 
-   1. La barra de portales: pestañas horizontales (Mi espacio, Kinesis, ValerIA, Wisfox) en el orden del flujo de trabajo.
+   1. La barra de portales: pestañas horizontales (Mi espacio, Kinesis, Niky, Wisfox) en el orden del flujo de trabajo.
       Cada portal tiene una lista desplegable con lo que le toca hacer a tu rol ahí y las secciones de Mi espacio donde
       puedes trabajarlo ahora mismo. Los portales que ya abriste quedan marcados y siguen vivos al cambiar de pestaña.
    2. El selector de rol, que cambia de rol sin perder el lugar, y la opción de empezar de nuevo.
@@ -98,7 +98,7 @@
     if (confirmar && !(await MT.dlg.confirmar('Se borrará todo lo que creaste en este dispositivo (actividades, ajustes, notas y archivos) y volverán los datos de ejemplo.', 'Sí, empezar de nuevo'))) return false;
     // Si el navegador no deja usar IndexedDB (modo privado, sin conexión a disco), los datos de ejemplo vuelven de todos modos.
     try { await MT.archivos.vaciar(); } catch (e) { console.error(e); }
-    // Los portales abiertos también vuelven a empezar: sin esto el chat de ValerIA conservaría su conversación.
+    // Los portales abiertos también vuelven a empezar: sin esto el chat de Niky conservaría su conversación.
     // y se borra lo que Kinesis y Wisfox guardaron en este navegador (ver vivos.js).
     if (MT.vivos && MT.vivos.reiniciar) await MT.vivos.reiniciar();
     st.reiniciar(); location.hash = '#/'; MT.router.recargar();

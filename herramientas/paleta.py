@@ -23,7 +23,7 @@ todos los pares, y por eso encontró que el océano claro se confundía con el v
 import math
 import sys
 
-HILOS = {'Verde bosque (Kinesis)': '#1B7F56', 'Ámbar (Wisfox)': '#E8A13C', 'Azul tinta (ValerIA)': '#2B4FA3'}
+HILOS = {'Verde bosque (Kinesis)': '#1B7F56', 'Ámbar (Wisfox)': '#E8A13C', 'Azul tinta (Niky)': '#2B4FA3'}
 DESCARTADO = {'Terracota (descartado)': '#D9604F'}
 SUPERFICIES = {'Papel': '#FFFFFF', 'Lino': '#F6F2EA', 'Tinta': '#1A1714'}
 
@@ -100,7 +100,7 @@ def main():
     print('   El ámbar no pasa 4,5 sobre papel: por eso identifica pero nunca lleva texto encima.\n')
 
     print('3. Daltonismo: ΔE entre pares de hilos (>= 8 se distinguen; < 8 se confunden)')
-    descartada_a = {'Verde bosque (Kinesis)': '#1B7F56', 'Terracota (descartado)': '#D9604F', 'Azul tinta (ValerIA)': '#2B4FA3'}
+    descartada_a = {'Verde bosque (Kinesis)': '#1B7F56', 'Terracota (descartado)': '#D9604F', 'Azul tinta (Niky)': '#2B4FA3'}
     descartada_b = {'Verde bosque (Kinesis)': '#1B7F56', 'Ámbar (Wisfox)': '#E8A13C', 'Océano claro (descartado)': '#1D6FB8'}
     for etiqueta, conjunto in (('Paleta elegida', HILOS), ('Descartada: con terracota', descartada_a), ('Descartada: con el océano claro', descartada_b)):
         print(f'   {etiqueta}')

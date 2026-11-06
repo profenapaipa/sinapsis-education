@@ -15,7 +15,7 @@
       cuenta: null,           // el registro de esta persona (correo, rol, plan); sobrevive a "empezar de nuevo"
       vinculo: 'P-03',        // el estudiante con quien se identifica la familia y el propio estudiante
       contador: {},
-      actividad: '',          // el último texto que propuso ValerIA al docente
+      actividad: '',          // el último texto que propuso Niky al docente
       ia: [],
     }, MT.datos.semilla());
   }

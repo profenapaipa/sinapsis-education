@@ -17,7 +17,7 @@
       entrega: 'Entrega a Wisfox la actividad aprobada y a la familia las novedades.', estado: ['Disponible', 'ok'],
     },
     valeria: {
-      nombre: 'ValerIA', rotulo: 'La guía', paraQuien: 'Docentes y estudiantes',
+      nombre: 'Niky', rotulo: 'La guía', paraQuien: 'Docentes y estudiantes',
       que: 'Es el hilo que cruza a los otros dos: propone, ordena y lleva la información hasta quien debe decidir. La IA amplía la agentividad de las personas; no la reemplaza.',
       haces: ['Pedir ideas para una actividad', 'Pedir ayuda para redactar un ajuste', 'Aclarar una duda de un tema', 'Responder en español e inglés'],
       entrega: 'Entrega propuestas al docente y explicaciones al estudiante.', estado: ['Respuestas de ejemplo', 'aviso'],
@@ -25,7 +25,7 @@
     wisfox: {
       nombre: 'Wisfox', rotulo: 'El estudiante', paraQuien: 'Estudiantes (y su familia, acompañando)',
       que: 'Es el hilo del estudiante: material didáctico interactivo que parte de la malla curricular de su institución.',
-      haces: ['Seguir su ruta de aprendizaje', 'Hacer la actividad que le llegó, a su medida', 'Responder quizes y ganar logros', 'Preguntar sus dudas a ValerIA'],
+      haces: ['Seguir su ruta de aprendizaje', 'Hacer la actividad que le llegó, a su medida', 'Responder quizes y ganar logros', 'Preguntar sus dudas a Niky'],
       entrega: 'Devuelve al docente el progreso: quiz, puntos y logros.', estado: ['Disponible', 'ok'],
     },
   };
@@ -36,7 +36,7 @@
     docente: { principal: 'kinesis', meta: 'Planear una clase, ajustarla a cada estudiante y ver cómo le va.', pasos: [
       { portal: 'kinesis', t: 'Conoce los apoyos de tus estudiantes', d: 'Mira qué le sirve a cada uno. Nunca verás un diagnóstico.', aqui: 'estudiantes' },
       { portal: 'kinesis', t: 'Planea la actividad con DUA', d: 'Piensa la clase para todos: varias formas de representar, de expresarse y de motivarse. Agrega su quiz.', aqui: 'actividades' },
-      { portal: 'valeria', t: 'Pide ideas a ValerIA', d: 'Te propone una actividad. Tú decides qué usar.', aqui: 'actividades' },
+      { portal: 'valeria', t: 'Pide ideas a Niky', d: 'Te propone una actividad. Tú decides qué usar.', aqui: 'actividades' },
       { portal: 'kinesis', t: 'Ajusta la actividad a un estudiante', d: 'Cada apoyo se vuelve un cambio concreto, con su razón. Envíalo a orientación.', aqui: 'ajustes' },
       { portal: 'wisfox', t: 'Mira cómo la recibe el estudiante', d: 'Cuando orientación aprueba, el estudiante la ve a su medida y tú ves su progreso.', aqui: 'resumen' },
     ] },
@@ -60,7 +60,7 @@
     estudiante: { principal: 'wisfox', meta: 'Aprender a tu ritmo, con la actividad hecha a tu medida.', pasos: [
       { portal: 'wisfox', t: 'Entra a tu actividad de hoy', d: 'Si orientación aprobó un ajuste para ti, ya viene a tu medida.', aqui: 'resumen' },
       { portal: 'wisfox', t: 'Sigue tu ruta de Inglés', d: 'Lecciones cortas con su quiz y la explicación de cada respuesta.', aqui: 'ruta' },
-      { portal: 'valeria', t: 'Pregunta lo que no entiendas', d: 'ValerIA te explica con ejemplos y te hace una pregunta para practicar.', aqui: null },
+      { portal: 'valeria', t: 'Pregunta lo que no entiendas', d: 'Niky te explica con ejemplos y te hace una pregunta para practicar.', aqui: null },
       { portal: 'wisfox', t: 'Mira tus logros', d: 'Puntos, niveles y logros por lo que vas haciendo.', aqui: 'logros' },
     ] },
   };

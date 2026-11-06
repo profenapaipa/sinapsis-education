@@ -63,7 +63,7 @@ Un color principal, dos funcionales y tres neutros. Todo en [PALETA.md](PALETA.m
 | Papel / Lino | `#FFFFFF` / `#F6F2EA` | Superficies |
 | **Verde bosque** | `#1B7F56` | **Principal: la acción.** El mismo verde que ya compartían Kinesis y Wisfox |
 | Ámbar | `#E8A13C` | Hilo de Wisfox y avisos. Nunca lleva texto |
-| Azul tinta | `#2B4FA3` | Hilo de ValerIA |
+| Azul tinta | `#2B4FA3` | Hilo de Niky |
 
 **El color nunca va solo:** todo estado lleva también texto ("Aprobado", "Pendiente", "Simulado").
 **Nunca rojo** para un PIAR o un estudiante.
@@ -90,7 +90,7 @@ Un mosaico se arma con teselas. **Cada hilo tiene la suya, en una sola tinta:**
 |---|---|---|
 | Kinesis | Cuadrado redondeado con la "K" en movimiento: su brazo superior termina en un punto, el estudiante que avanza | Su identidad original |
 | Wisfox | Hexágono con una "W" | Su identidad original |
-| ValerIA | Círculo con una "V" sencilla | Nueva. Sin chispas ni destellos: la guía es acompañamiento, no magia |
+| Niky | Círculo con una "V" sencilla | Nueva. Sin chispas ni destellos: la guía es acompañamiento, no magia |
 
 **Íconos:** de línea, un solo trazo redondeado de 2 px, en una sola tinta, como los que ya usaban Kinesis y Wisfox.
 
@@ -109,12 +109,12 @@ El telar y el mosaico dan para más que un logo. Se usan con medida: dan identid
 
 ## 8. Estructura de la interfaz
 
-1. **El riel** (izquierda, siempre igual, en tinta con íconos blancos): Mapa, Kinesis, Wisfox, ValerIA,
+1. **El riel** (izquierda, siempre igual, en tinta con íconos blancos): Mapa, Kinesis, Wisfox, Niky,
    Demo y Roles. En celular baja a una barra inferior.
 2. **Los proyectos reales, incrustados e intactos:** Kinesis y Wisfox se muestran con su propia cara,
    animaciones y recursos, dentro de un marco con su nombre, un selector de rol y el enlace a su código.
 3. **La demostración** (`/#/demo`): el ajuste de punta a punta, con una barra lateral por rol.
-4. **ValerIA**, con su propio espacio y un panel fijo que se abre desde cualquier pantalla.
+4. **Niky**, con su propio espacio y un panel fijo que se abre desde cualquier pantalla.
 
 Esquinas moderadas (14 px), filete fino y casi sin sombra. Sin degradados.
 

@@ -1,5 +1,5 @@
 /* main.js: arranque. Construye la navegación a partir de UNA lista (así el menú de escritorio y
-   la barra del celular nunca se contradicen), conecta la apariencia y el botón de ValerIA, y
+   la barra del celular nunca se contradicen), conecta la apariencia y el botón de Niky, y
    registra cualquier error para que las pruebas automáticas puedan verlo. */
 (function (MT) {
   'use strict';
@@ -75,4 +75,5 @@
   document.getElementById('btn-ia').addEventListener('click', () => MT.ia.panel.alternar());
   MT.ia.detectar();
   MT.router.iniciar();
+  if (MT.presentacion && MT.presentacion.desdeUrl) MT.presentacion.desdeUrl();
 })(window.MT = window.MT || {});

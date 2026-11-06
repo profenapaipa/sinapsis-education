@@ -12,7 +12,7 @@
     { nombre: 'Lino', hex: '#F6F2EA', rol: 'Monocromo', origen: 'Un blanco cálido que baja el brillo de la pantalla.', uso: 'Fondos secundarios y bandas.' },
     { nombre: 'Verde bosque', hex: '#1B7F56', rol: 'Color principal', origen: 'Kinesis: su color de marca. Wisfox usa la misma familia (#3D9960 y #2E7D4F).', uso: 'La acción: botón principal, enlaces y estados activos.' },
     { nombre: 'Ámbar', hex: '#E8A13C', rol: 'Funcional', origen: 'Wisfox: su acento y el zorro. Kinesis: sus avisos y el PIAR.', uso: 'Identifica a Wisfox y da avisos. Nunca rojo: un PIAR no es un error. Nunca lleva texto encima.' },
-    { nombre: 'Azul tinta', hex: '#2B4FA3', rol: 'Funcional', origen: 'El “Océano” del menú de apariencia de Kinesis (#1D6FB8), un paso más oscuro: el original se confundía con el verde en tritanopía.', uso: 'Identifica a ValerIA.' },
+    { nombre: 'Azul tinta', hex: '#2B4FA3', rol: 'Funcional', origen: 'El “Océano” del menú de apariencia de Kinesis (#1D6FB8), un paso más oscuro: el original se confundía con el verde en tritanopía.', uso: 'Identifica a Niky.' },
   ];
 
   // Contraste WCAG, calculado aquí mismo para que la cifra mostrada sea siempre la real.
@@ -29,7 +29,7 @@
 
   const FONDOS = [
     { id: 'kinesis', nombre: 'Verde Kinesis', hex: '#1B7F56', tinta: '#FFFFFF' },
-    { id: 'valeria', nombre: 'Azul ValerIA', hex: '#2B4FA3', tinta: '#FFFFFF' },
+    { id: 'valeria', nombre: 'Azul Niky', hex: '#2B4FA3', tinta: '#FFFFFF' },
     { id: 'wisfox', nombre: 'Ámbar Wisfox', hex: '#E8A13C', tinta: '#1A1714' },
     { id: 'mosaico', nombre: 'Rosa Mosaico', hex: '#E0527E', tinta: '#1A1714' },
   ];
@@ -52,11 +52,11 @@
           h('div', { class: 'tarjeta tarjeta--borde' }, h('p', { class: 'etiqueta' }, 'Eslogan'), h('p', { class: 'manual-grande' }, 'Tejemos caminos para aprender.'))),
         h('p', null, h('strong', null, 'Qué hacemos: '), 'una plataforma para que el docente planee una clase inclusiva, la orientación la valide, la familia la vea y cada estudiante la reciba a su medida.'),
         h('p', null, h('strong', null, 'Descriptor: '), 'Colectivo de educación inclusiva con tecnología.'),
-        h('div', { class: 'rejilla rejilla--3' }, [['Todos somos mosaico', 'Todos aprendemos distinto, también quienes no tienen un diagnóstico.'], ['Cada pieza conserva su nombre', 'Kinesis, Wisfox y ValerIA se unen sin perder su identidad.'], ['Los datos van primero', 'Son menores de edad. Lo que no es necesario, no se pide.'], ['Decimos qué hay', 'Y qué responde con ejemplos. Sin adornos.']]
+        h('div', { class: 'rejilla rejilla--3' }, [['Todos somos mosaico', 'Todos aprendemos distinto, también quienes no tienen un diagnóstico.'], ['Cada pieza conserva su nombre', 'Kinesis, Wisfox y Niky se unen sin perder su identidad.'], ['Los datos van primero', 'Son menores de edad. Lo que no es necesario, no se pide.'], ['Decimos qué hay', 'Y qué responde con ejemplos. Sin adornos.']]
           .map(([t, p]) => h('div', { class: 'tarjeta' }, h('h3', null, t), h('p', null, p))))));
 
       c.append(seccion('logo', 'Logo',
-        h('p', null, 'Una trama de telar vista de cerca: ', h('strong', null, 'nueve teselas negras cruzadas por hilos de cuatro colores'), ', que pasan por encima y por debajo. El mosaico son las piezas; el telar, lo que las une. Cada hilo es el color de uno de los portales: verde (Kinesis), azul (ValerIA), ámbar (Wisfox) y rosa (la plataforma que los une).'),
+        h('p', null, 'Una trama de telar vista de cerca: ', h('strong', null, 'nueve teselas negras cruzadas por hilos de cuatro colores'), ', que pasan por encima y por debajo. El mosaico son las piezas; el telar, lo que las une. Cada hilo es el color de uno de los portales: verde (Kinesis), azul (Niky), ámbar (Wisfox) y rosa (la plataforma que los une).'),
         // El logo grande, animado, sobre negro: es lo primero que se ve de la identidad.
         (() => {
           const grande = MT.tejido.logo({ animar: false, clase: 'logo-heroe__svg' });
@@ -107,7 +107,7 @@
       const F1 = 'M10 10H90V40a10 10 0 1 1 0 20V90H10Z';                       // lengüeta a la derecha
       const F2 = 'M10 10H90V40a10 10 0 1 1 0 20V90H10V60a10 10 0 1 0 0-20Z';   // hueco a la izquierda y lengüeta a la derecha
       const F3 = 'M10 10H90V90H10V60a10 10 0 1 0 0-20Z';                       // solo el hueco a la izquierda
-      const portales = h('div', { class: 'piezas-portales separadas' }, pieza('#1B7F56', 'Kinesis', 'El hilo de quien enseña', F1), pieza('#2B4FA3', 'ValerIA', 'El hilo que cruza a los otros dos', F2), pieza('#E8A13C', 'Wisfox', 'El hilo del estudiante', F3, 'pieza-portal-card--wisfox'));
+      const portales = h('div', { class: 'piezas-portales separadas' }, pieza('#1B7F56', 'Kinesis', 'El hilo de quien enseña', F1), pieza('#2B4FA3', 'Niky', 'El hilo que cruza a los otros dos', F2), pieza('#E8A13C', 'Wisfox', 'El hilo del estudiante', F3, 'pieza-portal-card--wisfox'));
       portales.addEventListener('mouseenter', () => portales.classList.remove('separadas'));
       portales.addEventListener('mouseleave', () => portales.classList.add('separadas'));
       const ovillo = () => svg('<svg viewBox="0 0 28 28" aria-hidden="true" focusable="false"><defs><clipPath id="ov-demo"><circle cx="13" cy="13" r="10"/></clipPath></defs><circle cx="13" cy="13" r="10" fill="#fff"/><g clip-path="url(#ov-demo)" fill="none" stroke-width="2.4"><path d="M2 8C8 14 16 4 26 10" stroke="#2B4FA3"/><path d="M2 14C8 20 16 10 26 16" stroke="#E8A13C"/><path d="M8 2C12 10 8 18 16 26" stroke="#E0527E"/></g><circle cx="13" cy="13" r="10" fill="none" stroke="#fff" stroke-width="1.5"/></svg>');
@@ -152,7 +152,7 @@
         h('div', { class: 'rejilla rejilla--3' },
           h('div', { class: 'tarjeta tesela' }, marca('kinesis', 'tesela-marca'), h('h3', null, 'Cuadrado redondeado'), h('p', null, 'Kinesis, el aula. La “K” en movimiento: su brazo superior termina en un punto, el estudiante que avanza.')),
           h('div', { class: 'tarjeta tesela' }, marca('wisfox', 'tesela-marca'), h('h3', null, 'Hexágono'), h('p', null, 'Wisfox, el estudiante. El hexágono con la W que ya tenía.')),
-          h('div', { class: 'tarjeta tesela' }, marca('valeria', 'tesela-marca'), h('h3', null, 'Círculo'), h('p', null, 'ValerIA, la guía. Una “V” sencilla, sin chispas ni destellos: la guía no es magia, es acompañamiento.'))),
+          h('div', { class: 'tarjeta tesela' }, marca('valeria', 'tesela-marca'), h('h3', null, 'Círculo'), h('p', null, 'Niky, la guía. Una “V” sencilla, sin chispas ni destellos: la guía no es magia, es acompañamiento.'))),
         h('div', { class: 'tarjeta', style: 'margin-top:1rem' }, h('h3', null, 'Íconos'), h('p', { class: 'suave' }, 'De línea, con un solo trazo redondeado de 2 px y en una sola tinta, como los que ya usaban Kinesis y Wisfox.'),
           h('div', { class: 'iconos-fila' }, ICONOS.map((n) => icono(n))))));
 

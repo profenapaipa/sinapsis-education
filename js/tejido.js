@@ -1,7 +1,7 @@
 /* tejido.js: el logo de Mosaico Telar tejiéndose, y la animación del hilo usada donde la plataforma "trabaja".
 
    La idea de la marca: nueve piezas unidas por cuatro hilos que se cruzan por encima y por debajo. Los cuatro hilos son
-   los tres portales y la plataforma que los une: verde Kinesis, azul ValerIA, ámbar Wisfox y rosa Mosaico Telar.
+   los tres portales y la plataforma que los une: verde Kinesis, azul Niky, ámbar Wisfox y rosa Mosaico Telar.
 
    Cómo está dibujado (y por qué no hay costuras): los hilos van DETRÁS de una sola forma negra que ya trae las piezas y los
    puentes de "por debajo". Así el entretejido sale solo, y al quitar el color los hilos son espacio vacío limpio.
@@ -183,7 +183,7 @@
         ? { eje, x: c - EXTRA, y: i, w: HILO + 2 * EXTRA, h: fin - i, color: COLOR[eje][k], linea: lineas.length - 1, desde: i, hasta: fin }
         : { eje, x: i, y: c - EXTRA, w: fin - i, h: HILO + 2 * EXTRA, color: COLOR[eje][k], linea: lineas.length - 1, desde: i, hasta: fin }));
     };
-    // El orden de las líneas es el del tejido: Kinesis, ValerIA, Wisfox, Mosaico Telar.
+    // El orden de las líneas es el del tejido: Kinesis, Niky, Wisfox, Mosaico Telar.
     agrega('v', 0, [0, 1].filter((b) => encima(0, b) === 'h').map((b) => CORTES[b][1]));
     agrega('h', 0, [0, 1].filter((a) => encima(a, 0) === 'v').map((a) => CORTES[a][1]));
     agrega('v', 1, [0, 1].filter((b) => encima(1, b) === 'h').map((b) => CORTES[b][1]));

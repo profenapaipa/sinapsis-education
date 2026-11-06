@@ -13,9 +13,9 @@
   /* Funciones Pro: lo que se ve bloqueado en la demo. */
   const PRO = {
     piar: { titulo: 'Exportar el PIAR en el formato oficial', que: 'Genera el documento del Plan Individual de Ajustes Razonables con los datos del perfil y los ajustes aprobados, listo para imprimir o firmar.', desde: 'Llegará con el espacio compartido' },
-    valeria: { titulo: 'ValerIA con un modelo de lenguaje real', que: 'Respuestas generadas por un modelo, ajustadas a tu actividad y a tu grado, sin que la IA reciba nunca información clínica.', desde: 'Llegará con el espacio compartido' },
+    valeria: { titulo: 'Niky con un modelo de lenguaje real', que: 'Respuestas generadas por un modelo, ajustadas a tu actividad y a tu grado, sin que la IA reciba nunca información clínica.', desde: 'Llegará con el espacio compartido' },
     nube: { titulo: 'Trabajo compartido en la nube', que: 'Lo que creas se guarda en un servidor y lo ven tu equipo y las familias desde cualquier dispositivo, sin perder nada al cambiar de equipo.', desde: 'Llegará con el espacio compartido' },
-    cuentas: { titulo: 'Cuentas por rol con inicio de sesión único', que: 'Cada persona entra con su cuenta, ve solo lo suyo y la misma sesión sirve en Kinesis, ValerIA y Wisfox.', desde: 'Llegará con el espacio compartido' },
+    cuentas: { titulo: 'Cuentas por rol con inicio de sesión único', que: 'Cada persona entra con su cuenta, ve solo lo suyo y la misma sesión sirve en Kinesis, Niky y Wisfox.', desde: 'Llegará con el espacio compartido' },
     reportes: { titulo: 'Reportes del colegio', que: 'Cuántos ajustes hay en cada estado, cuánto tarda un ajuste en llegar al aula y cómo usa la plataforma cada curso, sin ver datos de estudiantes.', desde: 'Llegará con el espacio compartido' },
     auditoria: { titulo: 'Historial de quién hizo qué', que: 'Un registro de las acciones importantes (aprobaciones, cambios de perfil, archivos) para rendir cuentas ante el colegio.', desde: 'Llegará con el espacio compartido' },
     avisos: { titulo: 'Avisos por correo a las familias', que: 'Cuando orientación aprueba un ajuste, la familia recibe un mensaje sencillo con lo que cambió y por qué.', desde: 'Llegará con el espacio compartido' },

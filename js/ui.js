@@ -7,7 +7,7 @@
 
    La familia de símbolos (ver marca.js y docs/ANALISIS_Y_DISENO.md):
    - Cada hilo tiene su propia forma de ficha, como las teselas de un mosaico:
-       Kinesis = cuadrado redondeado   Wisfox = hexágono   ValerIA = círculo
+       Kinesis = cuadrado redondeado   Wisfox = hexágono   Niky = círculo
    - Los conserva tal cual los tenían los proyectos (la K en movimiento, el hexágono con W)
      y le suma la tercera, que no existía.
    - El logo del colectivo es el telar: los tres colores de hilo cruzando hilos neutros. */
@@ -76,7 +76,7 @@
   }
 
   /* El telar. Los tres colores de hilo son los de las aplicaciones: el verde bosque de Kinesis,
-     el ámbar de Wisfox y el azul tinta (el océano que Kinesis ya traía, un paso más oscuro) y que aquí es de ValerIA. */
+     el ámbar de Wisfox y el azul tinta (el océano que Kinesis ya traía, un paso más oscuro) y que aquí es de Niky. */
   const HILOS = ['#1B7F56', '#E8A13C', '#2B4FA3'];
 
   function cuerpoTelar(columnas, filas, banda, hueco, margen, neutro, sombra) {
@@ -113,14 +113,14 @@
   const HILOS_LOGO = [['kinesis', 17, 2, 8, 14], ['kinesis', 17, 26, 8, 36], ['wisfox', 39, 2, 8, 36], ['wisfox', 39, 48, 8, 14], ['valeria', 2, 17, 36, 8], ['valeria', 48, 17, 14, 8], ['mosaico', 2, 39, 14, 8], ['mosaico', 26, 39, 36, 8]];
   const LOGO = (c) => `<svg class="${c}" viewBox="0 0 64 64" aria-hidden="true" focusable="false">${HILOS_LOGO.map(([n, x, y, w, h2]) => `<rect class="logo-hilo" fill="var(--hilo-${n})" x="${x}" y="${y}" width="${w}" height="${h2}"/>`).join('')}<path fill="currentColor" d="M14.0 2.0H18.0V18.0H2.0V14.0a12 12 0 0 1 12 -12ZM24.0 2.0H40.0V18.0H24.0V2.0ZM46.0 2.0H50.0a12 12 0 0 1 12 12V18.0H46.0V2.0ZM2.0 24.0H18.0V40.0H2.0V24.0ZM24.0 24.0H40.0V40.0H24.0V24.0ZM46.0 24.0H62.0V40.0H46.0V24.0ZM2.0 46.0H18.0V62.0H14.0a12 12 0 0 1 -12 -12V46.0ZM24.0 46.0H40.0V62.0H24.0V46.0ZM46.0 46.0H62.0V50.0a12 12 0 0 1 -12 12H46.0V46.0ZM18.0 14.0h6v4h-6ZM18.0 24.0h6v4h-6ZM14.0 40.0h4v6h-4ZM24.0 40.0h4v6h-4ZM36.0 18.0h4v6h-4ZM46.0 18.0h4v6h-4ZM40.0 36.0h6v4h-6ZM40.0 46.0h6v4h-6Z"/></svg>`;
 
-  /* Las tres teselas, una por hilo, en una sola tinta: cuadrado (Kinesis), hexágono (Wisfox), círculo (ValerIA).
+  /* Las tres teselas, una por hilo, en una sola tinta: cuadrado (Kinesis), hexágono (Wisfox), círculo (Niky).
      Las dos primeras conservan el glifo de su proyecto (la K en movimiento, la W); la tercera se diseñó. */
   const G = 'var(--logo-fondo,#FFFFFF)';
   const MARCAS = {
     mosaico: LOGO,
     kinesis: (c) => `<svg class="${c}" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><rect width="64" height="64" rx="16" fill="currentColor"/><path d="M22 16v32M24 34l18-15M28 34l16 14" fill="none" stroke="${G}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="49" cy="14" r="4.5" fill="${G}"/></svg>`,
     wisfox: (c) => `<svg class="${c}" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><path d="M32 4l24 14v28L32 60 8 46V18z" fill="currentColor" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M19 24l6.5 18L32 29l6.5 13L45 24" fill="none" stroke="${G}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-    valeria: (c) => `<svg class="${c}" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="30" fill="currentColor"/><path d="M19 21l13 24 13-24" fill="none" stroke="${G}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="45" r="0" fill="${G}"/></svg>`,
+    valeria: (c) => `<svg class="${c}" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle cx="32" cy="32" r="30" fill="currentColor"/><path d="M21 44V20l22 24V20" fill="none" stroke="${G}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   };
 
   // Íconos de línea: un solo trazo, redondeado, 2 px, como los de Kinesis y Wisfox.

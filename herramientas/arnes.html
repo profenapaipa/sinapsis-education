@@ -134,14 +134,14 @@ async function flujo() {
   await cargar('#/', 1280); await espera(400);
   afirmar('el inicio pregunta quién eres', textoPagina().includes('¿Quién eres?'));
   afirmar('hay una tarjeta por rol (5)', doc().querySelectorAll('.rol-tarjeta').length === 5);
-  afirmar('el riel lleva a mi espacio, mapa, ValerIA y roles', ['mi', 'mapa', 'recorrido', 'planes', 'hoja', 'identidad'].every((id) => doc().querySelector(`.riel a[data-ruta="${id}"]`)));
+  afirmar('el riel lleva a mi espacio, mapa, Niky y roles', ['mi', 'mapa', 'recorrido', 'planes', 'hoja', 'identidad'].every((id) => doc().querySelector(`.riel a[data-ruta="${id}"]`)));
   await pulsar('Soy docente');
   afirmar('elegir docente lleva a su guía de inicio rápido', ventana().location.hash === '#/guia/docente');
   afirmar('la franja dice con qué rol se mira', doc().getElementById('rol-actual').textContent.includes('Docente'));
-  afirmar('la guía tiene pasos, cada uno con su portal', doc().querySelectorAll('.guia-paso').length === 5 && /en kinesis/i.test(textoPagina()) && /en valeria/i.test(textoPagina()) && /en wisfox/i.test(textoPagina()));
-  // La barra de portales está siempre arriba: Mi espacio, Kinesis, ValerIA y Wisfox, en el orden del flujo.
+  afirmar('la guía tiene pasos, cada uno con su portal', doc().querySelectorAll('.guia-paso').length === 5 && /en kinesis/i.test(textoPagina()) && /en niky/i.test(textoPagina()) && /en wisfox/i.test(textoPagina()));
+  // La barra de portales está siempre arriba: Mi espacio, Kinesis, Niky y Wisfox, en el orden del flujo.
   const pestanas = () => [...doc().querySelectorAll('#barra-portales .pestana__ir')].map((a) => a.textContent.replace(/\s+/g, ' ').trim());
-  afirmar('la barra de portales muestra las cuatro pestañas en el orden del flujo', /Mi espacio/.test(pestanas()[0]) && /Kinesis/.test(pestanas()[1]) && /ValerIA/.test(pestanas()[2]) && /Wisfox/.test(pestanas()[3]), pestanas().join(' | '));
+  afirmar('la barra de portales muestra las cuatro pestañas en el orden del flujo', /Mi espacio/.test(pestanas()[0]) && /Kinesis/.test(pestanas()[1]) && /Niky/.test(pestanas()[2]) && /Wisfox/.test(pestanas()[3]), pestanas().join(' | '));
   const abiertas = []; ventana().open = (u) => { abiertas.push(u); return null; };
   await pulsar('Ir a Kinesis'); await espera(600);
   const marcoK = doc().querySelector('.vivos iframe');
@@ -180,7 +180,7 @@ async function flujo() {
   [...doc().querySelectorAll('.vivos button')].find((b) => /Quitar vista dividida/.test(b.textContent)).click(); await espera(250);
   afirmar('se puede quitar la vista dividida', [...doc().querySelectorAll('.vivo-panel')].filter((p) => !p.hidden).length === 1);
   doc().querySelector('#barra-portales .pestana[data-portal="valeria"] .pestana__ir').click(); await espera(500);
-  afirmar('la pestaña ValerIA trae el chat dentro de la plataforma', !!doc().querySelector('.vivo-panel[data-portal="valeria"]:not([hidden]) .chat') && !marcoK.closest('[hidden]') === false);
+  afirmar('la pestaña Niky trae el chat dentro de la plataforma', !!doc().querySelector('.vivo-panel[data-portal="valeria"]:not([hidden]) .chat') && !marcoK.closest('[hidden]') === false);
   // Cambiar de rol sin perder el lugar
   doc().getElementById('rol-actual').click(); await espera(200);
   afirmar('el selector de rol lista los cinco roles', doc().querySelectorAll('#menu-rol .menu-rol__lista button').length === 5 && !doc().getElementById('menu-rol').hidden);
@@ -348,14 +348,14 @@ async function flujo() {
   afirmar('el resumen de coordinación cuenta sin dar detalle', true);
 
   try { traza.push('paso 11: ' + ventana().MT.db.lista('actividades').length + '/' + (localStorage.getItem('mosaicotelar.v2') || '').length); } catch (e) { /* aún sin app */ }
-  // 11. ValerIA
+  // 11. Niky
   await ir('#/valeria/chat');
   doc().getElementById('btn-ia').click(); await espera(300);
   const panel = doc().getElementById('slot-ia');
-  afirmar('el panel de ValerIA se abre', panel && !panel.hidden);
+  afirmar('el panel de Niky se abre', panel && !panel.hidden);
   const campo = panel.querySelector('textarea'); campo.value = 'No entiendo la s del verbo';
   panel.querySelector('button[type=submit]').click(); await espera(1500);
-  afirmar('ValerIA responde y dice que es de ejemplo', panel.innerText.includes('Buena pregunta') && /ejemplo|En vivo|respaldo/i.test(panel.innerText));
+  afirmar('Niky responde y dice que es de ejemplo', panel.innerText.includes('Buena pregunta') && /ejemplo|En vivo|respaldo/i.test(panel.innerText));
   panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
   afirmar('Escape cierra el panel', panel.hidden);
 
@@ -681,7 +681,7 @@ async function flujoDemostracion() {
   afirmar('presentación: la letra crece (a 1280 px, de 16 a 20 px)', letraAntes === 16 && parseFloat(ventana().getComputedStyle(D().documentElement).fontSize) === 20, String(letraAntes));
   afirmar('presentación: hay menos navegación (sin pie, sin enlaces de planes ni hoja de ruta)', !visible(D().querySelector('.pie')) && !visible(D().querySelector('.riel-abajo')) && !visible(D().querySelector('.barra-portales__ayuda')));
   afirmar('presentación: el guion dice que es un borrador por aprobar mientras no esté aprobado', MTw().mensajes.guion.aprobado === true || /\[por aprobar\]/.test(guion().innerText), guion().innerText.slice(0, 80));
-  const pasos = MTw().mensajes.guion.pasos;
+  const pasos = MTw().casos.guion(MTw().casos.actual());
   afirmar('presentación: el guion recorre los cinco roles', CINCO.every((r) => pasos.some((p) => p.rol === r)), pasos.map((p) => p.rol).join());
   const malosPasos = pasos.filter((p) => { const [r = 'inicio', sub] = rutaDe(p.hash); const def = MTw().router.rutas[r]; if (!def) return true; if (r === 'mi' && p.rol) return !(MTw().secciones[p.rol] || []).some((s) => s.id === sub); return false; });
   afirmar('presentación: cada paso del guion lleva a una pantalla y a una sección que existen para su rol', malosPasos.length === 0, malosPasos.map((p) => p.hash + '/' + p.rol).join());
@@ -924,7 +924,7 @@ async function flujoDemostracion() {
   [...resc().querySelectorAll('button')].find((b) => /usa Mi espacio/.test(b.textContent)).click(); await espera(400);
   afirmar('QA-02: "usa Mi espacio" lleva a la versión equivalente', /^#\/mi/.test(ventana().location.hash), ventana().location.hash);
   await ir('#/portales/valeria'); await espera(300);
-  afirmar('QA-02: en ValerIA (que vive dentro de la plataforma) la línea no aparece', !visible(resc()));
+  afirmar('QA-02: en Niky (que vive dentro de la plataforma) la línea no aparece', !visible(resc()));
   // Un portal que responde con error HTTP: la plataforma lo ve y muestra el respaldo (el sondeo lee el estado en el mismo origen)
   for (const estado of [404, 503]) {
     await cargar('#/', 1280, 800); await espera(300);
