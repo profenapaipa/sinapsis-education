@@ -93,7 +93,7 @@ def revisar_navegacion_unica(raiz=None):
         pagina = f.read()
     if 'barra-portales' in pagina:
         fallos.append('index.html vuelve a tener la barra de portales: la navegación debe ser una sola (el riel)')
-    if len(re.findall(r'<nav[^>]*class="riel"', pagina)) != 1:
+    if len(re.findall(r'<nav\b[^>]*class="riel"', pagina)) != 1:
         fallos.append('index.html debe tener exactamente un <nav class="riel">')
     if 'id="menu-mas"' not in pagina:
         fallos.append('falta el menú «Más» (id="menu-mas") con lo secundario')
