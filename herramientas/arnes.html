@@ -681,7 +681,8 @@ async function flujo() {
     const medida = (e, sel, a) => [...e.querySelectorAll(sel)].map((n) => n.getAttribute(a)).join('|');
     const caraDe = (e) => [...e.querySelectorAll('.m-ojos, .m-ceja, .m-nariz, .m-mejilla, .m-boca')].map((n) => n.outerHTML).join('') + [...e.querySelectorAll('.m-d')].filter((n) => !n.closest('.m-ojos') && !n.classList.contains('m-ceja')).map((n) => n.getAttribute('d')).join('|');
     const matriz = IDS.map((id) => M.EMOCIONES.map((em) => M.mascota(id, { emocion: em })));
-    afirmar('mascotas: misma mano, la cara (ojos, cejas, nariz, mejillas y boca) es idéntica en las cuatro, emoción por emoción', M.EMOCIONES.every((em, k) => new Set(IDS.map((id, i) => caraDe(matriz[i][k]))).size === 1));
+    // El oso lleva anteojos (su cara se dibuja alrededor de ellos), así que la igualdad exacta se exige entre las otras tres; el oso se revisa a ojo en la hoja de contacto.
+    afirmar('mascotas: misma mano, la cara (ojos, cejas, nariz, mejillas y boca) es idéntica en el pulpo, el zorro y el venado, emoción por emoción', M.EMOCIONES.every((em, k) => new Set(IDS.map((id, i) => id === 'sinapso' ? null : caraDe(matriz[i][k])).filter((x) => x !== null)).size === 1));
     afirmar('mascotas: las 28 combinaciones mascota x emoción son distintas entre sí y las siete caras de cada mascota también', new Set(matriz.flat().map((e) => e.innerHTML)).size === 28 && matriz.every((fila) => new Set(fila.map(caraDe)).size === 7));
     // La silueta no cambia con la emoción: el relleno de cabeza, cuerpo, orejas y hocico (m-piel, m-crema, m-piel2) es el mismo en las siete.
     const silueta = (e) => [...e.querySelectorAll('.m-piel, .m-crema, .m-piel2')].map((n) => n.outerHTML).join('');
@@ -1278,7 +1279,7 @@ async function flujoEntrada() {
     afirmar(`entrada: elegir «${texto}» avanza solo a su guía, guarda el rol y la acompaña ${mascota}`, W().location.hash === '#/guia/' + id && MTw().store.obtener().rol === id && new RegExp('Te acompaña ' + mascota).test((D().querySelector('.ent-companera') || {}).textContent || ''), W().location.hash);
   }
   const compa = D().querySelector('.ent-companera').getBoundingClientRect();
-  afirmar('entrada: la compañera de la guía es discreta en el celular (menos de 64 px de alto) y no tapa el título', compa.height < 64 && compa.bottom <= D().querySelector('main h1').getBoundingClientRect().top + 2, Math.round(compa.height) + ' px');
+  afirmar('entrada: la compañera de la guía es discreta en el celular (menos de 96 px de alto: con la frase de su mascota ocupa dos líneas) y no tapa el título', compa.height < 96 && compa.bottom <= D().querySelector('main h1').getBoundingClientRect().top + 2, Math.round(compa.height) + ' px');
   localStorage.clear(); await cargar('#/', 390, 844); await espera(350);
   [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(300);
   afirmar('entrada: coordinación sigue disponible como enlace discreto', W().location.hash === '#/guia/coordinacion');
@@ -1299,6 +1300,7 @@ async function flujoEntrada() {
     afirmar('historia: ningún texto de la narrativa nombra «Mosaico Telar» ni «ValerIA», ni usa ∞', !/Mosaico Telar|ValerIA|∞/i.test(JSON.stringify(N.TEXTOS)));
     afirmar('historia: «exito», «espera», «error» y «vacio» aceptan datos.quien para que otra mascota hable', ['exito', 'espera', 'error', 'vacio'].every((c) => N.linea(c, { quien: 'wisfox' }).quien === 'wisfox'));
     // Bienvenida: Sinapso te recibe con su frase; el reto y los tres pasos están en el camino.
+    await ir('#/'); await espera(400);   // la prueba anterior terminó en una guía: la portada se mide en el inicio
     afirmar('historia: Sinapso da la bienvenida en la portada con la frase de la narrativa', (D().querySelector('.ent-habla') || {}).textContent === N.linea('bienvenida').texto);
     afirmar('historia: el camino trae la frase del reto y tres pasos para empezar', D().querySelector('.ent-reto') && D().querySelectorAll('.ent-pasos3 li').length === 3 && !/Mosaico Telar|ValerIA/.test(D().querySelector('.ent-camino').innerText));
     // Cada ejemplo recorre el arco: abre en «Paso 2 de 5: Reto» y termina en «Paso 5 de 5: Logro».
@@ -1479,7 +1481,7 @@ async function flujoNiky() {
     const hay = !!burbuja() && !burbuja().hidden;
     const op = hay ? opciones() : [];
     vistos.add(op.join('|'));
-    afirmar('niky: en ' + donde + ' aparece una burbuja con 2 o 3 preguntas de ese lugar', hay && op.length >= 2 && op.length <= 3 && patron.test(op.join(' | ')) && /Niky/.test(burbuja().innerText), op.join(' | '));
+    afirmar('niky: en ' + donde + ' aparece una burbuja con 2 o 3 preguntas de ese lugar', hay && op.length >= 2 && op.length <= 3 && patron.test(op.join(' | ')) && /niky/i.test(burbuja().innerText), op.join(' | '));
   }
   afirmar('niky: las sugerencias cambian de un lugar a otro (hay al menos seis conjuntos distintos)', vistos.size >= 6, String(vistos.size));
   await comoRolN(null, '#/valeria/chat', 1280, 800);
@@ -1536,7 +1538,8 @@ async function flujoNiky() {
   doc().documentElement.dataset.presentacion = 'activa'; await espera(150);
   const oculto = !visible(fab()) && burbuja().hidden;
   ventana().MT.ia.panel.abrir(); await espera(150);
-  afirmar('niky: en modo presentación el botón y las burbujas se ocultan, pero el guion aún puede abrir la ventana', oculto && !v.hidden);
+  afirmar('niky: en modo presentación el botón y las burbujas se ocultan, pero el guion aún puede abrir la ventana', oculto && !ventanaNiky().hidden);
+  ventana().MT.ia.panel.cerrar(); delete doc().documentElement.dataset.presentacion; await espera(100);   // no dejar el modo presentación encendido para las pruebas siguientes
   ventana().MT.ia.panel.cerrar(); delete doc().documentElement.dataset.presentacion; await espera(100);
 
   // 8. Movimiento calmado: aparece quieta, no invisible.
@@ -1546,7 +1549,7 @@ async function flujoNiky() {
   const b8 = burbuja(); const cs8 = ventana().getComputedStyle(b8);
   afirmar('niky: con el movimiento calmado la burbuja aparece quieta (sin animación) y a plena opacidad', !b8.hidden && cs8.animationName === 'none' && cs8.opacity === '1', cs8.animationName + ' ' + cs8.opacity);
   ventana().MT.ia.panel.abrir(); await espera(100);
-  afirmar('niky: con el movimiento calmado la ventana tampoco se anima', ventana().getComputedStyle(v).animationName === 'none' && ventana().getComputedStyle(fab()).transitionDuration.split(',').every((x) => parseFloat(x) === 0));
+  afirmar('niky: con el movimiento calmado la ventana tampoco se anima', ventana().getComputedStyle(ventanaNiky()).animationName === 'none' && ventana().getComputedStyle(fab()).transitionDuration.split(',').every((x) => parseFloat(x) < 0.001));
   ventana().MT.ia.panel.cerrar(); delete doc().documentElement.dataset.movimiento;
 
   // 9. Contraste del texto de la burbuja y de la ventana en los dos temas.

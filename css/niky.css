@@ -97,7 +97,8 @@
 }
 
 /* ---------- Donde la pantalla es de otra cosa ---------- */
-html[data-presentacion="activa"] .niky, html[data-amplio] .niky { display: none; }
+html[data-presentacion="activa"] .niky, html[data-amplio] .niky,
+html[data-presentacion="activa"] .niky-boton, html[data-presentacion="activa"] .niky-burbuja { display: none; }   /* explícito: el botón y la burbuja se ocultan aunque un estilo cambie al contenedor */
 @media print { .niky { display: none !important; } }
 
 /* ---------- Sin movimiento: quieto, no invisible ---------- */
