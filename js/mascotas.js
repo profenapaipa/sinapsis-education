@@ -103,11 +103,11 @@
 
   // El detalle pequeño de la esquina superior derecha (el único lugar libre en las cuatro). Las poses 'piensa' y 'celebra' ya ocupan esa esquina.
   const DETALLE = {
-    brillo: () => destello(103, 24, 8, 'var(--hilo-wisfox)') + destello(112, 38, 4, 'var(--hilo-wisfox)'),
+    brillo: () => destello(103, 24, 9, 'var(--hilo-wisfox)') + destello(113, 40, 4.5, 'var(--hilo-wisfox)'),
     gota: () => `<path class="m-gota" d="M104 9 C101 16 97 20 97 25 A7 7 0 0 0 111 25 C111 20 107 16 104 9 Z"/><path class="m-d" stroke="#FAF7F2" stroke-width="1.8" d="M101 25 Q101 28.5 104 29.5"/>`,
     destellos: () => destello(14, 26, 6.5, 'var(--hilo-kinesis)') + destello(106, 20, 8, 'var(--hilo-mosaico)') + destello(110, 44, 4.5, 'var(--hilo-wisfox)') + destello(18, 8, 3.8, 'var(--hilo-valeria)'),
     corazon: () => `<path class="m-corazon" d="M105 32 C96 26 96 17 101.5 17 C103.5 17 105 18.5 105 20 C105 18.5 106.5 17 108.5 17 C114 17 114 26 105 32 Z"/>`,
-    rayas: () => `<path class="m-t" stroke-width="2.6" d="M98 20 L104 14 M104 30 L113 27 M110 12 L111 4"/>`,
+    rayas: () => `<path class="m-t" stroke-width="3.2" d="M98 21 L104 14 M104 31 L113 28 M110 12 L111 4"/>`,
     pregunta: () => `<path class="m-t" stroke-width="3" d="M97 20 Q97 11 104 11 Q111 11 111 17.5 Q111 21.5 106 24 Q104 25.5 104 29"/><circle class="m-pt" cx="104" cy="35.5" r="2"/>`,
   };
 
