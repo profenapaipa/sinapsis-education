@@ -40,6 +40,26 @@
   // El servidor limita el texto; se recorta aquí también para no mandar de más.
   const recortar = (tarea, texto) => String(texto || '').replace(/\s+/g, ' ').trim().slice(0, tarea === 'ajustar' ? 2500 : 300);
 
+  /* Respuestas de ejemplo para las preguntas que Niky propone en cada pantalla (js/niky.js). Son textos preparados, no un modelo: el chat
+     lo dice con su sello «Respuesta de ejemplo». Van aquí y no en datos.js porque los casos de la exposición reescriben respuestasIA al
+     cargarse, y estas deben seguir ahí. Voz: cercana, sin promesas; Niky propone y decide quien enseña. Borradores por aprobar. */
+  const RESPUESTAS_GUIA = {
+    'que-es': '**Sinapsis Education** es una plataforma para que un aula aprenda de forma inclusiva. Reúne tres partes que se pasan el trabajo entre sí: **Kinesis** (el aula: docentes, orientación y familias), **Wisfox** (el estudiante practica a su ritmo) y **yo, Niky**, la guía que propone ideas y resuelve dudas.\n\nHoy se puede recorrer con datos de ejemplo. Nada de lo que ves aquí son datos reales.',
+    empezar: 'Una forma sencilla de empezar:\n\n- Si enseñas o acompañas, elige **tu rol** y mira el resumen de tu espacio.\n- Si quieres entender el conjunto, abre el **Mapa**: muestra cómo se conecta todo.\n- Si te gusta ver un caso completo, sigue la **guía de inicio rápido** de tu rol.\n\nNo hay un orden obligatorio: puedes volver cuando quieras.',
+    apoyos: 'Cada estudiante tiene un **perfil de apoyos**: lo que le ayuda a participar, por ejemplo letra grande, más tiempo o instrucciones con imágenes. En la lista de estudiantes verás los apoyos, **sin diagnósticos**, y en el ajuste de una actividad cada apoyo se vuelve un cambio concreto. Tú decides cuáles usar.',
+    revisar: 'Antes de aprobar un ajuste, mira tres cosas:\n\n- Que cada cambio **responda a un apoyo** del perfil.\n- Que la razón esté escrita de forma que la familia la entienda.\n- Que el estudiante pueda hacer la misma actividad de fondo.\n\nSi algo no te convence, devuélvelo con una nota. Yo solo propongo; decide quien acompaña.',
+    'explicar-familia': 'Una forma de contarlo a la familia, en tres pasos:\n\n- **Qué cambió:** el ajuste, dicho con palabras simples.\n- **Por qué:** el apoyo que lo motivó, sin mencionar diagnósticos.\n- **Cómo ayudar:** una acción pequeña que se puede hacer en casa.\n\nPuedes cambiar el tono: conoces mejor que yo a esa familia.',
+    casa: 'Algunas ideas para acompañar en casa: pídele que **te cuente con sus palabras** lo que hizo, celebra el esfuerzo y no solo el resultado, y deja que use los apoyos que ya usa en clase. Si tienes dudas, escríbele al colegio: yo propongo ideas, el equipo que lo conoce decide.',
+    pista: 'Una pista, sin la respuesta:\n\n- Vuelve a leer la pregunta y **subraya la palabra clave**.\n- Piensa en un ejemplo parecido que ya hayas visto.\n- Intenta con tus palabras y luego compara.\n\nSi todavía no sale, dime qué parte se te hace difícil y la miramos juntos.',
+    progreso: 'En tu ruta puedes ver lo que ya hiciste y lo que sigue. Avanzas a tu ritmo: lo importante es lo que vas aprendiendo, no la velocidad. Si algo se te quedó difícil, puedes repetirlo y pedirme ayuda.',
+    portales: 'Cada portal tiene su lugar:\n\n- **Kinesis:** el aula. Docentes planean y ajustan, orientación revisa y la familia se entera.\n- **Wisfox:** el estudiante recibe su actividad a la medida y practica.\n- **Niky:** soy yo, y acompaño a los dos con ideas y ayuda.\n\nSe pasan el trabajo entre sí, por eso se ven juntos.',
+    mapa: 'El mapa tiene tres columnas, una por cada parte (Kinesis, Niky y Wisfox), con sus módulos. Las flechas muestran **qué viaja de una parte a otra**. Toca un módulo para ver qué hace y quién lo usa, y mira la etiqueta: dice si **funciona hoy**, si es un ejemplo o si todavía viene.',
+    estado: 'El mapa lo dice módulo por módulo: unos **funcionan hoy**, otros están **en integración**, otros responden con **ejemplos** (como yo) y otros **vienen**. La etiqueta de cada uno es la fuente más fiable. Yo hoy no estoy conectada a un modelo de lenguaje.',
+    planes: 'Cada forma de participar describe qué incluye y qué todavía se está validando. Léelas con calma y compara con lo que tu colegio necesita. Yo no cierro acuerdos ni hago ofertas: eso lo conversan personas, en la sección de piloto.',
+    piloto: 'Un piloto es un **primer recorrido acompañado** en un colegio, paso a paso y sin datos reales hasta que todo esté en regla. Sirve para probar, escuchar y ajustar antes de decidir nada. Los detalles se conversan con el equipo, en la sección de piloto.',
+    pantalla: 'Esta pantalla forma parte de la plataforma. Mira el título, lee la descripción de arriba y usa el menú para moverte. Si te pierdes, el **inicio** siempre está a un toque. Si quieres, dime qué buscas y te sugiero adónde ir.',
+  };
+
   async function preguntar({ tarea, texto }) {
     const limpio = recortar(tarea, texto);
     if (info.modo === 'servidor') {
@@ -47,7 +67,8 @@
         const r = await fetch((cfg.base || '') + '/api/valeria', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tarea, texto: limpio }),
+          // El servidor solo conoce tres tareas; las preguntas guía de las burbujas viajan como «general».
+          body: JSON.stringify({ tarea: ['ajustar', 'disenar', 'ayuda'].includes(tarea) ? tarea : 'general', texto: limpio }),
           signal: AbortSignal.timeout((cfg.espera || 8000) + 2000),
         });
         if (!r.ok) throw new Error('servidor ' + r.status);
@@ -56,7 +77,7 @@
       } catch (e) { /* cae al ejemplo */ }
     }
     await demora(450);
-    return { fuente: 'ejemplo', texto: MT.datos.respuestasIA[tarea] || MT.datos.respuestasIA.general };
+    return { fuente: 'ejemplo', texto: MT.datos.respuestasIA[tarea] || RESPUESTAS_GUIA[tarea] || MT.datos.respuestasIA.general };
   }
 
   // Si la persona escribe libre, se adivina qué necesita. Cuando hay una tarea explícita, manda esa.
@@ -153,12 +174,18 @@
     };
   }
 
-  /* El panel: el lugar fijo de Niky en todos los espacios. */
+  /* La ventana de Niky: el lugar fijo de la IA en todos los espacios. Sigue siendo el aside #slot-ia (así los casos, el modo presentación y
+     los botones «Pedir ideas a Niky» no cambian), pero ahora es una ventana flotante y NO modal, junto al botón de js/niky.js: la persona
+     puede seguir leyendo la pantalla mientras conversa. El estilo está en css/niky.css. */
   const panel = {
     chat: null,
     abierto: false,
-    // Las sugerencias dependen de quién habla: el docente diseña, el estudiante pregunta.
+    quienAbrio: null,
+    // Las sugerencias dependen de dónde estás (js/niky.js las elige por pantalla y rol y pone primero las del caso activo).
+    // Sin ese módulo, o en la pantalla propia de Niky, se usan las de siempre.
     sugerenciasPara() {
+      const propias = MT.niky && MT.niky.sugerencias && MT.niky.sugerencias();
+      if (propias && propias.length) return propias;
       const rol = MT.store.obtener().rol;
       // En la exposición guiada las sugerencias son las del caso (asignatura y pregunta del estudiante).
       const delCaso = MT.casos && MT.casos.sugerencias(rol);
@@ -171,14 +198,21 @@
     abrir(opciones) {
       const slot = document.getElementById('slot-ia');
       if (!slot) return;
+      // Quién la abrió: al cerrar, el foco vuelve ahí (el botón flotante, o el botón «Pedir ideas a Niky» que se tocó).
+      const activo = document.activeElement;
+      if (!this.abierto && activo && activo !== document.body && !slot.contains(activo)) this.quienAbrio = activo;
       if (!this.chat) {
-        const cab = h('div', { class: 'panel-ia__cab' }, marca('valeria'), h('h2', { id: 'titulo-panel-ia' }, 'Niky'),
-          h('button', { class: 'btn btn--chico btn--suave cerrar', type: 'button', onclick: () => this.cerrar() }, 'Cerrar'));
+        let avatar;
+        try { avatar = MT.mascotas.mascota('niky', { tamano: 40, emocion: 'contento' }); } catch (e) { avatar = marca('valeria'); }
+        const cab = h('div', { class: 'panel-ia__cab' }, avatar, h('h2', { id: 'titulo-panel-ia' }, 'Niky'),
+          h('button', { class: 'btn btn--chico btn--suave cerrar', type: 'button', 'aria-label': 'Cerrar la conversación con Niky', onclick: () => this.cerrar() }, 'Cerrar'));
         const cuerpo = h('div', { class: 'panel-ia__cuerpo' });
         slot.replaceChildren(cab, cuerpo);
+        // No modal: no atrapa el foco ni tapa la pantalla. Tiene nombre y Escape la cierra desde cualquier punto de su interior.
         slot.setAttribute('role', 'dialog');
+        slot.setAttribute('aria-modal', 'false');
         slot.setAttribute('aria-labelledby', 'titulo-panel-ia');
-        slot.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.cerrar(); });
+        slot.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); this.cerrar(); } });
         this.cuerpo = cuerpo;
       }
       if (this.chat) this.chat.destruir();
@@ -187,16 +221,22 @@
       this.abierto = true;
       const btn = document.getElementById('btn-ia');
       if (btn) btn.setAttribute('aria-expanded', 'true');
-      if (opciones && opciones.texto) this.chat.enviar(opciones.texto, opciones.tarea);
+      if (opciones && opciones.texto) { this.chat.enviar(opciones.texto, opciones.tarea); this.chat.foco(); }
       else this.chat.foco();
     },
     cerrar() {
       const slot = document.getElementById('slot-ia');
       if (!slot) return;
+      const teniaFoco = slot.contains(document.activeElement);
       slot.hidden = true;
       this.abierto = false;
       const btn = document.getElementById('btn-ia');
-      if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.focus(); }
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+      // El foco vuelve a quien abrió; si ese botón ya no está a la vista, al botón flotante de Niky.
+      const visible = (el) => el && el.isConnected && el.getClientRects().length > 0;
+      const destino = [this.quienAbrio, document.getElementById('niky-fab'), btn].find(visible);
+      this.quienAbrio = null;
+      if (destino && (teniaFoco || document.activeElement === document.body)) destino.focus();
     },
     alternar() { this.abierto ? this.cerrar() : this.abrir(); },
   };

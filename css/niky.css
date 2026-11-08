@@ -1,1 +1,111 @@
-/* niky.css: botón flotante, burbujas y ventana de Niky. */
+/* niky.css: el botón flotante de Niky, sus burbujas de sugerencias y la ventana de chat (js/niky.js y js/ia.js).
+
+   Capas (z-index): la barra inferior y los menús están en 45 a 60; el botón y la burbuja, en 65; la ventana de chat (#slot-ia), en 70,
+   para que quede siempre por encima del botón que la abre. El modo presentación y el modo amplio de los portales lo esconden:
+   ahí la pantalla es de quien presenta.
+
+   Movimiento: las burbujas aparecen con un fundido corto. Con «Movimiento calmado» o con prefers-reduced-motion aparecen quietas
+   (sin fundido y sin desplazamiento); lo que se anima nunca es información. Todo el color sale de los tokens, así que sirve en claro y en oscuro. */
+
+.niky {
+  position: fixed; z-index: 65; right: 1.2rem; bottom: 1.2rem;
+  display: flex; flex-direction: column; align-items: flex-end; gap: .7rem;
+  pointer-events: none;                         /* el contenedor no tapa nada; solo lo tocan sus hijos */
+  max-width: calc(100vw - 1.6rem);
+}
+.niky > * { pointer-events: auto; }
+.niky [hidden] { display: none; }
+
+/* ---------- El botón ---------- */
+.niky-boton {
+  flex: none; width: 68px; height: 68px; padding: 0; border-radius: 50%;
+  display: grid; place-items: center; cursor: pointer;
+  background: var(--papel); color: var(--tinta);
+  border: 3px solid var(--azul);
+  box-shadow: 0 6px 20px rgba(26, 23, 20, .28);
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.niky-boton:hover { box-shadow: 0 8px 26px rgba(26, 23, 20, .38); transform: translateY(-2px); }
+.niky-boton:active { transform: none; }
+.niky-boton:focus-visible { outline: 3px solid var(--foco); outline-offset: 3px; border-radius: 50%; }
+.niky-boton[aria-expanded="true"] { border-color: var(--tinta); }
+.niky-boton svg { display: block; width: 56px; height: 56px; }
+.niky-boton__inicial { font: 800 1.6rem var(--fuente); color: var(--azul); }
+
+/* ---------- La burbuja ---------- */
+.niky-burbuja {
+  position: relative; width: min(19rem, calc(100vw - 1.6rem));
+  background: var(--papel); color: var(--tinta);
+  border: 1px solid var(--linea-fuerte); border-radius: 18px 18px 6px 18px;
+  box-shadow: 0 10px 30px rgba(26, 23, 20, .26);
+  padding: .55rem .8rem .8rem;
+}
+.niky-burbuja--entra { animation: niky-entra .35s ease both; }
+@keyframes niky-entra { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.niky-burbuja__cab { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.niky-burbuja__cab strong { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--azul); }
+/* 44 px: se acierta con un dedo, y no compite con las opciones. */
+.niky-burbuja__cerrar {
+  width: 44px; height: 44px; margin: -.45rem -.6rem -.2rem 0; padding: 0; border: 0; border-radius: 50%;
+  background: transparent; color: var(--tinta); font: 700 1.5rem/1 var(--fuente); cursor: pointer;
+}
+.niky-burbuja__cerrar:hover { background: var(--lino); }
+.niky-burbuja__cerrar:focus-visible { outline: 3px solid var(--foco); outline-offset: -2px; border-radius: 50%; }
+.niky-burbuja__texto { margin: 0 0 .65rem; font-size: .95rem; line-height: 1.45; }
+.niky-burbuja__opciones { display: grid; gap: .4rem; }
+.niky-burbuja__opcion {
+  width: 100%; min-height: 44px; padding: .45rem .8rem; border-radius: 999px; text-align: left;
+  background: var(--azul-suave); color: var(--tinta); border: 1px solid var(--azul);
+  font: 700 .9rem/1.3 var(--fuente); cursor: pointer;
+}
+.niky-burbuja__opcion:hover { background: var(--azul); color: var(--papel); }
+.niky-burbuja__opcion:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+/* ---------- La ventana de chat (el aside #slot-ia de siempre, ahora flotante y no modal) ---------- */
+#slot-ia.panel-ia {
+  z-index: 70; top: auto; left: auto; right: 1.2rem; bottom: calc(1.2rem + 68px + .7rem);
+  width: min(26rem, calc(100vw - 2.4rem)); height: min(36rem, calc(100dvh - 9.4rem)); max-height: calc(100dvh - 9.4rem);
+  border: 1px solid var(--linea-fuerte); border-radius: 18px; overflow: hidden;
+  box-shadow: 0 14px 40px rgba(26, 23, 20, .32);
+}
+#slot-ia[hidden] { display: none; }
+#slot-ia:not([hidden]) { animation: niky-entra .25s ease both; }
+#slot-ia .panel-ia__cab svg { width: 40px; height: 40px; }
+#slot-ia .panel-ia__cab { background: var(--azul-suave); }
+#slot-ia .chat__mensajes { min-height: 5rem; padding: .8rem; }
+#slot-ia .chat__estado { padding: .45rem .8rem; }
+#slot-ia .chat__sugerencias { padding: 0 .8rem .5rem; }
+#slot-ia .chat__form { padding: .6rem .8rem .8rem; }
+#slot-ia .chat__form textarea { max-height: 5.5rem; min-width: 0; }
+
+/* El botón del riel y de la franja se sustituye por el flotante: se conserva en el documento (su identificador lo usan otras partes)
+   pero no se muestra, ni en escritorio ni en la barra inferior del celular. */
+#btn-ia, .riel #btn-ia { display: none !important; }
+
+/* El pie deja sitio al botón para que no tape su último renglón. */
+.cuerpo .pie { padding-bottom: calc(2rem + 68px); }
+
+/* ---------- Celular: sobre la barra inferior, sin taparla ---------- */
+@media (max-width: 860px) {
+  .niky { right: .8rem; bottom: calc(5.6rem + env(safe-area-inset-bottom)); }
+  #slot-ia.panel-ia {
+    left: .6rem; right: .6rem; width: auto; border-left: 1px solid var(--linea-fuerte); border-top: 1px solid var(--linea-fuerte); border-radius: 18px;
+    bottom: calc(5.6rem + env(safe-area-inset-bottom) + 68px + .6rem);
+    height: min(34rem, calc(100dvh - 5.6rem - 68px - 1.2rem - env(safe-area-inset-bottom)));
+    max-height: calc(100dvh - 5.6rem - 68px - 1.2rem - env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------- Donde la pantalla es de otra cosa ---------- */
+html[data-presentacion="activa"] .niky, html[data-amplio] .niky { display: none; }
+@media print { .niky { display: none !important; } }
+
+/* ---------- Sin movimiento: quieto, no invisible ---------- */
+html[data-movimiento="calmado"] .niky-burbuja--entra, html[data-movimiento="calmado"] #slot-ia:not([hidden]) { animation: none; }
+html[data-movimiento="calmado"] .niky-boton { transition: none; }
+html[data-movimiento="calmado"] .niky-boton:hover { transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .niky-burbuja--entra, #slot-ia:not([hidden]) { animation: none; }
+  .niky-boton { transition: none; }
+  .niky-boton:hover { transform: none; }
+}
