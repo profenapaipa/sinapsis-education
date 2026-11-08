@@ -2,7 +2,7 @@
 
    CONTRATO (lo consumen la entrada, los espacios y Niky; si falta una línea devuelve null y quien llama no pinta nada):
      MT.narrativa.linea(contexto, datos) -> { texto, emocion, quien } | null
-       contexto: 'bienvenida' | 'rol:<id>' | 'portal:<kinesis|wisfox|niky>' | 'paso:<rol>:<n>' | 'exito' | 'espera' | 'error' | 'vacio'
+       contexto: 'bienvenida' | 'reto' | 'rol:<id>' | 'portal:<kinesis|wisfox|niky>' | 'paso:<rol>:<n>' | 'exito' | 'espera' | 'error' | 'vacio'
                  y, solo para la entrada: 'demo:<sinapso|kinesis|wisfox|niky>:<reto|accion|logro|animo>'
        datos (opcional): { quien } cambia quién habla en 'exito', 'espera', 'error' y 'vacio'; { tipo } afina 'exito' ('aprobado', 'enviado', 'respuesta')
        emocion: 'contento' | 'curioso' | 'pensando' | 'celebra' | 'animo' | 'sorprendido' | 'duda'
@@ -31,6 +31,7 @@
 
   /* Cada entrada es [texto, emoción, quién habla]. Si la emoción o quién se omiten, valen los de la regla de cada contexto. */
   const TEXTOS = {
+    reto: ['Cada cerebro aprende a su ritmo: hace falta apoyo a la medida.', 'curioso', 'sinapso'],
     bienvenida: ['Hola, te esperaba. Aquí cada cerebro aprende a su ritmo.', 'contento', 'sinapso'],
     rol: {
       docente: ['Planeas una vez y ajustas la clase a cada estudiante.', 'contento'],
@@ -93,7 +94,7 @@
       sinapso: { reto: ['Una actividad viaja del aula al estudiante.', 'curioso', 'sinapso'], accion: ['Cada paso pasa por una persona que decide.', 'pensando', 'sinapso'], logro: ['Así llega al estudiante, a su medida.', 'celebra', 'sinapso'] },
       kinesis: { reto: ['Cada estudiante necesita un apoyo distinto.', 'curioso', 'kinesis'], accion: ['Mira cómo cambia la actividad con ese apoyo.', 'pensando', 'kinesis'], logro: ['Aprobado: la actividad ya puede llegar al estudiante.', 'celebra', 'kinesis'] },
       wisfox: { reto: ['Practica con la actividad hecha a tu medida.', 'curioso', 'wisfox'], accion: ['Mira por qué esa respuesta es la correcta.', 'pensando', 'wisfox'], logro: ['Bien hecho: cada respuesta explica el camino.', 'celebra', 'wisfox'], animo: ['Todavía no, y está bien: la explicación ayuda.', 'animo', 'wisfox'] },
-      niky: { reto: ['Pregúntame; yo propongo y tú decides.', 'curioso', 'niky'], accion: ['Estoy pensando una respuesta para ti.', 'pensando', 'niky'], logro: ['Tú decidiste qué hacer con mi idea.', 'celebra', 'niky'] },
+      niky: { reto: ['Pregúntame; yo propongo y tú decides.', 'curioso', 'niky'], accion: ['Estoy pensando una respuesta para ti.', 'pensando', 'niky'], respuesta: ['Esta es mi propuesta; tú decides qué hacer.', 'animo', 'niky'], logro: ['Tú decidiste qué hacer con mi idea.', 'celebra', 'niky'] },
     },
   };
 
@@ -110,6 +111,7 @@
     const [tipo, a, b] = partes;
     switch (tipo) {
       case 'bienvenida': return hecha(TEXTOS.bienvenida);
+      case 'reto': return hecha(TEXTOS.reto);
       case 'rol': return hecha(TEXTOS.rol[a], 'contento', mascotaDeRol(a));
       case 'portal': return hecha(TEXTOS.portal[a]);
       case 'paso': {
