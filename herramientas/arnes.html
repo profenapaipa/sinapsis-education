@@ -609,6 +609,61 @@ async function flujo() {
       lp.irA(3300); caja.remove();
     }
   // ---- fin logo (agente de marca) ----
+  // ---- mascotas ----
+  {
+    const W = ventana(); const M = W.MT.mascotas; const D = doc();
+    const IDS = ['sinapso', 'kinesis', 'wisfox', 'niky'];
+    afirmar('mascotas: existen las cuatro (sinapso, kinesis, wisfox, niky) con nombre, animal, rol y color', !!M && IDS.every((id) => { const m = M.lista.find((x) => x.id === id); return m && m.nombre && m.animal && m.rol && m.color; }) && M.lista.length === 4);
+    afirmar('mascotas: la API responde (mascota, paraRol, escena, POSES) y paraRol lleva cada rol a su mascota', typeof M.mascota === 'function' && typeof M.escena === 'function' && M.paraRol('docente') === 'kinesis' && M.paraRol('estudiante') === 'wisfox' && M.paraRol('ia') === 'niky' && M.paraRol('desconocido') === 'sinapso');
+    const caja = D.createElement('div'); caja.style.cssText = 'position:fixed;left:0;top:0;width:900px;opacity:0;pointer-events:none'; D.body.append(caja);
+    // Las cinco poses de las cuatro: el contrato pide al menos base, saluda y señala, y que una pose desconocida caiga en base.
+    const sinPose = []; const desbordes = []; const sinOjos = [];
+    for (const id of IDS) for (const pose of M.POSES) for (const tam of [64, 120, 240]) {
+      const el = M.mascota(id, { pose, tamano: tam }); caja.append(el);
+      if (el.tagName.toLowerCase() !== 'svg' || el.getAttribute('viewBox') !== '0 0 120 120' || el.dataset.pose !== pose) sinPose.push(id + '/' + pose);
+      // Sin desbordes: la caja de cada forma, ensanchada media línea de contorno, tiene que caber en el lienzo (con 1 px de tolerancia).
+      const r0 = el.getBoundingClientRect(); const esc = r0.width / 120;
+      for (const f of el.querySelectorAll('path, ellipse, circle, rect')) {
+        const r = f.getBoundingClientRect(); const cs = W.getComputedStyle(f);
+        const g = cs.stroke !== 'none' ? parseFloat(cs.strokeWidth) * esc / 2 : 0;
+        if (r.left - g < r0.left - 1 || r.right + g > r0.right + 1 || r.top - g < r0.top - 1 || r.bottom + g > r0.bottom + 1) { desbordes.push(id + '/' + pose + '/' + tam + ' ' + f.getAttribute('class')); break; }
+      }
+      if (el.querySelectorAll('.m-ojo').length !== 2 || el.querySelectorAll('.m-brillo').length !== 2) sinOjos.push(id + '/' + pose);
+    }
+    afirmar('mascotas: las cuatro existen en las cinco poses y a 64, 120 y 240 px, con lienzo de 120 x 120', sinPose.length === 0, sinPose.slice(0, 6).join(', '));
+    afirmar('mascotas: ninguna forma se sale del lienzo en ninguna pose ni tamaño', desbordes.length === 0, desbordes.slice(0, 6).join(' | '));
+    afirmar('mascotas: todas tienen los mismos ojos (dos puntos con brillo)', sinOjos.length === 0, sinOjos.join(', '));
+    const base = IDS.map((id) => M.mascota(id, {})); base.forEach((e) => caja.append(e));
+    const medida = (e, sel, a) => [...e.querySelectorAll(sel)].map((n) => n.getAttribute(a)).join('|');
+    afirmar('mascotas: misma mano, los ojos y la nariz tienen el mismo tamaño y lugar en las cuatro', new Set(base.map((e) => medida(e, '.m-ojo', 'r') + medida(e, '.m-ojo', 'cx') + medida(e, '.m-ojo', 'cy') + medida(e, '.m-nariz', 'rx') + medida(e, '.m-nariz', 'cy'))).size === 1);
+    const grosores = new Set(base.map((e) => { const c = W.getComputedStyle(e.querySelector('.m-t.m-piel')); return c.strokeWidth + ' ' + c.strokeLinecap; }));
+    afirmar('mascotas: misma mano, el contorno tiene el mismo grosor y extremos redondos en las cuatro', grosores.size === 1 && [...grosores][0].endsWith('round'), [...grosores].join(' | '));
+    afirmar('mascotas: cada una lleva su hilo (el oso en la bufanda de cuatro colores, las otras en su color) y el infinito está apagado', base[0].querySelectorAll('rect[fill^="var(--hilo-"]').length >= 8 && /hilo-kinesis/.test(base[1].innerHTML) && /hilo-wisfox/.test(base[2].innerHTML) && /hilo-valeria/.test(base[3].innerHTML) && base[0].querySelectorAll('.m-gafa').length === 2);
+    afirmar('mascotas: una pose desconocida cae en base y un id desconocido en Sinapso', M.mascota('wisfox', { pose: 'baila' }).dataset.pose === 'base' && M.mascota('inexistente', {}).classList.contains('mascota--sinapso'));
+    // Accesibilidad: la decorativa se oculta a los lectores de pantalla; la que lleva etiqueta es una imagen con ese texto (aunque traiga comillas).
+    const deco = M.mascota('niky', {}); const con = M.mascota('niky', { etiqueta: 'Niky, tu "guía" con IA' });
+    afirmar('mascotas: sin etiqueta es decorativa (aria-hidden, sin role) y con etiqueta es role=img con su texto', deco.getAttribute('aria-hidden') === 'true' && !deco.hasAttribute('role') && con.getAttribute('role') === 'img' && con.getAttribute('aria-label') === 'Niky, tu "guía" con IA' && !con.hasAttribute('aria-hidden'));
+    const fila = M.escena(null, { tamano: 64 });
+    afirmar('mascotas: la escena trae las cuatro, decorativa por defecto', fila.querySelectorAll('svg.mascota').length === 4 && fila.getAttribute('aria-hidden') === 'true');
+    // Movimiento: por defecto nada se mueve; el parpadeo es opcional y se apaga con la versión calmada y con prefers-reduced-motion.
+    const ojosDe = (e) => W.getComputedStyle(e.querySelector('.m-ojos')).animationName;
+    const quieta = M.mascota('sinapso', {}); const viva = M.mascota('sinapso', { viva: true }); caja.append(quieta, viva);
+    const raiz = D.documentElement; const antes = raiz.getAttribute('data-movimiento');
+    raiz.removeAttribute('data-movimiento');
+    const reduce = W.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    afirmar('mascotas: por defecto no se mueve y con viva:true parpadea (salvo que el sistema pida menos movimiento)', ojosDe(quieta) === 'none' && (reduce ? ojosDe(viva) === 'none' : ojosDe(viva) === 'm-parpadeo'), ojosDe(quieta) + ' / ' + ojosDe(viva));
+    raiz.setAttribute('data-movimiento', 'calmado');
+    afirmar('mascotas: en la versión calmada no hay ningún movimiento, ni siquiera con viva:true', ojosDe(viva) === 'none' && ojosDe(quieta) === 'none', ojosDe(viva));
+    if (antes == null) raiz.removeAttribute('data-movimiento'); else raiz.setAttribute('data-movimiento', antes);
+    // Tema: el contorno sigue a la tinta del tema, así que se lee sobre el fondo claro y sobre el oscuro.
+    const tema = raiz.getAttribute('data-tema'); const lum = (c) => { const m = c.match(/\d+/g).map(Number); return (m[0] + m[1] + m[2]) / 3; };
+    raiz.setAttribute('data-tema', 'claro'); const enClaro = lum(W.getComputedStyle(quieta.querySelector('.m-t')).stroke);
+    raiz.setAttribute('data-tema', 'oscuro'); const enOscuro = lum(W.getComputedStyle(quieta.querySelector('.m-t')).stroke);
+    if (tema == null) raiz.removeAttribute('data-tema'); else raiz.setAttribute('data-tema', tema);
+    afirmar('mascotas: el contorno es oscuro en el tema claro y claro en el oscuro', enClaro < 80 && enOscuro > 175, 'claro=' + enClaro + ' oscuro=' + enOscuro);
+    caja.remove();
+  }
+  // ---- fin mascotas ----
   const csp = doc().querySelector('meta[http-equiv="Content-Security-Policy"]');
   afirmar('la página trae una política de seguridad de contenido restrictiva', !!csp && /script-src 'self'/.test(csp.content) && /object-src 'none'/.test(csp.content) && /frame-src https:\/\/profenapaipa\.github\.io/.test(csp.content) && !/unsafe-eval/.test(csp.content));
   afirmar('no hay scripts en línea (la política los bloquearía)', ![...doc().querySelectorAll('script')].some((x) => !x.src && x.textContent.trim()));
