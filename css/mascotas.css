@@ -1,0 +1,2 @@
+/* mascotas.css: estilos de las mascotas (las cuatro comparten contorno, ojos y proporciones). */
+.mascota { display: block; flex: none; overflow: visible; }
