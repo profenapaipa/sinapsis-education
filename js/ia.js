@@ -1,9 +1,9 @@
-/* ia.js: ValerIA, con un lugar fijo donde mostrarse y un solo punto de conexión.
+/* ia.js: Niky, con un lugar fijo donde mostrarse y un solo punto de conexión.
 
    Dos piezas:
    - El adaptador (preguntar): hoy responde con textos de ejemplo. Cuando haya un servidor
      con un modelo, el mismo método lo llama y nada más cambia.
-   - El lugar (chat y panel): el chat vive en la página de ValerIA y también en un panel que se
+   - El lugar (chat y panel): el chat vive en la página de Niky y también en un panel que se
      abre desde cualquier espacio. Ambos leen el mismo historial, así la conversación no se pierde
      al cambiar de pantalla.
 
@@ -99,9 +99,9 @@
     const st = MT.store;
     let ocupado = false;
     const estadoEl = h('div', { class: 'chat__estado' });
-    const lista = h('div', { class: 'chat__mensajes', role: 'log', 'aria-live': 'polite', 'aria-label': 'Conversación con ValerIA' });
+    const lista = h('div', { class: 'chat__mensajes', role: 'log', 'aria-live': 'polite', 'aria-label': 'Conversación con Niky' });
     const chips = h('div', { class: 'chat__sugerencias' });
-    const campo = h('textarea', { rows: '2', maxlength: '300', 'aria-label': 'Escribe tu mensaje para ValerIA', placeholder: 'Escribe aquí lo que necesitas…' });
+    const campo = h('textarea', { rows: '2', maxlength: '300', 'aria-label': 'Escribe tu mensaje para Niky', placeholder: 'Escribe aquí lo que necesitas…' });
     const boton = h('button', { class: 'btn', type: 'submit' }, 'Enviar');
     const form = h('form', { class: 'chat__form', 'aria-label': 'Mensaje para ValerIA', onsubmit: (e) => { e.preventDefault(); mandar(campo.value); } }, campo, boton);
     campo.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); mandar(campo.value); } });
@@ -112,6 +112,8 @@
       ocupado = true; boton.disabled = true; campo.value = '';
       await consultar(limpio, tarea);
       ocupado = false; boton.disabled = false;
+      // La respuesta se pintó cuando todavía estaba «ocupado»: sin este repintado «Niky está pensando…» quedaba junto a la respuesta.
+      pintarMensajes(st.obtener());
     }
 
     function pintarEstado() {
@@ -121,13 +123,13 @@
     function pintarMensajes(s) {
       const nodos = [];
       if (!s.ia.length) {
-        nodos.push(h('div', { class: 'msg msg--ia' }, ricoTexto('Hola, soy **ValerIA**, la guía de Mosaico Telar. Puedo ayudar al docente a diseñar una actividad y al estudiante a resolver sus dudas. Todo lo que respondo es una propuesta: decide quien enseña.')));
+        nodos.push(h('div', { class: 'msg msg--ia' }, ricoTexto('Hola, soy **Niky**, la guía de Mosaico Telar. Puedo ayudar al docente a diseñar una actividad y al estudiante a resolver sus dudas. Todo lo que respondo es una propuesta: decide quien enseña.')));
       }
       for (const m of s.ia) {
         nodos.push(h('div', { class: 'msg msg--' + m.rol }, ricoTexto(m.texto),
           m.rol === 'ia' && m.fuente ? h('small', null, m.fuente === 'ejemplo' ? 'Respuesta de ejemplo' : m.fuente === 'respaldo' ? 'Respuesta de respaldo' : 'Generada en vivo') : null));
       }
-      if (ocupado) nodos.push(h('div', { class: 'msg msg--ia' }, 'ValerIA está pensando…'));
+      if (ocupado) nodos.push(h('div', { class: 'msg msg--ia' }, 'Niky está pensando…'));
       lista.replaceChildren(...nodos);
       lista.scrollTop = lista.scrollHeight;
     }
@@ -151,13 +153,16 @@
     };
   }
 
-  /* El panel: el lugar fijo de ValerIA en todos los espacios. */
+  /* El panel: el lugar fijo de Niky en todos los espacios. */
   const panel = {
     chat: null,
     abierto: false,
     // Las sugerencias dependen de quién habla: el docente diseña, el estudiante pregunta.
     sugerenciasPara() {
       const rol = MT.store.obtener().rol;
+      // En la exposición guiada las sugerencias son las del caso (asignatura y pregunta del estudiante).
+      const delCaso = MT.casos && MT.casos.sugerencias(rol);
+      if (delCaso) return delCaso;
       if (rol === 'docente') return [{ etiqueta: 'Diseñar una actividad de inglés', texto: 'Necesito una actividad de 20 minutos para enseñar el present simple a grado 8.º.', tarea: 'disenar' }];
       if (rol === 'estudiante') return [{ etiqueta: 'No entiendo la s del verbo', texto: 'No entiendo cuándo se le pone la s al verbo.', tarea: 'ayuda' }];
       return [{ etiqueta: 'Diseñar una actividad', texto: 'Necesito una actividad de 20 minutos para enseñar el present simple a grado 8.º.', tarea: 'disenar' },
@@ -167,7 +172,7 @@
       const slot = document.getElementById('slot-ia');
       if (!slot) return;
       if (!this.chat) {
-        const cab = h('div', { class: 'panel-ia__cab' }, marca('valeria'), h('h2', { id: 'titulo-panel-ia' }, 'ValerIA'),
+        const cab = h('div', { class: 'panel-ia__cab' }, marca('valeria'), h('h2', { id: 'titulo-panel-ia' }, 'Niky'),
           h('button', { class: 'btn btn--chico btn--suave cerrar', type: 'button', onclick: () => this.cerrar() }, 'Cerrar'));
         const cuerpo = h('div', { class: 'panel-ia__cuerpo' });
         slot.replaceChildren(cab, cuerpo);

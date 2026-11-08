@@ -19,7 +19,7 @@ Qué hace
    menos de 24 px y contraste del texto (4,5 a 1, o 3 a 1 en texto grande).
 3. Ejecuta el recorrido completo como lo haría una persona: ajustar como docente, aprobar en
    Orientación, verlo en Familia, recibirlo como estudiante, hacer el quiz y hablar con
-   ValerIA.
+   Niky.
 4. Imprime un informe. Sale con código 1 si algo falla.
 
 Necesita Chrome o Edge instalado. No instala nada y no envía datos a ningún sitio.

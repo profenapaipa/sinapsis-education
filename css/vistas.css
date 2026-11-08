@@ -141,7 +141,7 @@
 .opcion.correcta { border-color: var(--ok-texto); background: var(--ok-suave); color: var(--ok-texto); }
 .opcion.incorrecta { border-color: var(--ambar-texto); background: var(--ambar-suave); color: var(--ambar-texto); }
 
-/* ---------- ValerIA: el chat ---------- */
+/* ---------- Niky: el chat ---------- */
 .tarjeta--chat { padding: 0; display: flex; flex-direction: column; height: 34rem; overflow: hidden; }
 .chat { display: flex; flex-direction: column; min-height: 0; flex: 1; }
 .chat__estado { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; padding: .6rem 1rem; border-bottom: 1px solid var(--linea); font-size: .85rem; }

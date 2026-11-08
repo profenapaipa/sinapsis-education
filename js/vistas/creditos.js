@@ -16,7 +16,7 @@
         h('p', { class: 'creditos__lema' }, 'Un proyecto del Semillero Maker de Tecnología con Sentido, liderado por Néstor Andrés Paipa y sus estudiantes.')));
       c.append(h('div', { class: 'rejilla rejilla--2', style: 'margin-top:1rem' },
         h('div', { class: 'tarjeta' }, h('h2', null, 'Los tres portales'),
-          h('p', null, 'Kinesis, ValerIA y Wisfox nacieron como proyectos de estudiantes del semillero. Cada uno conserva su nombre y su autonomía, y hoy se tejen en una misma plataforma.')),
+          h('p', null, 'Kinesis, Niky y Wisfox nacieron como proyectos de estudiantes del semillero. Cada uno conserva su nombre y su autonomía, y hoy se tejen en una misma plataforma.')),
         h('div', { class: 'tarjeta' }, h('h2', null, 'La ruta de Inglés'),
           h('p', null, 'Las lecciones y los quizes de Inglés de grado 8.° fueron escritos por el equipo de Wisfox a partir de la malla de Inglés 2026.'))));
       c.append(h('div', { class: 'tarjeta', style: 'margin-top:1rem' }, h('h2', null, 'Fuentes y herramientas abiertas'),

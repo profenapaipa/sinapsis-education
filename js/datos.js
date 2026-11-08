@@ -79,16 +79,16 @@
     { id: 'quiz', nombre: 'Quiz completo', icono: '🏅' },
     { id: 'perfecto', nombre: 'Quiz perfecto', icono: '🎯' },
     { id: 'nota', nombre: 'Primera nota', icono: '📝' },
-    { id: 'ia', nombre: 'Preguntó a ValerIA', icono: '💬' },
+    { id: 'ia', nombre: 'Preguntó a Niky', icono: '💬' },
     { id: 'adaptada', nombre: 'Actividad a mi medida', icono: '🧵' },
   ];
 
-  // Respuestas de ejemplo de ValerIA mientras no haya un modelo conectado.
+  // Respuestas de ejemplo de Niky mientras no haya un modelo conectado.
   const respuestasIA = {
     disenar: '**Actividad de 20 minutos**\n\n**Inicio (4 min).** Muestra tres imágenes del tema y pregunta: “¿Qué ves primero?”. Responden en voz alta, en parejas o señalando.\n\n**Desarrollo (12 min).** Cada estudiante arma su respuesta con tarjetas de imagen y palabra. Elige cómo mostrarla: escribiéndola, dibujándola con rótulos o grabando un audio corto.\n\n**Cierre (4 min).** Cada pareja comparte una idea y el docente señala la regla central.\n\nPor qué sirve al DUA: hay varias formas de representar (imagen y texto), de expresar (escribir, dibujar o hablar) y de motivar (elegir y compartir en pareja).',
     ajustar: '**Ajustes propuestos**\n\nCada apoyo del perfil se convierte en un cambio concreto, y cada cambio dice por qué. El docente puede aceptar, cambiar o quitar cualquiera antes de que pase a orientación.',
     ayuda: 'Buena pregunta. La idea es esta:\n\n- Con **I, you, we, they** el verbo queda igual: *I eat breakfast.*\n- Con **he, she, it** el verbo lleva **-s**: *She eats breakfast.*\n\nLa -s aparece solo cuando hablas de una tercera persona, alguien de quien cuentas algo.\n\n**Pruébalo tú:** ¿cómo dirías “mi hermano toma el bus”? Empieza con “My brother…” y dime qué le pasa al verbo.',
-    general: 'Estoy en **modo de ejemplo**: todavía no estoy conectada a un modelo de lenguaje, así que respondo con textos preparados. Puedes pedirme **diseñar una actividad**, **ajustarla a un perfil** o **explicarte un tema**.',
+    general: 'Estoy en **modo de ejemplo**: todavía no tengo conexión con un modelo de lenguaje, así que respondo con textos preparados. Puedes pedirme **diseñar una actividad**, **ajustarla a un perfil** o **explicarte un tema**.',
   };
 
   MT.datos = { dua, asignaturas, semilla, reglasAjuste, generarAjuste, logros, respuestasIA };

@@ -1,8 +1,8 @@
 /* vivos.js: los portales "vivos", para trabajar con varios a la vez.
 
-   Los portales (Kinesis y Wisfox son aplicaciones completas; ValerIA es un chat) viven en un contenedor que el router
+   Los portales (Kinesis y Wisfox son aplicaciones completas; Niky es un chat) viven en un contenedor que el router
    NUNCA destruye. Cambiar de pestaña solo muestra u oculta: lo que hiciste en Kinesis sigue ahí cuando vuelves de
-   Wisfox, el chat de ValerIA conserva su conversación, y puedes ver dos portales lado a lado (vista dividida).
+   Wisfox, el chat de Niky conserva su conversación, y puedes ver dos portales lado a lado (vista dividida).
 
    Por qué se ve así: un iframe se recarga si se le cambia de lugar en el documento, por eso el contenedor es fijo y
    solo se alterna su visibilidad. */
@@ -29,7 +29,7 @@
     const el = h('div', { class: 'vivo-panel', 'data-espacio': id, hidden: true, 'data-portal': id });
     if (id === 'valeria') {
       const caja = h('div', { class: 'tarjeta tarjeta--chat' });
-      el.append(h('p', { class: 'vivo-panel__nombre' }, marca(id), 'ValerIA · la guía'), h('p', { class: 'pro-fila' }, h('span', null, 'Hoy responde con ejemplos preparados. '), MT.plan.candado('valeria', 'Modelo de lenguaje real')), caja);
+      el.append(h('p', { class: 'vivo-panel__nombre' }, marca(id), 'Niky · la guía'), h('p', { class: 'pro-fila' }, h('span', null, 'Hoy responde con ejemplos preparados. '), MT.plan.candado('valeria', 'Modelo de lenguaje real')), caja);
       MT.ia.montarChat(caja, MT.ia.panel.sugerenciasPara()); // vive mientras la página: su conversación no se pierde al cambiar de pestaña
     } else {
       el.append(h('p', { class: 'vivo-panel__nombre' }, marca(id), `${p.nombre} · ${p.rotulo.toLowerCase()}`));
@@ -217,7 +217,7 @@
   document.addEventListener('click', (e) => { document.querySelectorAll('.vivo-ayuda[open]').forEach((d) => { if (!d.contains(e.target)) d.removeAttribute('open'); }); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.vivo-ayuda[open]').forEach((d) => d.removeAttribute('open')); });
 
-  /* Quita todos los portales abiertos (y la vista dividida): al empezar de nuevo, el chat de ValerIA pierde su conversación y los marcos
+  /* Quita todos los portales abiertos (y la vista dividida): al empezar de nuevo, el chat de Niky pierde su conversación y los marcos
      se vuelven a cargar limpios. Lo que Kinesis y Wisfox guardan en su propia aplicación es de sus equipos y no se toca. */
   function reiniciar() {
     lado = null;

@@ -2,7 +2,7 @@
 
    contacto: correo al que llegan las solicitudes de piloto. Si queda vacío, la página de piloto muestra
    la información sin el formulario.
-   portales: dirección pública de cada aplicación. ValerIA no tiene dirección propia: vive dentro de la
+   portales: dirección pública de cada aplicación. Niky no tiene dirección propia: vive dentro de la
    plataforma. */
 (function (MT) {
   'use strict';

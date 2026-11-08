@@ -18,7 +18,7 @@
      comprueba que todo lo que carga index.html esté en la lista, así que un archivo nuevo sin registrar se detecta antes de publicar. */
 'use strict';
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const PREFIJO = 'mosaicotelar-';
 const CACHE = PREFIJO + VERSION;
 
@@ -62,6 +62,7 @@ const CASCARA = [
   'fonts/nunito-900.woff2',
   'js/archivos.js',
   'js/barra.js',
+  'js/casos.js',
   'js/biblioteca.js',
   'js/conexion.js',
   'js/config.js',

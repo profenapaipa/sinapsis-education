@@ -17,7 +17,7 @@
     {
       id: 'docente', boton: 'Soy docente', nombre: 'Docente', espacio: 'Kinesis', marca: 'kinesis', icono: 'docente',
       lema: 'Planeo la clase una vez y la ajusto a cada estudiante.',
-      haces: ['Ver los apoyos de cada estudiante, sin diagnóstico', 'Planear con los tres principios del DUA', 'Pedir ideas a ValerIA', 'Enviar un ajuste a orientación'],
+      haces: ['Ver los apoyos de cada estudiante, sin diagnóstico', 'Planear con los tres principios del DUA', 'Pedir ideas a Niky', 'Enviar un ajuste a orientación'],
       noHaces: ['Ver información clínica de estudiantes que no son de su curso', 'Aprobar su propio ajuste'],
       recibes: 'La decisión de orientación sobre tu ajuste.',
       entregas: 'La actividad y el ajuste que propones.',
@@ -49,7 +49,7 @@
     {
       id: 'estudiante', boton: 'Soy estudiante', nombre: 'Estudiante', espacio: 'Wisfox', marca: 'wisfox', icono: 'libro',
       lema: 'Aprendo a mi ritmo, con la actividad hecha a mi medida.',
-      haces: ['Hacer la actividad que le llegó', 'Responder el quiz y jugar', 'Preguntarle a ValerIA'],
+      haces: ['Hacer la actividad que le llegó', 'Responder el quiz y jugar', 'Preguntarle a Niky'],
       noHaces: ['Ver los ajustes ni los perfiles de otros'],
       recibes: 'La actividad ya aprobada y a tu medida.',
       entregas: 'Tu progreso: puntos, quiz y logros.',
@@ -59,11 +59,11 @@
   const por = (id) => lista.find((r) => r.id === id);
 
   /* Qué ve y qué hace cada rol con cada dato. Es la regla de la plataforma; la demostración usa solo datos ficticios. */
-  const COLUMNAS = ['Docente', 'Orientación', 'Familia', 'Estudiante', 'Coordinación', 'ValerIA'];
+  const COLUMNAS = ['Docente', 'Orientación', 'Familia', 'Estudiante', 'Coordinación', 'Niky'];
   const MATRIZ = [
     { dato: 'Información clínica', celdas: ['No ve', 'Ve, con permiso', 'No ve', 'No ve', 'No ve', 'Nunca la recibe'], nota: 'Vive aislada en Kinesis. Es lo más protegido.' },
     { dato: 'Apoyos y fortalezas', celdas: ['Ve', 'Ve', 'Ve, en lenguaje sencillo', 'Ve su plan', 'No ve', 'Solo un perfil anónimo'], nota: 'Es lo que el docente necesita para ajustar la clase.' },
-    { dato: 'Actividad planeada', celdas: ['Crea', 'Ve', 'Ve el tema', 'Ve la suya', 'Ve el conteo', 'Propone ideas'], nota: 'El docente decide; ValerIA solo propone.' },
+    { dato: 'Actividad planeada', celdas: ['Crea', 'Ve', 'Ve el tema', 'Ve la suya', 'Ve el conteo', 'Propone ideas'], nota: 'El docente decide; Niky solo propone.' },
     { dato: 'Ajuste propuesto', celdas: ['Crea', 'Revisa', 'Ve cuando se aprueba', 'Recibe el ajustado', 'Ve cuántos hay', 'Ayuda a redactarlo'], nota: 'No llega a nadie sin la aprobación de orientación.' },
     { dato: 'Aprobación', celdas: ['Ve el resultado', 'Decide', 'Ve el resultado', 'No ve', 'Ve el conteo', 'No participa'], nota: 'La única decisión que desbloquea el paso siguiente.' },
     { dato: 'Progreso del estudiante', celdas: ['Ve el resumen', 'Ve', 'Ve', 'Lo genera', 'No ve', 'No lo ve'], nota: 'Puntos, quiz y logros de Wisfox.' },

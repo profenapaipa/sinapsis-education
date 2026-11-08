@@ -56,13 +56,20 @@ html[data-presentacion="activa"] .vivos { height: calc(100dvh - var(--cabeza) - 
 .guion__meta { letter-spacing: 0; text-transform: none; font-size: .85rem; font-weight: 700; }
 .guion__titulo { margin: 0; font: 800 1.25rem/1.2 var(--fuente); letter-spacing: 0; color: var(--sobre-panel); }
 .guion__texto { margin: .1rem 0 0; max-width: 70ch; }
-.guion__nav { display: flex; gap: .6rem; }
+.guion__nav { display: flex; flex-direction: column; align-items: flex-end; gap: .4rem; }
+.guion__nav-par { display: flex; gap: .6rem; }
+.guion__nav-extra { display: flex; gap: .4rem; }
 .guion__pie { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem 1rem; }
 .guion__puntos { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0; }
 .guion__punto { width: 24px; height: 24px; padding: 0; border: 0; background: none; cursor: pointer; display: grid; place-items: center; }
 .guion__punto::before { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--sobre-panel-suave); }
 .guion__punto[aria-current="step"]::before { background: var(--sobre-panel); border-color: var(--sobre-panel); width: 16px; height: 16px; }
-.guion__utiles { display: flex; flex-wrap: wrap; gap: .4rem; }
+.guion__utiles { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+/* El selector de caso lleva su rótulo y se parece a los botones de contorno que lo rodean. */
+.guion__caso { display: inline-flex; align-items: center; gap: .4rem; font: 700 .78rem var(--fuente); color: var(--sobre-panel); }
+.guion__caso select { min-height: 36px; max-width: 22rem; padding: .15rem .5rem; font: 700 .78rem var(--fuente); color: var(--sobre-panel);
+  background: transparent; border: 2px solid var(--sobre-panel-suave); border-radius: 999px; }
+.guion__caso select option { color: #1A1714; background: #FFFFFF; }
 /* Los botones de uso ocasional del guion son más bajos que los de pasar de paso, para que la barra ocupe poco. */
 .guion .btn--chico { min-height: 36px; padding: .15rem .7rem; font-size: .78rem; }
 
@@ -78,7 +85,9 @@ html[data-presentacion="activa"] .vivos { height: calc(100dvh - var(--cabeza) - 
   .guion { left: 0; bottom: 5.4rem; font-size: .85rem; max-height: 40vh; overflow-y: auto; }
   .guion[data-oculto="si"] { right: .6rem; bottom: 6rem; max-height: none; }
   .guion__cuerpo { grid-template-columns: 1fr; padding: .5rem .8rem; }
-  .guion__nav .btn { flex: 1; min-height: 44px; }
+  .guion__nav { align-items: stretch; }
+  .guion__nav-par .btn { flex: 1; min-height: 44px; }
+  .guion__nav-extra { flex-wrap: wrap; }
   /* En un celular el guion se queda en lo esencial: título, paso y botones. El texto y los puntos no caben. */
   .guion__texto, .guion__puntos { display: none; }
   #btn-presentacion { display: none; }
