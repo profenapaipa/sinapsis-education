@@ -151,7 +151,9 @@ async function flujo() {
   doc().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
   afirmar('Escape cierra «Más» y devuelve el foco a su botón', doc().getElementById('menu-mas').hidden && doc().activeElement === doc().getElementById('btn-mas') && doc().getElementById('btn-mas').getAttribute('aria-expanded') === 'false');
   afirmar('la franja se calmó: un aviso en una línea y un solo botón (el rol)', doc().querySelectorAll('.franja .btn').length === 1 && !!doc().querySelector('.franja .franja-aviso'));
-  afirmar('Niky es un único botón del riel y abre su panel', doc().querySelectorAll('#btn-ia').length === 1 && !!doc().querySelector('.riel #btn-ia'));
+  // ---- niky ---- (cambió: el botón «Niky» del riel se sustituyó por el botón flotante; #btn-ia sigue en el documento, sin mostrarse, para que nada que lo busque se rompa)
+  afirmar('Niky tiene un único acceso a la vista, el botón flotante (el del riel se conserva oculto)', doc().querySelectorAll('#btn-ia').length === 1 && !!doc().querySelector('.riel #btn-ia') && doc().querySelector('#btn-ia').getClientRects().length === 0 && doc().querySelectorAll('#niky-fab').length === 1 && doc().getElementById('niky-fab').getClientRects().length > 0);
+  // ---- fin niky ----
   // ---- fin ligera ----
   await pulsar('Soy docente');
   afirmar('elegir docente lleva a su guía de inicio rápido', ventana().location.hash === '#/guia/docente');
@@ -367,7 +369,9 @@ async function flujo() {
   try { traza.push('paso 11: ' + ventana().MT.db.lista('actividades').length + '/' + (localStorage.getItem('mosaicotelar.v2') || '').length); } catch (e) { /* aún sin app */ }
   // 11. Niky
   await ir('#/valeria/chat');
-  doc().getElementById('btn-ia').click(); await espera(300);
+  // ---- niky ---- (cambió: se abre con el botón flotante, que es como lo hace una persona; la ventana es el mismo #slot-ia)
+  doc().getElementById('niky-fab').click(); await espera(300);
+  // ---- fin niky ----
   const panel = doc().getElementById('slot-ia');
   afirmar('el panel de Niky se abre', panel && !panel.hidden);
   const campo = panel.querySelector('textarea'); campo.value = 'No entiendo la s del verbo';
@@ -1333,7 +1337,9 @@ async function flujoMovil() {
   afirmar('móvil: la barra inferior respeta el área segura (usa env(safe-area-inset-bottom))', /\.riel \{[^}]*safe-area-inset-bottom/.test(cssMovil));
 
   // ---- ligera ---- Móvil: una sola navegación de máximo cuatro ítems, sin desborde, en los dos estados (sin rol y con rol).
-  for (const [rolM, esperado] of [[null, 'Inicio|Elegir rol|Niky|Más'], ['docente', 'Kinesis|Mi espacio|Niky|Más'], ['estudiante', 'Wisfox|Mi espacio|Niky|Más']]) {
+  // ---- niky ---- (cambió: Niky ya no es un ítem de la barra inferior; es el botón flotante que se apoya sobre ella, así que la barra queda con tres ítems)
+  for (const [rolM, esperado] of [[null, 'Inicio|Elegir rol|Más'], ['docente', 'Kinesis|Mi espacio|Más'], ['estudiante', 'Wisfox|Mi espacio|Más']]) {
+    // ---- fin niky ----
     localStorage.clear(); await cargar('#/mapa', 390, 844); await espera(300);
     if (rolM) { ventana().MT.store.cambiar((s) => { s.rol = rolM; }); await espera(150); }
     const items = [...D().querySelectorAll('.riel .riel-item')].filter(visible);
@@ -1375,6 +1381,150 @@ async function flujoMovil() {
   localStorage.clear();
 }
 
+// ---- niky ----
+/* El botón flotante de Niky, sus burbujas y su ventana. Mide en el navegador lo que el dueño pidió: «siempre un botón emergente que muestre
+   mensajes como un chat que sugiere en qué puede ayudar, según el portal». Tres cosas se cuidan aparte: que no robe el foco, que no desborde
+   a 390 px ni tape la barra inferior, y que con el movimiento calmado aparezca quieta. */
+async function flujoNiky() {
+  const visible = (el) => !!el && el.getClientRects().length > 0 && ventana().getComputedStyle(el).visibility !== 'hidden';
+  const dentro = (r, w, h) => r.left >= -1 && r.right <= w + 1 && r.top >= -1 && r.bottom <= h + 1;
+  const fab = () => doc().getElementById('niky-fab');
+  const burbuja = () => doc().getElementById('niky-burbuja');
+  const ventanaNiky = () => doc().getElementById('slot-ia');
+  const opciones = () => [...burbuja().querySelectorAll('.niky-burbuja__opcion')].map((x) => x.textContent.trim());
+  // Cada caso arranca como una persona nueva: sin datos guardados y sin burbujas ya vistas en la sesión.
+  const comoRolN = async (rol, ruta, ancho, alto) => { localStorage.clear(); if (rol) localStorage.setItem('mosaicotelar.v2', JSON.stringify({ rol })); try { sessionStorage.clear(); } catch (e) { /* sin sesión */ } await cargar(ruta, ancho, alto); await espera(1700); };
+
+  // 1. El botón está en todas las pantallas, a la vista, con nombre y con el avatar de Niky.
+  const sinBoton = []; const mal = [];
+  for (const [, ruta] of RUTAS.filter(([r]) => !r)) {
+    await cargar(ruta, 1280, 800); await espera(250);
+    const b = fab();
+    if (!b || !visible(b)) { sinBoton.push(ruta); continue; }
+    const r = b.getBoundingClientRect();
+    if (!(b.getAttribute('aria-label') || '').includes('Niky') || !b.querySelector('svg.mascota--niky') || r.width < 44 || !dentro(r, 1280, 800) || ventana().getComputedStyle(b.parentElement).position !== 'fixed') mal.push(ruta);
+  }
+  afirmar('niky: el botón flotante está en todas las pantallas (' + RUTAS.filter(([r]) => !r).length + ' rutas), con nombre y el avatar de Niky', !sinBoton.length && !mal.length, 'sin botón: ' + sinBoton.join(' ') + ' | mal: ' + mal.join(' '));
+
+  // 2. Las sugerencias cambian con el lugar y con el rol.
+  const comoVer = [
+    [null, '#/', /por dónde empiezo/i, 'inicio'],
+    [null, '#/mapa/conexiones', /qué es cada parte/i, 'mapa'],
+    [null, '#/planes/formas', /forma de participar/i, 'participar'],
+    ['docente', '#/mi/resumen', /cómo ajusto una actividad/i, 'docente'],
+    ['orientacion', '#/mi/resumen', /explico a la familia/i, 'orientación'],
+    ['familia', '#/mi/resumen', /cómo acompaño en casa/i, 'familia'],
+    ['estudiante', '#/mi/resumen', /dame una pista/i, 'estudiante'],
+    [null, '#/portales/wisfox', /dame una pista/i, 'portal Wisfox'],
+  ];
+  const vistos = new Set();
+  for (const [rol, ruta, patron, donde] of comoVer) {
+    await comoRolN(rol, ruta, 1280, 800);
+    const hay = !!burbuja() && !burbuja().hidden;
+    const op = hay ? opciones() : [];
+    vistos.add(op.join('|'));
+    afirmar('niky: en ' + donde + ' aparece una burbuja con 2 o 3 preguntas de ese lugar', hay && op.length >= 2 && op.length <= 3 && patron.test(op.join(' | ')) && /Niky/.test(burbuja().innerText), op.join(' | '));
+  }
+  afirmar('niky: las sugerencias cambian de un lugar a otro (hay al menos seis conjuntos distintos)', vistos.size >= 6, String(vistos.size));
+  await comoRolN(null, '#/valeria/chat', 1280, 800);
+  afirmar('niky: en la pantalla propia de Niky no se ofrece burbuja (el chat ya está a la vista), pero el botón sigue', burbuja().hidden && visible(fab()));
+
+  // 3. La burbuja no roba el foco, se descarta y no vuelve en la misma pantalla.
+  await comoRolN(null, '#/', 1280, 800);
+  afirmar('niky: la burbuja no toma el foco (el foco sigue donde el enrutador lo dejó)', !burbuja().contains(doc().activeElement) && doc().activeElement !== fab());
+  afirmar('niky: la burbuja es un grupo con nombre y su botón de descartar tiene nombre', burbuja().getAttribute('role') === 'group' && !!burbuja().getAttribute('aria-label') && /Descartar/.test(burbuja().querySelector('.niky-burbuja__cerrar').getAttribute('aria-label')));
+  afirmar('niky: el orden del teclado es burbuja, botón y ventana', (burbuja().compareDocumentPosition(fab()) & 4) !== 0 && (fab().compareDocumentPosition(ventanaNiky()) & 4) !== 0);
+  burbuja().querySelector('.niky-burbuja__cerrar').click(); await espera(150);
+  afirmar('niky: un toque descarta la burbuja', burbuja().hidden);
+  await ir('#/mapa/conexiones'); await espera(1700); burbuja().querySelector('.niky-burbuja__cerrar').click();
+  await ir('#/'); await espera(1700);
+  afirmar('niky: la burbuja descartada no reaparece al volver a la misma pantalla en la sesión', burbuja().hidden);
+  await comoRolN(null, '#/', 1280, 800);
+  burbuja().querySelector('.niky-burbuja__opcion').focus();
+  burbuja().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
+  afirmar('niky: Escape dentro de la burbuja la descarta y devuelve el foco al botón', burbuja().hidden && doc().activeElement === fab());
+
+  // 4. Tocar una sugerencia abre la ventana y la envía como primera pregunta.
+  await comoRolN(null, '#/', 1280, 800);
+  burbuja().querySelector('.niky-burbuja__opcion').click(); await espera(1400);
+  const v = ventanaNiky();
+  afirmar('niky: tocar una sugerencia abre la ventana y la envía como primera pregunta, con respuesta de ejemplo', !v.hidden && /¿Qué es Sinapsis Education\?/.test(v.innerText) && /plataforma/.test(v.innerText) && /Respuesta de ejemplo/.test(v.innerText) && burbuja().hidden, v.innerText.slice(0, 160));
+  afirmar('niky: la ventana dice que hoy responde con ejemplos (sin modelo conectado)', /ejemplo/i.test(v.querySelector('.chat__estado').innerText));
+  afirmar('niky: la ventana es un diálogo no modal con nombre y las respuestas se anuncian con cortesía', v.getAttribute('role') === 'dialog' && v.getAttribute('aria-modal') === 'false' && doc().getElementById(v.getAttribute('aria-labelledby')).textContent === 'Niky' && v.querySelector('[role="log"]').getAttribute('aria-live') === 'polite');
+  afirmar('niky: con la ventana abierta el botón dice aria-expanded=true y el foco está dentro de la ventana', fab().getAttribute('aria-expanded') === 'true' && v.contains(doc().activeElement), doc().activeElement && doc().activeElement.tagName);
+  afirmar('niky: la ventana no tapa el botón y queda dentro de la pantalla', dentro(v.getBoundingClientRect(), 1280, 800) && v.getBoundingClientRect().bottom <= fab().getBoundingClientRect().top + 1 && ventana().getComputedStyle(v).position === 'fixed');
+  afirmar('niky: la ventana ofrece sugerencias del lugar como botones dentro del chat', v.querySelectorAll('.chat__sugerencias button').length >= 2);
+
+  // 5. Teclado: abrir con el botón, Escape cierra y el foco vuelve al botón.
+  v.querySelector('textarea').dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
+  afirmar('niky: Escape cierra la ventana y el foco vuelve al botón flotante', v.hidden && doc().activeElement === fab() && fab().getAttribute('aria-expanded') === 'false');
+  fab().focus(); fab().click(); await espera(200);
+  afirmar('niky: con el botón (teclado: foco y Enter o Espacio) se abre la ventana y el foco pasa al campo de texto', !v.hidden && doc().activeElement === v.querySelector('textarea'));
+  v.querySelector('.cerrar').click(); await espera(100);
+  afirmar('niky: el botón «Cerrar» de la ventana también devuelve el foco al botón flotante', v.hidden && doc().activeElement === fab());
+
+  // 6. Los demás llaman a la ventana por MT.ia.panel: eso debe seguir funcionando.
+  ventana().MT.ia.panel.abrir(); await espera(150);
+  afirmar('niky: MT.ia.panel.abrir() abre la ventana flotante y el botón lo refleja', !v.hidden && ventana().MT.ia.panel.abierto === true && fab().getAttribute('aria-expanded') === 'true');
+  ventana().MT.ia.panel.alternar(); await espera(100);
+  afirmar('niky: MT.ia.panel.alternar() la cierra', v.hidden && ventana().MT.ia.panel.abierto === false);
+  ventana().MT.ia.panel.abrir({ texto: 'Dame una pista, sin la respuesta.', tarea: 'pista' }); await espera(1400);
+  afirmar('niky: MT.ia.panel.abrir({ texto, tarea }) envía la pregunta (lo usan los casos y «Pedir ideas a Niky»)', /Una pista/.test(v.innerText), v.innerText.slice(0, 120));
+  ventana().MT.ia.panel.cerrar(); await espera(100);
+  doc().getElementById('btn-ia').click(); await espera(150);
+  afirmar('niky: el viejo #btn-ia (oculto) sigue abriendo la ventana si algo lo llama', !v.hidden);
+  ventana().MT.ia.panel.cerrar(); await espera(100);
+
+  // 7. Presentación: lo oculta a propósito; la ventana sigue abriéndose si el guion la llama.
+  await comoRolN(null, '#/', 1280, 800);
+  doc().documentElement.dataset.presentacion = 'activa'; await espera(150);
+  const oculto = !visible(fab()) && burbuja().hidden;
+  ventana().MT.ia.panel.abrir(); await espera(150);
+  afirmar('niky: en modo presentación el botón y las burbujas se ocultan, pero el guion aún puede abrir la ventana', oculto && !v.hidden);
+  ventana().MT.ia.panel.cerrar(); delete doc().documentElement.dataset.presentacion; await espera(100);
+
+  // 8. Movimiento calmado: aparece quieta, no invisible.
+  await comoRolN(null, '#/mapa/conexiones', 1280, 800);
+  doc().documentElement.dataset.movimiento = 'calmado';
+  ventana().location.hash = '#/glosario'; await espera(1700);
+  const b8 = burbuja(); const cs8 = ventana().getComputedStyle(b8);
+  afirmar('niky: con el movimiento calmado la burbuja aparece quieta (sin animación) y a plena opacidad', !b8.hidden && cs8.animationName === 'none' && cs8.opacity === '1', cs8.animationName + ' ' + cs8.opacity);
+  ventana().MT.ia.panel.abrir(); await espera(100);
+  afirmar('niky: con el movimiento calmado la ventana tampoco se anima', ventana().getComputedStyle(v).animationName === 'none' && ventana().getComputedStyle(fab()).transitionDuration.split(',').every((x) => parseFloat(x) === 0));
+  ventana().MT.ia.panel.cerrar(); delete doc().documentElement.dataset.movimiento;
+
+  // 9. Contraste del texto de la burbuja y de la ventana en los dos temas.
+  for (const tema of TEMAS) {
+    await comoRolN(null, '#/', 1280, 800); doc().documentElement.dataset.tema = tema;
+    const textos = [...burbuja().querySelectorAll('strong, p, button')].filter((x) => x.textContent.trim());
+    const malos = textos.map((x) => { const cs = ventana().getComputedStyle(x); const fg = parsear(cs.color); const bg = fondoEfectivo(x); if (!fg || !bg) return null; const r = razon(mezclar(fg, bg), bg); return r < 4.5 ? x.textContent.trim().slice(0, 20) + ' ' + r.toFixed(2) : null; }).filter(Boolean);
+    afirmar('niky: el texto de la burbuja tiene contraste AA en el tema ' + tema + ' (' + textos.length + ' textos)', textos.length >= 4 && !malos.length, malos.join('; '));
+    ventana().MT.ia.panel.abrir(); await espera(150);
+    const tv = [...v.querySelectorAll('h2, .msg, .chat__estado span, .chat__sugerencias button, small')].filter((x) => x.textContent.trim());
+    const mv = tv.map((x) => { const cs = ventana().getComputedStyle(x); const fg = parsear(cs.color); const bg = fondoEfectivo(x); if (!fg || !bg) return null; const r = razon(mezclar(fg, bg), bg); return r < 4.5 ? x.textContent.trim().slice(0, 20) + ' ' + r.toFixed(2) : null; }).filter(Boolean);
+    afirmar('niky: el texto de la ventana tiene contraste AA en el tema ' + tema + ' (' + tv.length + ' textos)', tv.length >= 3 && !mv.length, mv.join('; '));
+    ventana().MT.ia.panel.cerrar();
+  }
+
+  // 10. Celular a 390 px: sin desbordes, sobre la barra inferior sin taparla, ventana con margen.
+  for (const [rol, ruta] of [[null, '#/'], ['docente', '#/mi/resumen'], ['estudiante', '#/mi/resumen'], [null, '#/mapa/conexiones'], [null, '#/portales/kinesis']]) {
+    await comoRolN(rol, ruta, 390, 844);
+    const W = ventana().innerWidth; const H = ventana().innerHeight; const riel = doc().querySelector('.riel');
+    const rf = fab().getBoundingClientRect(); const rb = burbuja().getBoundingClientRect(); const rr = riel.getBoundingClientRect();
+    const hayB = !burbuja().hidden;
+    const quien = 'niky 390 (' + (rol || 'sin rol') + ' ' + ruta + '): ';
+    afirmar(quien + 'el botón y la burbuja caben y quedan sobre la barra inferior, sin taparla', dentro(rf, W, H) && (!hayB || dentro(rb, W, H)) && rf.bottom <= rr.top + 1 && (!hayB || rb.bottom <= rf.top + 1), JSON.stringify({ rf, rr: rr.top }));
+    afirmar(quien + 'sin desborde horizontal con la burbuja a la vista', doc().documentElement.scrollWidth <= doc().documentElement.clientWidth + 1);
+    ventana().MT.ia.panel.abrir(); await espera(150);
+    const rv = ventanaNiky().getBoundingClientRect(); const ta = ventanaNiky().querySelector('textarea').getBoundingClientRect(); const bs = ventanaNiky().querySelector('button[type=submit]').getBoundingClientRect();
+    afirmar(quien + 'la ventana ocupa el ancho menos márgenes, con altura máxima, sin desbordar y sin tapar la barra', dentro(rv, W, H) && rv.left >= 8 && W - rv.right >= 8 && rv.bottom <= rr.top + 1 && rv.height <= H * 0.8 && rv.width >= W - 40 && dentro(ta, W, H) && dentro(bs, W, H), JSON.stringify(rv));
+    afirmar(quien + 'sin desborde horizontal con la ventana abierta', doc().documentElement.scrollWidth <= doc().documentElement.clientWidth + 1);
+    ventana().MT.ia.panel.cerrar();
+  }
+  localStorage.clear();
+}
+// ---- fin niky ----
+
 (async () => {
   try {
     for (const ancho of ANCHOS) for (const [rol, ruta] of RUTAS) {
@@ -1392,6 +1542,9 @@ async function flujoMovil() {
   try { await flujoFrontend(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'frontend: ' + String(e && e.stack || e); }
   try { await flujoEntrada(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'entrada: ' + String(e && e.stack || e); }
   try { await flujoMovil(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'móvil: ' + String(e && e.stack || e); }
+  // ---- niky ----
+  try { await flujoNiky(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'niky: ' + String(e && e.stack || e); }
+  // ---- fin niky ----
   document.getElementById('resultado').textContent = JSON.stringify(salida);
   document.title = 'listo';
   // auditar.py escucha en /__resultado: así no hace falta ninguna espera fija.
