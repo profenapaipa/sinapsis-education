@@ -13,7 +13,7 @@
 
 /* ---------- Tamaños de mascota (el dibujo no manda) ---------- */
 .ent-masc { display: block; width: var(--m, 96px); height: auto; max-width: 100%; }
-.ent-masc--grande { --m: clamp(110px, min(34svh, calc(100svh - 470px)), 300px); }   /* en pantallas bajas cede espacio para que el botón «Empezar» quede a la vista */
+.ent-masc--grande { --m: clamp(64px, min(34svh, calc(100svh - 640px)), 300px); }   /* en pantallas bajas cede espacio para que el botón «Empezar» quede a la vista */
 .ent-masc--estacion { --m: 84px; }
 .ent-masc--panel { --m: 88px; }
 .ent-masc--paso { --m: 44px; }
@@ -36,8 +36,9 @@
 /* ---------- 1. Portada ---------- */
 .ent-portada { background: var(--lino); border-bottom: 1px solid var(--linea); }
 .ent-portada__cuerpo { display: grid; justify-items: center; text-align: center; gap: .6rem; padding-top: 1rem; padding-bottom: 1.4rem; }
-.ent-marca { display: flex; align-items: center; justify-content: center; gap: .7rem; margin-bottom: .5rem; }
-.ent-marca > svg { width: 52px; height: 52px; flex: none; }
+.ent-marca { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; margin-bottom: .7rem; }
+/* El logo es el primer gesto de la marca: grande, para que se vea cómo encajan las piezas. */
+.ent-marca > svg { width: clamp(76px, min(30vw, 15svh), 156px); height: auto; aspect-ratio: 1; flex: none; }
 .ent-marca .etiqueta { margin: 0; text-align: left; }
 .ent-portada .etiqueta { font-size: .9rem; }
 .ent-portada h1 { margin: 0; font-size: clamp(2.1rem, 8vw, 3.6rem); }
@@ -52,7 +53,7 @@
   .ent-portada__acciones { align-items: flex-start; }
   .ent-portada__texto, .ent-portada__acciones { width: auto; }
   .ent-empezar { width: auto; min-width: 15rem; }
-  .ent-marca { justify-content: flex-start; }
+  .ent-marca { align-items: flex-start; }
 }
 
 /* ---------- 2. El camino con las mascotas ---------- */

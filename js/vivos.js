@@ -140,10 +140,13 @@
         pasos.length ? h('ol', null, pasos.map((x) => h('li', null, h('span', null, x.t), x.aqui ? h('button', { class: 'enlace-boton', type: 'button', onclick: () => MT.guias.irAqui(rol, x.aqui) }, 'Hacerlo en Mi espacio') : null))) : null,
         activo !== 'valeria' ? h('p', { class: 'suave' }, aviso) : null));
     // replaceChildren (nativo) convertiría un null en el texto "null": por eso solo se pasan nodos reales.
+    // El título de la página vive fuera de la barra: en modo inmersivo la barra se oculta y la página no puede quedarse sin su h1.
+    if (!titulo1) { titulo1 = h('h1', { class: 'solo-lectores' }); raiz.prepend(titulo1); }
+    titulo1.textContent = `${p.nombre}: ${p.rotulo.toLowerCase()}`;
     encabezado.replaceChildren(...[
       h('div', { class: 'vivo-barra__titulo', 'data-espacio': activo },
         marca(activo, 'vivo-cab__marca'),
-        h('p', { class: 'vivo-titulo', role: 'heading', 'aria-level': '1' }, `${p.nombre}: ${p.rotulo.toLowerCase()}`)),
+        h('p', { class: 'vivo-titulo' }, `${p.nombre}: ${p.rotulo.toLowerCase()}`)),
       ayuda,
       activo !== 'valeria' ? h('span', { class: 'vivo-badge', title: aviso }, 'Aplicación aparte') : null,
       h('div', { class: 'vivo-barra__acciones' },
@@ -207,10 +210,20 @@
     if (!raiz) iniciar(document.getElementById('app'));
     activo = id; if (lado === id) lado = null;
     raiz.hidden = false;
+    // Modo inmersivo: con un portal abierto, la franja y el pie se van y el portal ocupa casi toda la pantalla (queda el riel de iconos).
+    // Sus controles pasan a un botón «⋯» flotante, para que el portal se vea grande y como parte de la misma aplicación.
+    document.documentElement.dataset.portal = id; raiz.classList.remove('vivos--menu');
+    if (!menuBtn) crearMenu();
     medirCabeza();
     refrescar();
   }
-  function ocultar() { alternarAmplio(false); if (raiz) raiz.hidden = true; if (MT.barra) MT.barra.actualizar(); }
+  let menuBtn = null; let titulo1 = null;
+  function crearMenu() {
+    menuBtn = h('button', { class: 'vivo-menu-btn', type: 'button', 'aria-label': 'Opciones del portal', 'aria-expanded': 'false', onclick: () => {
+      const abre = !raiz.classList.contains('vivos--menu'); raiz.classList.toggle('vivos--menu', abre); menuBtn.setAttribute('aria-expanded', String(abre)); } }, '⋯');
+    raiz.append(menuBtn);
+  }
+  function ocultar() { alternarAmplio(false); delete document.documentElement.dataset.portal; if (raiz) raiz.hidden = true; if (MT.barra) MT.barra.actualizar(); medirCabeza(); }
 
   window.addEventListener('resize', medirCabeza);
   // El desplegable de "qué te toca" se cierra al tocar fuera o con Escape.

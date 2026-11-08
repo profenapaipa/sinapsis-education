@@ -78,3 +78,19 @@
   .vivo-ayuda__cuerpo { position: fixed; left: .5rem; right: .5rem; width: auto; top: calc(var(--cabeza) + 3.4rem); max-height: 60vh; overflow-y: auto; }
   .vivo-barra__acciones { margin-left: 0; }
 }
+
+/* ---- Modo inmersivo: con un portal abierto, casi toda la pantalla es del portal ----
+   Se van la franja crema de arriba y el pie (le quitaban altura y lo hacían ver pequeño y como otra aplicación); queda el riel de iconos a la
+   izquierda y Niky como botón redondo abajo a la derecha. Los controles del portal viven en el botón «⋯» de la esquina superior derecha. */
+html[data-portal] .franja, html[data-portal] .pie, html[data-portal] .barra-portales { display: none; }
+html[data-portal] .vivos { --cabeza: 0px; height: 100dvh; min-height: 0; padding: 0; gap: 0; position: relative; }
+html[data-portal] .vivos .portal-marco { border: 0; border-radius: 0; }
+html[data-portal] .vivo-panel .tarjeta--chat { border-radius: 0; border-width: 0; }
+html[data-portal] .vivo-barra, html[data-portal] .vivo-rescate { display: none; }
+html[data-portal] .vivos--menu .vivo-barra { display: flex; position: absolute; z-index: 40; top: 3.2rem; right: .6rem; left: auto; max-width: calc(100% - 1.2rem); padding: .7rem .8rem; flex-direction: column; align-items: stretch; background: var(--papel); border: 1px solid var(--linea); border-radius: var(--radio); box-shadow: 0 10px 30px rgba(0, 0, 0, .35); }
+html[data-portal] .vivos--menu .vivo-rescate:not([hidden]) { display: block; position: absolute; z-index: 40; top: auto; right: .6rem; left: auto; bottom: 5.4rem; max-width: min(26rem, calc(100% - 1.2rem)); padding: .5rem .8rem; background: var(--papel); border: 1px solid var(--linea); border-radius: var(--radio); }
+html[data-portal] .vivos--menu .vivo-barra__acciones { margin-left: 0; }
+.vivo-menu-btn { display: none; }
+html[data-portal] .vivo-menu-btn { display: grid; place-items: center; position: absolute; z-index: 41; top: .6rem; right: .6rem; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--linea); background: var(--papel); color: var(--tinta); font: 800 1.3rem/1 var(--fuente); cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, .3); }
+html[data-portal] .vivo-menu-btn:focus-visible { outline: 3px solid var(--tinta); outline-offset: 2px; }
+@media (max-width: 860px) { html[data-portal] .vivos { height: calc(100dvh - 76px); } }   /* en celular la barra inferior sigue siendo la navegación */

@@ -26,8 +26,9 @@
   // Los cuatro hilos: verticales (izquierdo, derecho) y horizontales (superior, inferior).
   const COLOR = { v: ['var(--hilo-kinesis)', 'var(--hilo-wisfox)'], h: ['var(--hilo-valeria)', 'var(--hilo-mosaico)'] };
   const EXTRA = 1;      // cuánto se mete cada hilo bajo las piezas vecinas
-  const DURACION = 3250; // ms: cuando termina la animación y se pasa a la forma única
-  const RELEVO = 3050;   // ms: instante del cambio a la forma única
+  const ARRIBO = 1900;  // ms que tarda el encaje de las piezas (llegan rápido y rebotan hasta asentarse, despacio)
+  const DURACION = 3250 + (ARRIBO - 1050); // ms: cuando termina la animación y se pasa a la forma única
+  const RELEVO = 3050 + (ARRIBO - 1050);   // ms: instante del cambio a la forma única
   // La lengüeta y su muesca: cuánto entra en la vecina, cuánto más alta que el puente es, cuánto la rebasa para que no haya
   // línea clara en el borde de la muesca, y el radio de las esquinas redondeadas.
   // Hay dos formas de encaje para elegir (solo cambian la animación; el logo final es el mismo): "escalon", sobria, y "curva",
@@ -197,7 +198,7 @@
   /* La animación completa. Devuelve la lista de animaciones para poder cancelarlas o detenerlas en un instante. */
   const SUAVE = 'cubic-bezier(.45, 0, .2, 1)';
   const suave3 = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-  const INICIOS = [1050, 1250, 1450, 1650]; const TRAVESIA = 1350; const MUESTRAS = 30;
+  const INICIOS = [1050, 1250, 1450, 1650].map((x) => x + ARRIBO - 1050); const TRAVESIA = 1350; const MUESTRAS = 30;
   function tejer(el, g, forma, flojo) {
     const A = [];
     // Lo que termina en el estado base (piezas, lienzo, tramos) usa fill "backwards": al acabar, la animación deja de aplicarse. Con "both"
@@ -205,16 +206,21 @@
     // piezas que comparten arista. Solo lo que debe quedarse en su valor final (punta, relevo) usa "both".
     const an = (nodo, kf, op) => { const a = nodo.animate(kf, Object.assign({ fill: 'backwards' }, op)); A.push(a); return a; };
     const lienzo = el.querySelector('.lienzo');
-    an(lienzo, [{ scale: forma.escala }, { scale: 1 }], { duration: 1050, easing: SUAVE });
+    an(lienzo, [{ scale: forma.escala }, { scale: 1 }], { duration: ARRIBO, easing: SUAVE });
     // 1. Las piezas llegan separadas y encajan. Las del centro primero, las esquinas al final.
     el.querySelectorAll('.pieza').forEach((n) => {
       const i = +n.dataset.i; const j = +n.dataset.j;
       const retraso = 60 * ((i === 1 ? 0 : 1) + (j === 1 ? 0 : 1));
       const giro = ((i + j) % 2 ? 1 : -1) * 5;
       an(n, [{ opacity: 0 }, { opacity: 1 }], { duration: 380, delay: retraso, easing: 'ease-out' });
-      const fin = flojo ? `${(i - 1) * SEP}px ${(j - 1) * SEP}px` : '0px 0px';
-      an(n, [{ translate: `${(i - 1) * forma.separa}px ${(j - 1) * forma.separa}px` }, { translate: fin }], { duration: 820, delay: retraso + 120, easing: SUAVE });
-      an(n, [{ rotate: `${giro}deg` }, { rotate: '0deg' }], { duration: 560, delay: retraso + 120, easing: 'cubic-bezier(.3, 0, .2, 1)' });
+      // El encaje: llegan rápido (primer tramo), se pasan un poco de su sitio y rebotan, cada vez menos, hasta asentarse despacio.
+      // k es cuánto está corrida la pieza respecto de su lugar, en múltiplos de "separa"; el rebote es la serie que cambia de signo.
+      const fin = flojo ? SEP / forma.separa : 0;
+      const K = [1, -0.34, 0.17, -0.07, 0.025, fin]; const OFF = [0, 0.3, 0.5, 0.68, 0.84, 1];
+      an(n, K.map((k, m) => ({ translate: `${f((i - 1) * forma.separa * k)}px ${f((j - 1) * forma.separa * k)}px`, offset: OFF[m], easing: m === 0 ? 'cubic-bezier(.1, .7, .3, 1)' : 'ease-in-out' })), { duration: ARRIBO - 200, delay: retraso + 120 });
+      an(n, [{ rotate: `${giro * 2}deg`, offset: 0 }, { rotate: `${-giro * 0.6}deg`, offset: 0.45 }, { rotate: `${giro * 0.2}deg`, offset: 0.75 }, { rotate: '0deg', offset: 1 }], { duration: ARRIBO - 300, delay: retraso + 120, easing: 'ease-in-out' });
+      // La del centro no se desplaza (ya está en su sitio): late un poco al encajar las demás, para que se note el golpe.
+      if (i === 1 && j === 1) an(n, [{ scale: 0.9, offset: 0 }, { scale: 1.05, offset: 0.35 }, { scale: 0.985, offset: 0.65 }, { scale: 1, offset: 1 }], { duration: ARRIBO - 200, delay: retraso + 120, easing: 'ease-in-out' });
     });
     // 2. Cada hilo avanza de un borde al otro con su aguja. La punta y los tramos usan la misma curva de avance, por eso se ve continuo.
     g.lineas.forEach((l, k) => {

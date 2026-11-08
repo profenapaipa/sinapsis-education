@@ -167,10 +167,12 @@ async function flujo() {
   const marcoK = doc().querySelector('.vivos iframe');
   afirmar('Ir a Kinesis lo muestra dentro de la plataforma', ventana().location.hash === '#/portales/kinesis' && !!marcoK && marcoK.getAttribute('src') === ventana().MT.config.portales.kinesis && abiertas.length === 0, ventana().location.hash);
   afirmar('el ítem del portal se marca como actual y el portal queda como abierto', doc().querySelector('.riel [data-portal="kinesis"]').getAttribute('aria-current') === 'page' && doc().querySelector('.riel [data-portal="kinesis"]').classList.contains('riel-item--abierto'));   // ---- ligera: ítem del riel en lugar de pestaña ----
+  // Modo inmersivo (cambió): los controles del portal viven en el menú «⋯»; se abre para leerlos.
+  { const mb = doc().querySelector('.vivo-menu-btn'); if (mb && !doc().querySelector('.vivos--menu')) { mb.click(); await espera(150); } }
   afirmar('el portal dice qué le toca hacer al rol', /Tu rol: Docente/.test(textoPagina()) && /te toca/.test(textoPagina()));
   const mk = doc().querySelector('.vivos iframe').getBoundingClientRect(); const vent = ventana();
   afirmar('el portal ocupa todo el panel: casi todo el ancho y casi todo el alto de la pantalla', mk.width >= vent.innerWidth * 0.7 && mk.height >= vent.innerHeight * 0.65, Math.round(mk.width) + 'x' + Math.round(mk.height) + ' de ' + vent.innerWidth + 'x' + vent.innerHeight);
-  afirmar('la barra del portal es de una sola fila delgada', doc().querySelector('.vivo-barra').getBoundingClientRect().height < 90, String(doc().querySelector('.vivo-barra').getBoundingClientRect().height));
+  afirmar('modo inmersivo: la barra del portal es un menú flotante que no le resta alto al portal, y no hay franja ni pie', getComputedStyle(doc().querySelector('.vivo-barra')).position === 'absolute' && !visible(doc().querySelector('.franja')) && !visible(doc().querySelector('.pie')));
   afirmar('el portal se puede pasar a pantalla completa', [...doc().querySelectorAll('.vivo-barra button')].some((b) => /Pantalla completa/.test(b.textContent)));
   afirmar('el portal avisa que es una aplicación aparte con sus propios datos', /Aplicación aparte/.test(textoPagina()) && /propios datos/.test(doc().querySelector('.vivo-badge').title));
   // ---- ligera ---- Por qué: las listas desplegables de cada portal desaparecieron con la barra de pestañas (lo que le toca a tu rol ya está en el desplegable del propio portal, «Tu rol: … · qué te toca aquí»).
@@ -1038,6 +1040,7 @@ async function flujoDemostracion() {
   localStorage.clear();
   await cargar('#/', 1280, 800); await espera(400);
   await ir('#/portales/kinesis'); await espera(500);
+  { const mb = D().querySelector('.vivo-menu-btn'); if (mb && !D().querySelector('.vivos--menu')) { mb.click(); await espera(150); } }   // la línea de rescate vive en el menú «⋯»
   const resc = () => D().querySelector('.vivos .vivo-rescate');
   const textoResc = resc() ? resc().innerText.replace(/\s+/g, ' ').trim() : '';
   afirmar('QA-02: bajo la barra del portal hay una línea fija "¿No ves el portal? Ábrelo aparte o usa Mi espacio"', visible(resc()) && textoResc.startsWith('¿No ves el portal? Ábrelo aparte o usa Mi espacio'), textoResc);
@@ -1046,7 +1049,7 @@ async function flujoDemostracion() {
   afirmar('QA-02: "Ábrelo aparte" abre la dirección del portal en otra pestaña, de forma segura', !!enl && enl.getAttribute('href') === MTw().config.portales.kinesis && enl.target === '_blank' && /noopener/.test(enl.rel));
   afirmar('QA-02: la línea sigue ahí después de que el marco cargue (no depende del evento load)', (await espera(1500), visible(resc())));
   const barraAlto = D().querySelector('.vivo-barra').getBoundingClientRect().height;
-  afirmar('QA-02: la línea no hace crecer la barra de herramientas del portal', barraAlto < 90, String(barraAlto));
+  afirmar('QA-02: la línea no hace crecer el menú del portal (en modo inmersivo es flotante y no resta alto)', barraAlto < 420, String(barraAlto));
   [...resc().querySelectorAll('button')].find((b) => /usa Mi espacio/.test(b.textContent)).click(); await espera(400);
   afirmar('QA-02: "usa Mi espacio" lleva a la versión equivalente', /^#\/mi/.test(ventana().location.hash), ventana().location.hash);
   await ir('#/portales/valeria'); await espera(300);

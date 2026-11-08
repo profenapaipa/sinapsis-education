@@ -35,7 +35,7 @@
      solo se repite lo que la persona ve. Si el h1 coincide con la sección, no se duplica. */
   function titulo(def, main) {
     if (def.titulo === 'Inicio') return MT.nombre;
-    const t = main.querySelector('h1') || main.querySelector('.vivos:not([hidden]) [role="heading"]');
+    const t = [...main.querySelectorAll('h1')].find((x) => !x.closest('[hidden]')) || null;
     const limpio = (x) => (x ? x.textContent.replace(/\s+/g, ' ').trim() : '');
     // Las guías por rol y las pestañas de página (Roles y datos, Mapa...) comparten h1: lo que las distingue es la pestaña activa.
     const pestana = limpio(main.querySelector('.pestanas-pagina [aria-current="page"]'));
@@ -70,7 +70,7 @@
     if (MT.barra) MT.barra.actualizar();
     if (op.foco) {
       window.scrollTo(0, 0);
-      const t = main.querySelector('h1') || main.querySelector('.vivos:not([hidden]) [role="heading"]');
+      const t = [...main.querySelectorAll('h1')].find((x) => !x.closest('[hidden]')) || null;
       if (t) { t.setAttribute('tabindex', '-1'); t.focus({ preventScroll: true }); }
     } else {
       window.scrollTo(0, y);
