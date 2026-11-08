@@ -1,1 +1,185 @@
-/* entrada.css: estilos del recorrido de entrada. */
+/* entrada.css: estilos del recorrido de entrada (portada con scroll, camino de mascotas, cuatro pestañas, «¿Quién eres?» y «Saber más»).
+
+   Principios:
+   - Móvil primero (390 px): una columna, objetivos táctiles de 48 px o más, texto de 1 rem o más.
+   - Las mascotas se colocan y se miden SOLO con las clases .ent-masc--* (ancho en CSS, alto automático): el dibujo definitivo puede tener otra
+     proporción y entra sin tocar nada aquí. Ningún selector mira dentro del <svg> de la mascota.
+   - Todo el color sale de tokens.css, así el tema oscuro funciona sin reglas propias.
+   - Movimiento: solo opacidad y transform. calmado.css ya acorta toda transición; además aquí no se oculta nada si hay calmado. */
+
+.entrada { overflow-x: clip; }   /* las mascotas entran deslizándose unos píxeles: que nunca ensanchen la página */
+.ent-ancho { width: 100%; max-width: 1040px; margin: 0 auto; padding: 0 1.4rem; }
+@media (max-width: 860px) { .ent-ancho { padding: 0 1rem; } }
+
+/* ---------- Tamaños de mascota (el dibujo no manda) ---------- */
+.ent-masc { display: block; width: var(--m, 96px); height: auto; max-width: 100%; }
+.ent-masc--grande { --m: clamp(150px, 34svh, 300px); }
+.ent-masc--estacion { --m: 84px; }
+.ent-masc--panel { --m: 88px; }
+.ent-masc--paso { --m: 44px; }
+.ent-masc--tab { --m: 40px; }
+.ent-masc--rol { --m: 56px; }
+.ent-masc--chica { --m: 40px; }
+@media (min-width: 861px) {
+  .ent-masc--grande { --m: clamp(220px, 40svh, 340px); }
+  .ent-masc--estacion { --m: 110px; }
+  .ent-masc--panel { --m: 112px; }
+  .ent-masc--rol { --m: 88px; }
+  .ent-masc--tab { --m: 48px; }
+}
+
+/* ---------- Un enlace discreto con forma de texto (pero con objetivo táctil de 44 px) ---------- */
+.ent-enlace { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: .4rem .6rem; background: none; border: 0; color: var(--verde-texto);
+  font: 800 1rem var(--fuente); text-decoration: underline; text-underline-offset: 4px; cursor: pointer; }
+.ent-enlace:hover { text-decoration-thickness: 2px; }
+
+/* ---------- 1. Portada ---------- */
+.ent-portada { background: var(--lino); border-bottom: 1px solid var(--linea); }
+.ent-portada__cuerpo { display: grid; justify-items: center; text-align: center; gap: .6rem; padding-top: 1rem; padding-bottom: 1.4rem; }
+.ent-marca { display: flex; align-items: center; justify-content: center; gap: .7rem; margin-bottom: .5rem; }
+.ent-marca > svg { width: 52px; height: 52px; flex: none; }
+.ent-marca .etiqueta { margin: 0; text-align: left; }
+.ent-portada h1 { margin: 0; font-size: clamp(2.1rem, 8vw, 3.6rem); }
+.ent-lema { font-family: var(--fuente-titulo); font-size: clamp(1.15rem, 4.2vw, 1.5rem); color: var(--tinta-suave); margin: .35rem 0 0; }
+.ent-portada__acciones { display: flex; flex-direction: column; align-items: center; gap: .25rem; margin-top: 1rem; }
+.ent-empezar { min-height: 54px; min-width: min(100%, 15rem); font-size: 1.15rem; padding: .7rem 2.2rem; }
+@media (min-width: 861px) {
+  .ent-portada__cuerpo { grid-template-columns: 1fr auto; justify-items: start; text-align: left; align-items: center; gap: 3rem; padding-top: 2.4rem; padding-bottom: 2.8rem; min-height: min(70svh, 560px); }
+  .ent-portada__texto { order: 1; }
+  .ent-portada__masc { order: 2; }
+  .ent-portada__acciones { align-items: flex-start; }
+  .ent-marca { justify-content: flex-start; }
+}
+
+/* ---------- 2. El camino con las mascotas ---------- */
+.ent-camino { padding: 1.6rem 0 1.2rem; outline: none; }
+.ent-sinapso, .ent-estacion { display: flex; align-items: center; gap: 1rem; position: relative; }
+.ent-sinapso p, .ent-estacion p { margin: 0; font-size: 1.05rem; line-height: 1.45; }
+.ent-sinapso p strong { font-family: var(--fuente-titulo); font-size: 1.25rem; font-weight: 700; display: block; margin-bottom: .2rem; }
+.ent-estaciones { list-style: none; margin: 0; padding: 0; position: relative; display: grid; gap: .6rem; }
+/* El hilo: una línea con los cuatro colores que pasa por detrás de las mascotas. */
+.ent-camino .ent-ancho { position: relative; }
+.ent-camino .ent-ancho::before { content: ""; position: absolute; top: 3rem; bottom: 3rem; left: calc(1rem + 42px - 2px); width: 4px; border-radius: 2px;
+  background: linear-gradient(var(--hilo-mosaico), var(--hilo-kinesis), var(--hilo-wisfox), var(--hilo-valeria)); opacity: .55; }
+.ent-flota { transform: translateY(var(--py, 0)); flex: none; position: relative; }
+.ent-estacion strong { font-size: 1.15rem; }
+.ent-estacion span { color: var(--tinta-suave); }
+.ent-estacion span::before { content: " · "; }
+/* En pantalla ancha el camino se tiende en horizontal: Sinapso arriba y las tres mascotas en fila, con el hilo por encima. */
+@media (min-width: 861px) {
+  .ent-camino { padding: 2.4rem 0 2rem; }
+  .ent-camino .ent-ancho::before { display: none; }
+  .ent-sinapso { justify-content: center; margin-bottom: 1.4rem; }
+  .ent-sinapso p { max-width: 36rem; }
+  .ent-sinapso p strong { font-size: 1.5rem; }
+  .ent-estaciones { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; padding-top: 1.4rem; }
+  .ent-estaciones::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; border-radius: 2px; opacity: .55;
+    background: linear-gradient(90deg, var(--hilo-kinesis), var(--hilo-wisfox), var(--hilo-valeria)); }
+  .ent-estacion { flex-direction: column; text-align: center; }
+  .ent-estacion p { font-size: 1.15rem; }
+  .ent-estacion span { display: block; }
+  .ent-estacion span::before { content: none; }
+}
+
+/* Aparecer al desplazarse. La clase ent-oculto solo la pone JavaScript, y no la pone con movimiento calmado. */
+.ent-aparece { transition: opacity .6s ease, transform .6s cubic-bezier(.2, .8, .3, 1); }
+.ent-oculto { opacity: 0; transform: translateX(-26px); }
+.ent-estacion:nth-child(even).ent-oculto { transform: translateX(26px); }
+html[data-movimiento="calmado"] .ent-oculto { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .ent-oculto { opacity: 1; transform: none; } .ent-flota { transform: none; } }
+html[data-movimiento="calmado"] .ent-flota { transform: none; }
+
+/* ---------- Secciones ---------- */
+.ent-seccion { padding: 1.8rem 0; }
+.ent-seccion h2 { margin-bottom: .8rem; }
+.ent-seccion .bajada { margin-bottom: 1rem; }
+.ent-seccion--pestanas { background: var(--lino); border-block: 1px solid var(--linea); }
+
+/* ---------- 3. Las cuatro pestañas ---------- */
+.ent-pestanas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .4rem; }
+.ent-pestana { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .15rem; min-height: 72px; padding: .4rem .2rem;
+  font: 800 .88rem var(--fuente); color: var(--tinta); background: var(--papel); border: 2px solid var(--linea); border-radius: var(--radio); cursor: pointer; }
+.ent-pestana:hover { border-color: var(--tinta-suave); }
+.ent-pestana[aria-selected="true"] { border-color: var(--e-vivo); box-shadow: inset 0 -4px 0 var(--e-vivo); background: var(--papel); }
+.ent-pestana:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+@media (min-width: 861px) { .ent-pestana { flex-direction: row; gap: .6rem; min-height: 64px; font-size: 1.05rem; } }
+
+.ent-panel { margin-top: .8rem; background: var(--papel); border: 1px solid var(--linea); border-top: 4px solid var(--e-vivo); border-radius: var(--radio); padding: 1.1rem 1rem 1.2rem; box-shadow: var(--sombra); }
+.ent-panel__cab { display: flex; align-items: center; gap: .9rem; }
+.ent-panel__cab h3 { font-size: 1.5rem; margin: 0; font-family: var(--fuente-titulo); }
+.ent-panel__cab .etiqueta { margin: 0; }
+.ent-panel__masc { flex: none; }
+.ent-panel__frase { font-size: 1.08rem; line-height: 1.5; margin: .8rem 0 1rem; max-width: 46rem; }
+.ent-panel__pie { margin-top: 1.1rem; }
+@media (min-width: 861px) { .ent-panel { padding: 1.6rem 1.8rem 1.8rem; } .ent-panel__frase { font-size: 1.2rem; } }
+
+/* El mini ejemplo */
+.ent-demo { background: var(--lino); border: 1px dashed var(--linea-fuerte); border-radius: var(--radio); padding: 1rem; }
+.ent-demo__guia { font-weight: 800; margin: 0 0 .7rem; }
+.ent-demo__nota { font-size: .92rem; margin: .7rem 0 0; }
+.ent-demo__salida { margin-top: .8rem; min-height: 3.2rem; }
+.ent-demo__salida p { margin: 0 0 .4rem; }
+.ent-demo__ok { font-weight: 800; color: var(--ok-texto); margin: .5rem 0 0; }
+.ent-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ent-chip { min-height: 48px; padding: .5rem 1rem; font: 700 1rem/1.25 var(--fuente); text-align: left; color: var(--tinta); background: var(--papel); border: 2px solid var(--tinta); border-radius: 24px; cursor: pointer; }
+.ent-chip:hover { background: var(--hundido); }
+.ent-chip[aria-pressed="true"] { background: var(--tinta); color: var(--papel); }
+.ent-chip:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+.ent-quiz__q { font-size: 1.12rem; font-weight: 700; margin: 0 0 .7rem; }
+.ent-opciones { display: grid; gap: .5rem; grid-template-columns: 1fr; }
+@media (min-width: 600px) { .ent-opciones { grid-template-columns: 1fr 1fr; } }
+.ent-opcion { min-height: 48px; padding: .5rem 1rem; text-align: left; font: 700 1rem/1.3 var(--fuente); color: var(--tinta); background: var(--papel); border: 2px solid var(--linea-fuerte); border-radius: var(--radio-chico); cursor: pointer; }
+.ent-opcion:hover:not(:disabled) { background: var(--hundido); }
+.ent-opcion:disabled { cursor: default; color: var(--tinta); }
+/* La respuesta correcta se marca con borde grueso y con un signo (no solo con color); la elegida que no era, con borde punteado. */
+.ent-opcion--bien { border-color: var(--verde); background: var(--verde-suave); box-shadow: inset 0 0 0 2px var(--verde); }
+.ent-opcion--bien::before { content: "✓ "; font-weight: 800; color: var(--ok-texto); }
+.ent-opcion--elegida { border-style: dashed; background: var(--ambar-suave); }
+
+.ent-chat { display: grid; gap: .6rem; margin-top: .8rem; }
+.ent-burbuja { border-radius: var(--radio); padding: .7rem .9rem; max-width: 100%; }
+.ent-burbuja small { display: block; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; font-size: .72rem; color: var(--tinta-suave); margin-bottom: .15rem; }
+.ent-burbuja--yo { background: var(--papel); border: 1px solid var(--linea-fuerte); }
+.ent-burbuja--ia { background: var(--azul-suave); border: 1px solid var(--azul); }
+.ent-burbuja__texto { max-height: 13rem; overflow: auto; margin-bottom: .5rem; line-height: 1.5; }
+.ent-burbuja__texto:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+.ent-viaje { list-style: none; margin: 0 0 .8rem; padding: 0; display: grid; gap: .5rem; }
+.ent-viaje__paso { display: flex; align-items: center; gap: .8rem; padding: .6rem .8rem; border-radius: var(--radio-chico); border: 2px solid var(--linea); background: var(--papel); opacity: .45; transition: opacity .3s ease; }
+.ent-viaje__paso--visto { opacity: 1; }
+.ent-viaje__paso--actual { border-color: var(--e-vivo); box-shadow: inset 4px 0 0 var(--e-vivo); }
+.ent-viaje__paso p { margin: 0; }
+
+/* ---------- 4. ¿Quién eres? ---------- */
+.ent-roles { display: grid; grid-template-columns: 1fr; gap: .7rem; }
+.ent-rol { display: flex; align-items: center; gap: 1rem; min-height: 80px; padding: .7rem 1rem; text-align: left; font: inherit; color: var(--tinta); background: var(--papel);
+  border: 2px solid var(--linea-fuerte); border-left: 8px solid var(--e-vivo); border-radius: var(--radio); cursor: pointer; box-shadow: var(--sombra); }
+.ent-rol:hover { background: var(--hundido); }
+.ent-rol:focus-visible { outline: 3px solid var(--foco); outline-offset: 3px; }
+.ent-rol__texto { display: grid; gap: .1rem; }
+.ent-rol__texto strong { font-size: 1.25rem; font-family: var(--fuente-titulo); font-weight: 700; }
+.ent-rol__texto small { font-size: .95rem; color: var(--tinta-suave); font-weight: 600; }
+.ent-rol-niky { display: flex; align-items: center; gap: .8rem; margin-top: 1.2rem; }
+.ent-rol-niky p { margin: 0; }
+.ent-rol-coord { margin: .4rem 0 0; }
+@media (min-width: 600px) { .ent-roles { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 861px) {
+  .ent-roles { grid-template-columns: repeat(4, 1fr); }
+  .ent-rol { flex-direction: column; text-align: center; justify-content: center; min-height: 210px; padding: 1.2rem .8rem; border-left-width: 2px; border-top: 8px solid var(--e-vivo); }
+}
+
+/* ---------- 5. Saber más ---------- */
+.ent-saber { padding: 1.8rem 0 2.4rem; }
+.ent-detalle { border: 1px solid var(--linea); border-radius: var(--radio); background: var(--papel); margin-bottom: 1rem; }
+.ent-detalle summary { cursor: pointer; padding: .9rem 1.1rem; min-height: 48px; font-weight: 800; }
+.ent-detalle summary:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.ent-detalle__cuerpo { padding: 0 1.1rem 1rem; max-width: 46rem; }
+.ent-objetivo { font-family: var(--fuente-titulo); font-size: 1.2rem; margin-bottom: .3rem; }
+.ent-enlaces { list-style: none; margin: 0; padding: 0; display: grid; gap: 0 1.5rem; grid-template-columns: 1fr; }
+.ent-enlaces a { display: flex; align-items: center; min-height: 44px; font-weight: 700; }
+@media (min-width: 700px) { .ent-enlaces { grid-template-columns: 1fr 1fr; } }
+
+/* ---------- La compañera en la guía de cada rol ---------- */
+.ent-companera { display: inline-flex; align-items: center; gap: .6rem; margin: 0 0 .6rem; padding: .2rem .9rem .2rem .3rem; border: 1px solid var(--linea); border-radius: 999px; background: var(--lino); font-weight: 800; font-size: .95rem; }
+@media (min-width: 861px) { .ent-companera .ent-masc--chica { --m: 52px; } .ent-companera { font-size: 1rem; } }

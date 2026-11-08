@@ -1,126 +1,121 @@
-/* inicio.js: la puerta de entrada, pensada como la de una plataforma que se presenta a colegios y
-   a un jurado. Muestra la plataforma misma (capturas de sus espacios), hace una sola pregunta
-   ("¿quién eres?") y todo lo demás sale de ahí. Cada cifra tiene su fuente y lo simulado se dice. */
+/* inicio.js: la portada de la plataforma, pensada para una mesa con un celular o un portátil.
+
+   Una sola idea por pantalla, de arriba hacia abajo:
+   1. la portada: Sinapso, el nombre, el eslogan y UN solo botón («Empezar»);
+   2. un camino corto donde las mascotas aparecen una a una al desplazarse (decorado, nunca necesario para entender);
+   3. cuatro pestañas con un mini ejemplo que funciona: Sinapsis, Kinesis, Wisfox y Niky;
+   4. «¿Quién eres?»: una pregunta, y cada opción avanza sola a la guía de ese rol;
+   5. «Saber más»: lo que antes llenaba el inicio (por qué existe, normatividad, a dónde ir después), plegado y a un toque.
+
+   Qué se quitó del inicio y dónde sigue: las capturas, los tres ✓ de confianza, «Qué es», las tarjetas de los portales, «Así viaja una clase»,
+   «Qué la hace distinta» y la regla de los datos ya viven en #/portales, #/recorrido, #/mapa y #/planes; lo que solo vivía aquí
+   (para qué existe, los tres términos de neurodiversidad y las leyes) quedó en «Saber más».
+
+   Los textos están todos en js/entrada.js. Aparecer al desplazarse usa IntersectionObserver con opacidad y transform, nada más; si la persona
+   pide menos movimiento (sistema o interruptor «calmado») todo está visible desde el principio. */
 (function (MT) {
   'use strict';
-  const { h, marca } = MT.ui;
+  const { h } = MT.ui;
   const st = MT.store;
 
+  const ir = (id) => { const el = document.getElementById(id); if (el) MT.movimiento.desplazar(el); };
 
-  function tarjetaRol(r) {
-    return h('article', { class: 'tarjeta rol-tarjeta' },
-      h('span', { class: 'rol-icono' }, MT.ui.icono(r.icono)),
-      h('h3', null, r.nombre), h('p', { class: 'rol-lema' }, r.lema),
-      h('button', { class: 'btn', type: 'button', onclick: () => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/guia/' + r.id; } }, r.boton));
+  /* Las mascotas del camino aparecen una a una. Sin IntersectionObserver, o con movimiento calmado, no se oculta nada: el contenido nunca
+     depende de la animación. El efecto de paralaje es mínimo (unos píxeles, al ritmo del desplazamiento) y se apaga con el calmado. */
+  function conAparicion(raiz) {
+    const items = [...raiz.querySelectorAll('.ent-aparece')];
+    if (!('IntersectionObserver' in window) || MT.movimiento.calmado()) return;
+    items.forEach((el) => el.classList.add('ent-oculto'));
+    const io = new IntersectionObserver((entradas) => {
+      entradas.forEach((e) => { if (e.isIntersecting) { e.target.classList.remove('ent-oculto'); io.unobserve(e.target); } });
+    }, { threshold: 0.25, rootMargin: '0px 0px -8% 0px' });
+    items.forEach((el) => io.observe(el));
+
+    const flotantes = [...raiz.querySelectorAll('.ent-flota')];
+    let cuadro = 0;
+    const mover = () => {
+      cuadro = 0;
+      if (MT.movimiento.calmado()) { flotantes.forEach((el) => el.style.removeProperty('--py')); return; }
+      const mitad = window.innerHeight / 2;
+      flotantes.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > window.innerHeight) return;
+        const py = Math.max(-14, Math.min(14, ((r.top + r.height / 2) - mitad) * -0.05));
+        el.style.setProperty('--py', py.toFixed(1) + 'px');
+      });
+    };
+    const alDesplazar = () => { if (!cuadro) cuadro = requestAnimationFrame(mover); };
+    window.addEventListener('scroll', alDesplazar, { passive: true });
+    MT.router.alSalir(() => { io.disconnect(); window.removeEventListener('scroll', alDesplazar); if (cuadro) cancelAnimationFrame(cuadro); });
   }
 
-  function componente(id, nombre, rotulo, texto) {
-    return h('article', { class: 'tarjeta proyecto-tarjeta portal', 'data-espacio': id }, h('div', { class: 'cuerpo' },
-      h('div', { class: 'proyecto-cab' }, marca(id), h('div', null, h('h3', null, nombre), h('small', null, rotulo))), h('p', null, texto),
-      h('div', { class: 'acciones' }, h('a', { class: 'btn btn--chico btn--suave', href: '#/portales/' + id, 'aria-label': 'Ir a ' + nombre }, 'Ir a ' + nombre))));
+  function portada(E, T, presentando) {
+    const s = st.obtener(); const rol = s.rol ? MT.roles.por(s.rol) : null;
+    // El logo (piezas negras con hilos de colores) sigue en la portada, pequeño y sin los botones de demostración que tenía el inicio anterior.
+    // Se guarda el manejador en MT.entrada.logo para que las pruebas puedan alternar blanco y negro sin botones en pantalla.
+    const logo = MT.tejido.logoTejido(); E.logo = logo;
+    return h('section', { class: 'ent-portada', 'aria-labelledby': 'ent-h1' },
+      h('div', { class: 'ent-ancho ent-portada__cuerpo' },
+        h('div', { class: 'ent-portada__masc' }, E.mascota('sinapso', 'saluda', 'ent-masc--grande')),
+        h('div', { class: 'ent-portada__texto' },
+          h('div', { class: 'ent-marca' }, logo.el, h('p', { class: 'etiqueta' }, T.portada.descriptor)),
+          h('h1', { id: 'ent-h1' }, E.MARCA.nombre),
+          h('p', { class: 'ent-lema' }, E.MARCA.lema),
+          h('div', { class: 'ent-portada__acciones' },
+            h('button', { class: 'btn ent-empezar', type: 'button', onclick: () => ir(presentando ? 'ent-quien' : 'ent-camino') }, T.portada.empezar),
+            h('button', { class: 'ent-enlace', type: 'button', onclick: () => ir('ent-quien') }, T.portada.yaSe),
+            rol ? h('a', { class: 'ent-enlace', href: '#/guia/' + rol.id }, T.portada.seguir(rol.nombre)) : null))));
+  }
+
+  // El camino: un hilo con los colores de los cuatro hilos de la plataforma y las tres mascotas que van apareciendo.
+  function camino(E, T) {
+    const C = T.camino;
+    const estacion = (id, texto) => h('li', { class: 'ent-estacion ent-aparece', 'data-espacio': E.ESPACIO[id] },
+      h('div', { class: 'ent-flota' }, E.mascota(id, 'saluda', 'ent-masc--estacion')),
+      h('p', null, h('strong', null, E.nombreDe(id)), h('span', null, texto)));
+    return h('section', { class: 'ent-camino', id: 'ent-camino', tabindex: '-1', 'aria-labelledby': 'ent-camino-t' },
+      h('div', { class: 'ent-ancho' },
+        h('h2', { id: 'ent-camino-t', class: 'solo-lectores' }, C.etiqueta),
+        h('div', { class: 'ent-sinapso ent-aparece', 'data-espacio': E.ESPACIO.sinapso },
+          h('div', { class: 'ent-flota' }, E.mascota('sinapso', 'senala', 'ent-masc--estacion')),
+          h('p', null, h('strong', null, C.sinapso[0]), ' ', C.sinapso[1])),
+        h('ol', { class: 'ent-estaciones' }, ['kinesis', 'wisfox', 'niky'].map((id) => estacion(id, C.rotulos[id])))));
+  }
+
+  function saberMas(E, T) {
+    const S = T.saberMas;
+    const leyes = h('button', { class: 'termino', type: 'button', 'aria-label': 'Marco normativo: las leyes que respaldan estas ideas', onclick: () => MT.glosario.abrirNombre('Marco normativo') }, S.leyes);
+    return h('section', { class: 'ent-saber', id: 'ent-saber', 'aria-labelledby': 'ent-saber-t' },
+      h('div', { class: 'ent-ancho' },
+        h('h2', { id: 'ent-saber-t' }, S.titulo),
+        h('details', { class: 'ent-detalle' },
+          h('summary', null, S.resumen),
+          h('div', { class: 'ent-detalle__cuerpo' },
+            h('p', { class: 'ent-objetivo' }, S.paraQue), h('p', { class: 'suave' }, S.sentido),
+            h('p', null, S.neuro(E.MARCA.nombre)), h('p', null, S.realidad),
+            h('p', null, S.pedagogia[0], leyes, S.pedagogia[1]),
+            h('p', null, S.privacidad), h('p', null, S.conexion))),
+        h('ul', { class: 'ent-enlaces' }, S.enlaces.map(([t, href]) => h('li', null, h('a', { href }, t))))));
   }
 
   MT.router.registrar({
     id: 'inicio', titulo: 'Inicio', espacio: '',
     render(main) {
-      const s = st.obtener();
-      const c = h('div', { class: 'contenedor' });
-      const tejido = MT.tejido.logoTejido();
-
-      c.append(h('section', { class: 'lienzo' },
-        h('div', null,
-          h('p', { class: 'descriptor' }, 'Colectivo de educación inclusiva con tecnología'),
-          h('div', { class: 'marca-hero' },
-            h('div', { class: 'marca-hero__logo' }, tejido.el, h('div', { class: 'marca-hero__controles' },
-              h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: tejido.repetir }, 'Ver otra vez'),
-              h('button', { class: 'btn btn--chico btn--suave', type: 'button', 'aria-pressed': 'false', onclick: (e) => { e.currentTarget.setAttribute('aria-pressed', String(tejido.alternar())); } }, 'Blanco y negro'))),
-            h('div', null, h('h1', null, 'Mosaico Telar'), h('p', { class: 'marca-hero__lema' }, 'Tejemos caminos para aprender.'))),
-          h('p', { class: 'intro' }, 'Cada cerebro se desarrolla a su ritmo (neurodesarrollo), algunos por caminos distintos a los más comunes (neurodivergencia), y esa variedad es parte natural de lo humano (neurodiversidad). Mosaico Telar acompaña esa variedad en el aula.'),
-          h('ul', { class: 'hilos-leyenda', 'aria-label': 'Sus tres portales' }, [['kinesis', 'Kinesis', 'el aula'], ['valeria', 'Niky', 'la guía'], ['wisfox', 'Wisfox', 'el estudiante'], ['mosaico', 'Mosaico Telar', 'la plataforma que los une']].map(([id, n, r]) => h('li', { 'data-espacio': id }, h('i', { 'aria-hidden': 'true' }), h('strong', null, n), ' ' + r))),
-          h('div', { class: 'acciones' },
-            h('a', { class: 'btn', href: '#roles', onclick: (e) => { e.preventDefault(); const el = document.getElementById('roles'); if (el) MT.movimiento.desplazar(el); } }, 'Entrar con mi rol'),
-            h('a', { class: 'btn btn--suave', href: '#/planes' }, 'Participar')),
-          h('ul', { class: 'confianza' },
-            h('li', null, 'Pensado desde la pedagogía inclusiva, el DUA y el PIAR, y desde ',
-              h('button', { class: 'termino', type: 'button', 'aria-label': 'Marco normativo: las leyes que respaldan estas ideas', onclick: () => MT.glosario.abrirNombre('Marco normativo') }, 'las leyes que los respaldan'), '.'),
-            h('li', null, 'Privacidad en la información de cada persona: cada rol ve solo lo que le corresponde.'),
-            h('li', null, 'Funciona sin instalar nada'))),
-        h('div', { class: 'vitrina' },
-          h('div', { class: 'dispositivo dispositivo--a' }, h('img', { src: 'assets/capturas/docente.jpg', alt: 'El espacio del docente: sus estudiantes, el siguiente paso y las actividades planeadas con DUA', width: '1280', height: '800', loading: 'lazy', decoding: 'async' }), h('span', { class: 'dispositivo-rotulo' }, 'Espacio del docente')),
-          h('div', { class: 'dispositivo dispositivo--b' }, h('img', { src: 'assets/capturas/estudiante.jpg', alt: 'El espacio del estudiante: su actividad del día con el quiz, sus puntos y sus logros', width: '1280', height: '800', loading: 'lazy', decoding: 'async' }), h('span', { class: 'dispositivo-rotulo' }, 'Espacio del estudiante')))));
-
-      if (s.rol) {
-        const r = MT.roles.por(s.rol);
-        c.append(h('section', { class: 'siguiente-banner', 'aria-label': 'Continuar' },
-          h('div', null, h('p', { class: 'etiqueta' }, 'Estás como ' + r.nombre.toLowerCase()), h('h2', null, 'Continúa donde lo dejaste')),
-          h('a', { class: 'btn', href: '#/guia' }, 'Ver mi guía de inicio')));
-      }
-
-      c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-que' },
-        h('h2', { id: 'h-que' }, 'Qué es Mosaico Telar'),
-        h('p', { class: 'bajada' }, 'Es la plataforma donde el docente planea una clase inclusiva, orientación la valida, la familia la ve y cada estudiante la recibe a su medida. Reúne tres portales para que esa clase llegue completa, del docente al estudiante. Cada portal nació como un proyecto de estudiantes; juntos comparten una identidad, un camino para cada rol y los mismos datos.'),
-        h('div', { class: 'plataforma' },
-          h('span', { class: 'plataforma__rotulo' }, marca('mosaico', 'plataforma__marca'), 'Mosaico Telar · la plataforma'),
-          h('div', { class: 'rejilla rejilla--3' },
-            componente('kinesis', 'Kinesis', 'El aula', 'Es el hilo de quien enseña: desde aquí la docencia teje la personalización del aprendizaje con cada estudiante.'),
-            componente('wisfox', 'Wisfox', 'El estudiante', 'Es el hilo del estudiante: material didáctico interactivo que parte de la malla curricular de su institución.'),
-            componente('valeria', 'Niky', 'La guía', 'Es el hilo que cruza a los otros dos: propone, ordena y lleva la información hasta quien debe decidir. La IA amplía la agentividad de las personas; no la reemplaza. Hoy responde con ejemplos.')),
-          h('p', { class: 'plataforma__une' }, h('strong', null, 'Cómo se conectan: '), 'En Mi espacio ya se tejen así: la actividad que se aprueba en Kinesis es la que recibe el estudiante en Wisfox, y Niky acompaña a los dos. Entre los portales originales, compartir los datos es lo que viene con el servidor.')),
-        h('div', { class: 'objetivo' }, h('p', { class: 'etiqueta' }, 'Para qué existe'),
-          h('p', { class: 'objetivo__texto' }, 'Para que cada estudiante encuentre en el aula caminos para aprender a su manera, y para que quienes enseñan cuenten con herramientas que acompañen su labor.'),
-          h('p', { class: 'objetivo__sentido' }, 'Tecnología con sentido: humana, pedagógica, al servicio del encuentro.')),
-        h('div', { class: 'acciones' }, h('a', { class: 'btn', href: '#roles', onclick: (e) => { e.preventDefault(); const el = document.getElementById('roles'); if (el) MT.movimiento.desplazar(el); } }, 'Elegir mi rol'),
-          h('a', { class: 'btn btn--suave', href: '#/portales' }, 'Ver los tres portales'))));
-
-      c.append(h('section', { class: 'seccion', id: 'roles', 'aria-labelledby': 'h-roles' },
-        h('h2', { id: 'h-roles' }, '¿Quién eres? Empieza por aquí'),
-        h('p', { class: 'bajada' }, 'Elige tu rol y te mostramos por dónde empezar: qué portal te toca, en qué orden y qué hace cada uno. Puedes cambiar de rol cuando quieras.'),
-        h('div', { class: 'rejilla rejilla--5' }, MT.roles.lista.map(tarjetaRol)),
-        h('p', { class: 'suave', style: 'margin-top:1rem' }, 'Si solo quieres conocerla, ', h('a', { href: '#/portales' }, 'mira los tres portales'), ', ', h('a', { href: '#/mapa/conexiones' }, 'el mapa'), ' o ', h('a', { href: '#/recorrido/roles' }, 'qué ve cada rol'), '.')));
-
-      c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-como' },
-        h('h2', { id: 'h-como' }, 'Así viaja una clase inclusiva'),
-        h('p', { class: 'bajada' }, 'Un ajuste nace en el aula, pasa por orientación y solo entonces llega a la familia y al estudiante. Niky acompaña a quien enseña y a quien aprende.'),
-        h('ol', { class: 'pasos3' },
-          h('li', null, h('h3', null, 'Planea'), h('p', null, 'El docente diseña la clase con DUA, ve los apoyos de cada estudiante y le pide ideas a Niky.'), h('span', { class: 'sello sello--ok' }, 'Disponible hoy')),
-          h('li', null, h('h3', null, 'Valida'), h('p', null, 'Orientación revisa el ajuste y lo aprueba o lo devuelve. Nada llega a nadie sin esa decisión.'), h('span', { class: 'sello sello--ok' }, 'Disponible hoy')),
-          h('li', null, h('h3', null, 'Aprende'), h('p', null, 'El estudiante recibe la actividad a su medida y la familia ve el proceso mientras ocurre.'), h('span', { class: 'sello sello--ok' }, 'Disponible hoy'))),
-        h('div', { class: 'acciones' }, h('a', { class: 'btn', href: '#/recorrido/camino' }, 'Recorrerlo de punta a punta'), h('a', { class: 'btn btn--suave', href: '#/mapa/conexiones' }, 'Ver todo en el mapa'))));
-
-      c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-dif' },
-        h('h2', { id: 'h-dif' }, 'Qué la hace distinta'),
-        h('div', { class: 'rejilla rejilla--3 diferencial' },
-          h('div', { class: 'tarjeta tarjeta--borde' }, h('h3', null, 'Un camino compartido'), h('p', null, 'Docentes, orientación, familias y estudiantes ven el mismo proceso, cada uno con lo suyo, y cada paso se entiende.')),
-          h('div', { class: 'tarjeta tarjeta--borde' }, h('h3', null, 'Para todos, no solo con diagnóstico'), h('p', null, 'El DUA es la base: la clase se piensa para todos y el ajuste cubre lo que el diseño no alcanza.')),
-          h('div', { class: 'tarjeta tarjeta--borde' }, h('h3', null, 'Protegida por diseño'), h('p', null, 'La información clínica queda aislada y la IA nunca la recibe.'))),
-        h('p', { style: 'margin-top:1rem' }, h('a', { href: '#/mapa/distingue' }, 'Conocer todo lo que nos distingue'))));
-
-      c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-problema' },
-        h('h2', { id: 'h-problema' }, 'Cada aula reúne muchas maneras de aprender'),
-        h('p', { class: 'bajada' }, 'En cada aula conviven muchas maneras de aprender. Queremos tejer entre ellas: herramientas que ayuden a la docencia a imaginar, probar y acompañar.'),
-        h('div', { class: 'rejilla rejilla--3' },
-          h('div', { class: 'tarjeta' }, h('span', { class: 'cifra' }, 'Cada estudiante'), h('p', null, 'tiene una experiencia y una realidad de vida diferentes. Por eso el aprendizaje se personaliza, en un entorno inclusivo donde las distintas formas de desarrollarse y de aprender encuentran su lugar.')),
-          h('div', { class: 'tarjeta' }, h('span', { class: 'cifra' }, 'Una mirada que evoluciona'), h('p', null, 'La normatividad de educación inclusiva y la reflexión pedagógica avanzan hacia una atención más humana y cercana. Mosaico Telar la toma como punto de partida, no como meta.')),
-          h('div', { class: 'tarjeta' }, h('span', { class: 'cifra' }, 'Todos'), h('p', null, 'Todos aprendemos distinto, y por eso todos somos parte del mosaico. La herramienta está para acompañar esa diversidad.')))));
-
-      c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-datos' },
-        h('div', { class: 'garantias' },
-          h('h2', { id: 'h-datos' }, 'Los datos de los estudiantes van primero'),
-          h('p', null, 'Trabajamos con información de menores de edad. Por eso la regla es clara: los datos de partida son de ejemplo y lo que tú escribes se queda en tu navegador.'),
-          h('div', { class: 'rejilla rejilla--2' },
-            [['Ningún dato real entra hasta que todo esté en regla', 'Política de tratamiento de datos, autorización de las familias, contrato con el colegio, cifrado y una revisión de seguridad independiente.'],
-             ['La información clínica queda aislada', 'Solo la ve orientación. Ni docentes, ni familias, ni coordinación, ni la IA la reciben.'],
-             ['La IA solo propone', 'Trabaja con perfiles ficticios y sin acceso a bases de datos. Sus respuestas son propuestas, nunca decisiones.'],
-             ['Lo que subes se queda contigo', 'Los archivos se guardan solo en este navegador y no se envían a ningún servidor. Cada archivo lo ve únicamente quien tú elijas.']]
-              .map(([t, p]) => h('div', { class: 'item' }, h('h3', null, t), h('p', null, p)))),
-          h('p', { style: 'margin-top:1rem' }, h('a', { href: '#/recorrido/datos' }, 'Ver cómo viaja la información')))));
-
-      c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-participa' },
-        h('h2', { id: 'h-participa' }, 'Participa en su construcción'),
-        h('p', { class: 'bajada' }, 'Puedes recorrer la demostración completa sin registrarte. Si quieres seguirnos de cerca o conversar sobre tu colegio, hay una puerta abierta.'),
-        h('div', { class: 'acciones' }, h('a', { class: 'btn', href: '#/registro/lista' }, 'Dejar mi correo'), h('a', { class: 'btn btn--suave', href: '#/registro/conversar' }, 'Conversar sobre mi colegio'), h('a', { class: 'btn btn--suave', href: '#/planes' }, 'Ver las formas de participar'), h('a', { class: 'btn btn--suave', href: '#/hoja/propuesta' }, 'Conocer nuestro sentido'))));
-
-      main.append(c);
+      const E = MT.entrada; const T = E.TEXTOS;
+      // En modo presentación (o entrando con ?caso= / #/caso/N, que lo activa un instante después) el recorrido se omite: la exposición guiada
+      // del lunes empieza en su guion y no debe verse alterada. Queda la portada, la pregunta de rol y «Saber más».
+      const presentando = (MT.presentacion && MT.presentacion.activo()) || /[?&]caso=\d+/.test(location.search) || /^#\/caso\//.test(location.hash);
+      const raiz = h('div', { class: 'entrada' });
+      raiz.append(
+        portada(E, T, presentando),
+        presentando ? null : camino(E, T),
+        presentando ? null : h('section', { class: 'ent-seccion ent-seccion--pestanas', id: 'ent-pestanas', 'aria-labelledby': 'ent-pest-t' },
+          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-pest-t' }, T.pestanas.titulo), E.pestanas(() => ir('ent-quien')))),
+        h('section', { class: 'ent-seccion ent-seccion--rol', id: 'ent-quien', tabindex: '-1', 'aria-labelledby': 'ent-rol-t' },
+          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-rol-t' }, T.rol.titulo), h('p', { class: 'bajada' }, T.rol.bajada), E.quienEres())),
+        saberMas(E, T));
+      main.append(raiz);
+      conAparicion(raiz);
     },
   });
 })(window.MT = window.MT || {});
