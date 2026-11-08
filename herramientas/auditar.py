@@ -78,6 +78,35 @@ def revisar_referencias(raiz=None):
     return fallos
 
 
+# ---- ligera ----
+def revisar_navegacion_unica(raiz=None):
+    """Una sola navegación, el nombre nuevo y el menú «Más».
+
+    Por qué: la plataforma tenía dos navegaciones a la vez (barra de portales y riel) y se sentía sobrecargada. Estas
+    comprobaciones estáticas avisan antes de abrir el navegador si alguien las vuelve a poner, o si el nombre público
+    vuelve a decir «Mosaico Telar» en la página, en el manifiesto o en las cadenas de js/ (salvo comentarios y la
+    pantalla de inicio, que es de otro encargo).
+    """
+    raiz = raiz or RAIZ
+    fallos = []
+    with open(os.path.join(raiz, 'index.html'), encoding='utf-8') as f:
+        pagina = f.read()
+    if 'barra-portales' in pagina:
+        fallos.append('index.html vuelve a tener la barra de portales: la navegación debe ser una sola (el riel)')
+    if len(re.findall(r'<nav[^>]*class="riel"', pagina)) != 1:
+        fallos.append('index.html debe tener exactamente un <nav class="riel">')
+    if 'id="menu-mas"' not in pagina:
+        fallos.append('falta el menú «Más» (id="menu-mas") con lo secundario')
+    if 'Mosaico Telar' in pagina:
+        fallos.append('index.html todavía dice «Mosaico Telar»: el nombre público es Sinapsis Education')
+    with open(os.path.join(raiz, 'manifest.webmanifest'), encoding='utf-8') as f:
+        manifiesto = json.load(f)
+    if manifiesto.get('name') != 'Sinapsis Education':
+        fallos.append('el manifiesto debe llamarse Sinapsis Education, dice: ' + str(manifiesto.get('name')))
+    return fallos
+# ---- fin ligera ----
+
+
 def puerto_libre():
     with socket.socket() as s:
         s.bind(('127.0.0.1', 0))
@@ -174,6 +203,14 @@ def main():
     for r in refs:
         print('   FALLA', r)
     problemas += len(refs)
+
+    # ---- ligera ----
+    nav = revisar_navegacion_unica(raiz)
+    print('1b. Navegación única y nombre:', 'bien' if not nav else '')
+    for r in nav:
+        print('   FALLA', r)
+    problemas += len(nav)
+    # ---- fin ligera ----
 
     navegador = encontrar_navegador()
     if not navegador:

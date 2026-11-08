@@ -1,6 +1,6 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Arnés de pruebas de Mosaico Telar</title>
+<title>Arnés de pruebas de Sinapsis Education</title>
 <!-- Lo lanza herramientas/auditar.py. Por qué existe: los fallos de este tipo de página no se
      ven leyendo el código, se ven midiendo en un navegador. Carga cada pantalla dentro de un
      marco del ancho de un celular o de un escritorio, y mide. Necesita servirse por http (no
@@ -15,6 +15,9 @@ const RUTAS = [[null, '#/'], [null, '#/mi'], [null, '#/mapa/conexiones'], [null,
 const ANCHOS = [390, 1280];
 const TEMAS = ['claro', 'oscuro'];
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+// ---- ligera ---- Apariencia y modo presentación viven en el menú «Más» (antes, en la franja): este ayudante lo abre antes de tocarlos.
+const abrirMas = async (d) => { const m = d.getElementById('menu-mas'); if (m && m.hidden) d.getElementById('btn-mas').click(); await new Promise((r) => setTimeout(r, 120)); };
+// ---- fin ligera ----
 const f = document.getElementById('f');
 const salida = { casos: [], flujo: [], fatal: null };
 let n = 0;
@@ -97,7 +100,7 @@ function medirCaso(ruta, ancho, tema, extra) {
   const aplastadas = [...d.querySelectorAll('main .tarjeta, main .chat')].filter((x) => { const r = x.getBoundingClientRect(); return x.getClientRects().length && r.width < 150; });
   if (aplastadas.length) fallos.push(`${aplastadas.length} tarjetas aplastadas (menos de 150 px de ancho)`);
   // La barra de navegación debe verse completa: en celular, todos sus íconos dentro de la pantalla.
-  const riel = [...d.querySelectorAll('.riel-items a')].filter((x) => { const r = x.getBoundingClientRect(); return r.width && (r.right > e.clientWidth + 1 || r.left < -1); });
+  const riel = [...d.querySelectorAll('.riel .riel-item')].filter((x) => { const r = x.getBoundingClientRect(); return r.width && (r.right > e.clientWidth + 1 || r.left < -1); });   // ---- ligera ----
   if (riel.length) fallos.push(`${riel.length} íconos del riel quedan fuera de la pantalla`);
   if (extra) fallos.push(...extra());   // comprobaciones propias de un modo (por ejemplo, el modo presentación)
   const c = medirContraste();
@@ -134,52 +137,58 @@ async function flujo() {
   await cargar('#/', 1280); await espera(400);
   afirmar('el inicio pregunta quién eres', textoPagina().includes('¿Quién eres?'));
   afirmar('hay una tarjeta por rol (5)', doc().querySelectorAll('.rol-tarjeta').length === 5);
-  afirmar('el riel lleva a mi espacio, mapa, Niky y roles', ['mi', 'mapa', 'recorrido', 'planes', 'hoja', 'identidad'].every((id) => doc().querySelector(`.riel a[data-ruta="${id}"]`)));
+  // ---- ligera ---- Por qué: la plataforma tenía DOS navegaciones (barra de portales y riel de seis ítems). Ahora es una sola (el riel), que cambia con el rol,
+  // y todo lo secundario vive en un único menú «Más». Estas pruebas reemplazan a las del riel de seis ítems y a las de la barra de pestañas.
+  const rielTxt = () => [...doc().querySelectorAll('.riel .riel-item')].map((x) => x.textContent.replace(/\s+/g, ' ').trim());
+  afirmar('una sola navegación: hay un riel y ninguna barra de portales aparte', doc().querySelectorAll('nav.riel').length === 1 && !doc().getElementById('barra-portales') && !doc().querySelector('.pestanas'));
+  afirmar('sin rol, el riel muestra lo mínimo: Inicio, Elegir rol, Niky y Más', rielTxt().join('|') === 'Inicio|Elegir rol|Niky|Más', rielTxt().join('|'));
+  doc().getElementById('btn-mas').click(); await espera(150);
+  const enMas = [...doc().querySelectorAll('#menu-mas a')];
+  afirmar('«Más» alcanza todo lo secundario: portales, mapa, roles y datos, participa, hoja de ruta, glosario, piloto, identidad y créditos', ['portales', 'mapa', 'recorrido', 'planes', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos'].every((id) => enMas.some((x) => x.dataset.ruta === id && x.getClientRects().length)), enMas.map((x) => x.dataset.ruta).join());
+  afirmar('«Más» reúne también lo de uso ocasional: apariencia y modo presentación', !!doc().getElementById('btn-presentacion') && doc().getElementById('btn-presentacion').getClientRects().length > 0 && doc().getElementById('btn-apariencia').getClientRects().length > 0);
+  doc().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
+  afirmar('Escape cierra «Más» y devuelve el foco a su botón', doc().getElementById('menu-mas').hidden && doc().activeElement === doc().getElementById('btn-mas') && doc().getElementById('btn-mas').getAttribute('aria-expanded') === 'false');
+  afirmar('la franja se calmó: un aviso en una línea y un solo botón (el rol)', doc().querySelectorAll('.franja .btn').length === 1 && !!doc().querySelector('.franja .franja-aviso'));
+  afirmar('Niky es un único botón del riel y abre su panel', doc().querySelectorAll('#btn-ia').length === 1 && !!doc().querySelector('.riel #btn-ia'));
+  // ---- fin ligera ----
   await pulsar('Soy docente');
   afirmar('elegir docente lleva a su guía de inicio rápido', ventana().location.hash === '#/guia/docente');
   afirmar('la franja dice con qué rol se mira', doc().getElementById('rol-actual').textContent.includes('Docente'));
   afirmar('la guía tiene pasos, cada uno con su portal', doc().querySelectorAll('.guia-paso').length === 5 && /en kinesis/i.test(textoPagina()) && /en niky/i.test(textoPagina()) && /en wisfox/i.test(textoPagina()));
-  // La barra de portales está siempre arriba: Mi espacio, Kinesis, Niky y Wisfox, en el orden del flujo.
-  const pestanas = () => [...doc().querySelectorAll('#barra-portales .pestana__ir')].map((a) => a.textContent.replace(/\s+/g, ' ').trim());
-  afirmar('la barra de portales muestra las cuatro pestañas en el orden del flujo', /Mi espacio/.test(pestanas()[0]) && /Kinesis/.test(pestanas()[1]) && /Niky/.test(pestanas()[2]) && /Wisfox/.test(pestanas()[3]), pestanas().join(' | '));
+  // ---- ligera ---- (reemplaza las pruebas de la barra de pestañas)
+  afirmar('con rol docente el riel muestra solo lo suyo: Kinesis, Mi espacio, Niky y Más (sin Wisfox)', rielTxt().join('|') === 'Kinesis|Mi espacio|Niky|Más', rielTxt().join('|'));
+  // ---- fin ligera ----
   const abiertas = []; ventana().open = (u) => { abiertas.push(u); return null; };
   await pulsar('Ir a Kinesis'); await espera(600);
   const marcoK = doc().querySelector('.vivos iframe');
-  afirmar('Ir a Kinesis lo muestra dentro de Mosaico Telar', ventana().location.hash === '#/portales/kinesis' && !!marcoK && marcoK.getAttribute('src') === ventana().MT.config.portales.kinesis && abiertas.length === 0, ventana().location.hash);
-  afirmar('la pestaña activa se marca y el portal queda como abierto', doc().querySelector('#barra-portales .pestana[data-portal="kinesis"] .pestana__ir').getAttribute('aria-current') === 'page' && doc().querySelector('#barra-portales .pestana[data-portal="kinesis"]').classList.contains('pestana--abierta'));
+  afirmar('Ir a Kinesis lo muestra dentro de la plataforma', ventana().location.hash === '#/portales/kinesis' && !!marcoK && marcoK.getAttribute('src') === ventana().MT.config.portales.kinesis && abiertas.length === 0, ventana().location.hash);
+  afirmar('el ítem del portal se marca como actual y el portal queda como abierto', doc().querySelector('.riel [data-portal="kinesis"]').getAttribute('aria-current') === 'page' && doc().querySelector('.riel [data-portal="kinesis"]').classList.contains('riel-item--abierto'));   // ---- ligera: ítem del riel en lugar de pestaña ----
   afirmar('el portal dice qué le toca hacer al rol', /Tu rol: Docente/.test(textoPagina()) && /te toca/.test(textoPagina()));
   const mk = doc().querySelector('.vivos iframe').getBoundingClientRect(); const vent = ventana();
   afirmar('el portal ocupa todo el panel: casi todo el ancho y casi todo el alto de la pantalla', mk.width >= vent.innerWidth * 0.7 && mk.height >= vent.innerHeight * 0.65, Math.round(mk.width) + 'x' + Math.round(mk.height) + ' de ' + vent.innerWidth + 'x' + vent.innerHeight);
   afirmar('la barra del portal es de una sola fila delgada', doc().querySelector('.vivo-barra').getBoundingClientRect().height < 90, String(doc().querySelector('.vivo-barra').getBoundingClientRect().height));
   afirmar('el portal se puede pasar a pantalla completa', [...doc().querySelectorAll('.vivo-barra button')].some((b) => /Pantalla completa/.test(b.textContent)));
   afirmar('el portal avisa que es una aplicación aparte con sus propios datos', /Aplicación aparte/.test(textoPagina()) && /propios datos/.test(doc().querySelector('.vivo-badge').title));
-  // Lista desplegable de cada portal: qué hace tu rol ahí y dónde trabajarlo
-  const caretWisfox = doc().querySelector('#barra-portales .pestana[data-portal="wisfox"] .pestana__abrir');
-  caretWisfox.click(); await espera(200);
-  const menuW = doc().getElementById('menu-portal-wisfox');
-  afirmar('la lista desplegable de un portal explica qué hace tu rol ahí', !menuW.hidden && /para tu rol: docente/i.test(menuW.innerText) && /Mira cómo la recibe/.test(menuW.innerText));
-  const rm = menuW.getBoundingClientRect(); const tocado = doc().elementFromPoint(rm.left + 24, rm.top + 24);
-  afirmar('la lista desplegable se VE completa (no queda recortada por la barra)', rm.width > 200 && rm.height > 100 && !!tocado && menuW.contains(tocado) && rm.bottom <= ventana().innerHeight, JSON.stringify([rm.width, rm.height, rm.bottom, ventana().innerHeight]));
-  afirmar('solo hay un menú abierto a la vez', doc().querySelectorAll('.menu-portal:not([hidden])').length === 1);
-  doc().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
-  afirmar('Escape cierra la lista y devuelve el foco al botón', menuW.hidden && doc().activeElement === caretWisfox);
-  caretWisfox.click(); await espera(150);
-  [...menuW.querySelectorAll('a')].find((a) => /Ir a Wisfox/.test(a.textContent)).click(); await espera(600);
+  // ---- ligera ---- Por qué: las listas desplegables de cada portal desaparecieron con la barra de pestañas (lo que le toca a tu rol ya está en el desplegable del propio portal, «Tu rol: … · qué te toca aquí»).
+  // Un portal que no es del rol sigue abriéndose por su dirección, y el riel del docente no tiene ítem de Wisfox.
+  await ir('#/portales/wisfox'); await espera(700);
   const marcoW = doc().querySelector('.vivos iframe[src="' + ventana().MT.config.portales.wisfox + '"]');
-  afirmar('desde la lista se salta a otro portal sin salir de la plataforma', !!marcoW && ventana().location.hash === '#/portales/wisfox' && !!doc().querySelector('.riel'));
-  afirmar('Kinesis y Wisfox quedan abiertos a la vez', ['kinesis', 'wisfox'].every((p) => doc().querySelector('#barra-portales .pestana[data-portal="' + p + '"]').classList.contains('pestana--abierta')));
+  afirmar('un portal que no es del rol se abre por su dirección (#/portales/wisfox) dentro de la plataforma', !!marcoW && ventana().location.hash === '#/portales/wisfox' && !!doc().querySelector('.riel'));
+  afirmar('el riel del docente no tiene ítem de Wisfox: solo lo de su rol', !doc().querySelector('.riel [data-portal="wisfox"]'));
+  afirmar('Kinesis y Wisfox quedan abiertos a la vez', ventana().MT.vivos.abiertos().includes('kinesis') && ventana().MT.vivos.abiertos().includes('wisfox'));
+  // ---- fin ligera ----
   // Los portales son persistentes: volver a ellos no los recarga, y se ven dos a la vez
   let cargas = 0; marcoK.addEventListener('load', () => cargas++); marcoW.addEventListener('load', () => cargas++);
-  doc().querySelector('#barra-portales .pestana[data-portal="kinesis"] .pestana__ir').click(); await espera(400);
+  doc().querySelector('.riel [data-portal="kinesis"]').click(); await espera(400);   // ---- ligera: ítem del riel ----
   await ir('#/mi'); await espera(300);
   afirmar('al salir de los portales siguen en el documento, ocultos', marcoK.isConnected && marcoW.isConnected && marcoK.closest('[hidden]'));
-  doc().querySelector('#barra-portales .pestana[data-portal="kinesis"] .pestana__ir').click(); await espera(500);
+  doc().querySelector('.riel [data-portal="kinesis"]').click(); await espera(500);   // ---- ligera: ítem del riel ----
   afirmar('volver a un portal NO lo recarga: conserva lo que se estaba haciendo', cargas === 0 && marcoK.isConnected && !marcoK.closest('[hidden]'), 'cargas=' + cargas);
   poner(doc().getElementById('dividir-con'), 'wisfox'); await espera(300);
   afirmar('la vista dividida muestra dos portales lado a lado', [...doc().querySelectorAll('.vivo-panel')].filter((p) => !p.hidden).length === 2 && doc().querySelector('.vivo-marcos--2') && cargas === 0, 'cargas=' + cargas);
   [...doc().querySelectorAll('.vivos button')].find((b) => /Quitar vista dividida/.test(b.textContent)).click(); await espera(250);
   afirmar('se puede quitar la vista dividida', [...doc().querySelectorAll('.vivo-panel')].filter((p) => !p.hidden).length === 1);
-  doc().querySelector('#barra-portales .pestana[data-portal="valeria"] .pestana__ir').click(); await espera(500);
+  await ir('#/portales/valeria'); await espera(500);   // ---- ligera: Niky ya no es una pestaña; el portal se abre por su dirección ----
   afirmar('la pestaña Niky trae el chat dentro de la plataforma', !!doc().querySelector('.vivo-panel[data-portal="valeria"]:not([hidden]) .chat') && !marcoK.closest('[hidden]') === false);
   // Cambiar de rol sin perder el lugar
   doc().getElementById('rol-actual').click(); await espera(200);
@@ -215,6 +224,9 @@ async function flujo() {
   afirmar('los tres portales se muestran en paralelo con su flujo', doc().querySelectorAll('.portal').length === 3 && doc().querySelectorAll('.carril-paso').length === 9);
   await comoRol('docente', '#/mi');
   afirmar('el espacio tiene barra lateral, encabezado y cifras', !!doc().querySelector('.lateral .lockup') && !!doc().querySelector('.hero') && !!doc().querySelector('.panel-cifras'));
+  // ---- ligera ---- sitio previsto para la mascota del rol: existe en el encabezado, vacío y sin ocupar lugar hasta que llegue MT.mascotas.
+  { const cr = doc().querySelector('.hero .companero-rol'); afirmar('el encabezado de la vista del rol trae el contenedor .companero-rol, vacío y sin ocupar sitio', !!cr && cr.childElementCount === 0 && cr.getBoundingClientRect().height === 0 && cr.dataset.rol === 'docente'); }
+  // ---- fin ligera ----
 
   try { traza.push('paso 2: ' + ventana().MT.db.lista('actividades').length + '/' + (localStorage.getItem('mosaicotelar.v2') || '').length); } catch (e) { /* aún sin app */ }
   // 2. Docente crea una actividad desde la malla de Inglés y edita su quiz
@@ -312,6 +324,9 @@ async function flujo() {
   try { traza.push('paso 9: ' + ventana().MT.db.lista('actividades').length + '/' + (localStorage.getItem('mosaicotelar.v2') || '').length); } catch (e) { /* aún sin app */ }
   // 9. Estudiante: recibe la versión a su medida, hace el quiz y gana logros
   await comoRol('estudiante', '#/mi');
+  // ---- ligera ---- el rol cambia los ítems del riel: el estudiante ve Wisfox y su espacio, nunca Kinesis.
+  afirmar('con rol estudiante el riel muestra Wisfox, Mi espacio, Niky y Más (sin Kinesis)', rielTxt().join('|') === 'Wisfox|Mi espacio|Niky|Más', rielTxt().join('|'));
+  // ---- fin ligera ----
   afirmar('el estudiante ve que la actividad quedó a su medida', /A tu medida/.test(textoPagina()));
   for (let i = 0; i < 4; i++) {
     const op = doc().querySelector('.opciones .opcion:not([disabled])'); if (!op) break; op.click(); await espera(120);
@@ -395,7 +410,7 @@ async function flujo() {
     { const v = cs.borderRadius + '|' + cs.backgroundColor + '|' + cs.borderTopColor + '|' + cs.borderTopWidth; afirmar('el botón de inicio es un círculo con contorno blanco y fondo oscuro', /^(50%|26px)\|rgb\(26, 23, 20\)\|rgb\(255, 255, 255\)\|3px$/.test(v), v); }
     { const r = rl.getBoundingClientRect(); const s = rl.querySelector('svg').getBoundingClientRect(); const d = Math.hypot((s.left + s.width / 2) - (r.left + r.width / 2), (s.top + s.height / 2) - (r.top + r.height / 2)); afirmar('el logo del botón de inicio está centrado en su círculo', d < 0.6, 'desvío=' + d.toFixed(2) + ' px'); }
     afirmar('el botón de inicio muestra los hilos de colores', rl.querySelectorAll('.hilos rect').length > 0);
-    afirmar('el riel nombra la sección Identidad, no Marca', [...ventana().document.querySelectorAll('.riel a')].some((x) => x.textContent.trim() === 'Identidad') && ![...ventana().document.querySelectorAll('.riel a')].some((x) => x.textContent.trim() === 'Marca'));
+    afirmar('«Más» nombra la sección Identidad, no Marca', [...ventana().document.querySelectorAll('#menu-mas a')].some((x) => x.textContent.trim() === 'Identidad') && ![...ventana().document.querySelectorAll('#menu-mas a')].some((x) => x.textContent.trim() === 'Marca'));   // ---- ligera: Identidad vive en «Más» ----
     await ir('#/identidad'); await espera(250);
     const muestras = [...ventana().document.querySelectorAll('.muestra-logo')];
     const fondo = (m) => ventana().getComputedStyle(m).backgroundColor;
@@ -446,6 +461,7 @@ async function flujo() {
   await ir('#/piloto');
   afirmar('la página de piloto explica las fases', /Requisitos de protección de datos/.test(textoPagina()));
   await ir('#/hoja/propuesta');
+  doc().querySelectorAll('details.plegable').forEach((d) => { d.open = true; });   // ---- ligera: lo largo ahora está plegado en <details>; la prueba lee lo que la persona vería al abrirlo ----
   afirmar('la hoja de ruta trae objetivo, riesgos y qué necesitamos', /nuestro sentido/i.test(textoPagina()) && /riesgos/i.test(textoPagina()) && /qué necesitamos/i.test(textoPagina()));
   afirmar('el foco llega al título al cambiar de pantalla', doc().activeElement && doc().activeElement.tagName === 'H1');
 
@@ -469,8 +485,17 @@ async function flujo() {
   const u = await ventana().MT.archivos.url(ventana().MT.db.lista('archivos')[0].id);
   afirmar('el contenido del archivo sigue guardado al recargar', !!u);
   // 15. Formas de participar, lo que viene y el registro
+  // ---- ligera ---- Por qué: «Dejar mi correo» decía «te escribiremos» sin un lugar a dónde enviarlo; ahora está detrás de MT.config.mostrarRegistro (apagado).
+  afirmar('el registro de correo está apagado por defecto', ventana().MT.config.mostrarRegistro === false);
+  await ir('#/planes'); ventana().MT.router.recargar(); await espera(300);
+  afirmar('apagado el registro, Participar no ofrece «Dejar mi correo» ni la tarjeta «Con tu correo»', !/Dejar mi correo|Con tu correo|Lista de interés/.test(textoPagina()) && doc().querySelectorAll('.plan-tarjeta').length === 3, String(doc().querySelectorAll('.plan-tarjeta').length));
+  await ir('#/registro/lista'); await espera(400);
+  afirmar('un enlace viejo a #/registro/lista lleva a la página de piloto, que sí tiene a dónde escribir', ventana().location.hash === '#/piloto', ventana().location.hash);
+  ventana().MT.config.mostrarRegistro = true;   // el resto de pruebas recorre el registro como estaba
+  // ---- fin ligera ----
   await ir('#/planes'); ventana().MT.router.recargar(); await espera(300);
   afirmar('las formas de participar son cuatro y dicen en qué etapa está cada una', ['Demostración', 'Lista de interés', 'Espacio compartido', 'Con un colegio'].every((n) => [...doc().querySelectorAll('.plan-tarjeta .etiqueta')].some((e) => e.textContent === n)) && doc().querySelectorAll('.plan-tarjeta').length === 4);
+  doc().querySelectorAll('details.plegable').forEach((d) => { d.open = true; });   // ---- ligera: lo largo ahora está plegado en <details>; la prueba lee lo que la persona vería al abrirlo ----
   afirmar('la tabla distingue lo disponible hoy de lo que viene', /Disponible/.test(textoPagina()) && /Próximamente/.test(textoPagina()) && /Acompañamiento/.test(textoPagina()));
   afirmar('el lenguaje es sobrio: sin precios, sin planes de pago y sin lenguaje de venta', !/\$\s?\d|COP|USD|\d+\s?€|Probar gratis|Prueba gratuita|\bPro\b|cotizaci|paquete/i.test(textoPagina()));
   await ir('#/planes/acompanamiento'); ventana().MT.router.recargar(); await espera(250);
@@ -641,7 +666,7 @@ function medirPresentacion(ancho) {
   const letra = parseFloat(w.getComputedStyle(e).fontSize);
   if (ancho >= 1600 && letra < 23.9) fallos.push(`a 1920 px la letra base debe ser de 24 px (es ${letra})`);
   if (ancho >= 1000 && ancho < 1600 && letra < 19.9) fallos.push(`a 1280 px la letra base debe ser de 20 px (es ${letra})`);
-  ['.pie', '.riel-abajo', '.barra-portales__ayuda'].forEach((s) => { const x = d.querySelector(s); if (x && ancho > 860 && x.getClientRects().length) fallos.push(`${s} debería estar oculto en modo presentación`); });
+  ['.pie'].forEach((s) => { const x = d.querySelector(s); if (x && ancho > 860 && x.getClientRects().length) fallos.push(`${s} debería estar oculto en modo presentación`); });   // ---- ligera: «Más» (en .riel-abajo) debe quedar visible en la mesa: ahí están Apariencia y el modo presentación ----
   // Controles grandes: ningún botón visible de menos de 36 px (los del celular quedan fuera del cálculo de 44 px de la franja).
   const chicos = [...d.querySelectorAll('.btn')].filter((x) => x.getClientRects().length && x.getBoundingClientRect().height < 36);
   if (chicos.length && ancho > 860) fallos.push(`${chicos.length} botones de menos de 36 px en modo presentación`);
@@ -672,14 +697,17 @@ async function flujoDemostracion() {
   localStorage.clear();
   await cargar('#/', 1280, 720); await espera(500);
   const bp = D().getElementById('btn-presentacion');
-  afirmar('presentación: hay un botón "Modo presentación" en la franja, con su atajo anunciado', !!bp && bp.getAttribute('aria-keyshortcuts') === 'Alt+P' && bp.getAttribute('aria-pressed') === 'false' && visible(bp));
+  await abrirMas(D());   // ---- ligera: el botón «Modo presentación» vive en el menú «Más», no en la franja ----
+  afirmar('presentación: hay un botón "Modo presentación" en el menú «Más», con su atajo anunciado', !!bp && bp.getAttribute('aria-keyshortcuts') === 'Alt+P' && bp.getAttribute('aria-pressed') === 'false' && visible(bp));
   afirmar('presentación: sin activarlo, el sitio no cambia (sin atributo ni guion)', !D().documentElement.dataset.presentacion && !D().getElementById('guion-mesa'));
   const letraAntes = parseFloat(ventana().getComputedStyle(D().documentElement).fontSize);
   bp.click(); await espera(350);
   const guion = () => D().getElementById('guion-mesa');
   afirmar('presentación: el botón activa el modo y muestra el guion', D().documentElement.dataset.presentacion === 'activa' && bp.getAttribute('aria-pressed') === 'true' && visible(guion()));
   afirmar('presentación: la letra crece (a 1280 px, de 16 a 20 px)', letraAntes === 16 && parseFloat(ventana().getComputedStyle(D().documentElement).fontSize) === 20, String(letraAntes));
-  afirmar('presentación: hay menos navegación (sin pie, sin enlaces de planes ni hoja de ruta)', !visible(D().querySelector('.pie')) && !visible(D().querySelector('.riel-abajo')) && !visible(D().querySelector('.barra-portales__ayuda')));
+  // ---- ligera ---- Por qué: el riel de abajo ya no lleva enlaces de planes ni hoja de ruta (viven en «Más» y el chip «Participa» se oculta en la mesa); lo que se mide es lo mismo: sin pie y sin «Participa».
+  afirmar('presentación: hay menos navegación (sin pie ni enlace de Participa)', !visible(D().querySelector('.pie')) && !visible(D().getElementById('plan-chip')));
+  // ---- fin ligera ----
   afirmar('presentación: el guion dice que es un borrador por aprobar mientras no esté aprobado', MTw().mensajes.guion.aprobado === true || /\[por aprobar\]/.test(guion().innerText), guion().innerText.slice(0, 80));
   const pasos = MTw().casos.guion(MTw().casos.actual());
   afirmar('presentación: el guion recorre los cinco roles', CINCO.every((r) => pasos.some((p) => p.rol === r)), pasos.map((p) => p.rol).join());
@@ -793,7 +821,7 @@ async function flujoDemostracion() {
   /* ===== 4. Versión calmada ===== */
   localStorage.clear();
   await cargar('#/', 1280, 800); await espera(500);
-  D().getElementById('btn-apariencia').click(); await espera(150);
+  await abrirMas(D()); D().getElementById('btn-apariencia').click(); await espera(150); // ---- ligera: Apariencia está dentro de «Más» ----
   const cb = D().getElementById('opcion-calmado');
   afirmar('calmado: el menú de Apariencia trae el interruptor "Versión calmada" con su explicación', !!cb && visible(cb) && /Versión calmada/.test(cb.closest('label').innerText) && /animaciones/.test(D().getElementById('ayuda-calmado').innerText) && cb.getAttribute('aria-describedby') === 'ayuda-calmado');
   const dur = (el, prop) => Math.max(...ventana().getComputedStyle(el)[prop].split(',').map(parseFloat));
@@ -807,7 +835,7 @@ async function flujoDemostracion() {
   afirmar('calmado: sin el modo, los botones sí tenían transición (la regla es la que cambia algo)', normal > 0.05, String(normal));
   await cargar('#/', 1280, 800); await espera(500);
   afirmar('calmado: se recuerda al recargar y se aplica antes del primer pintado', D().documentElement.dataset.movimiento === 'calmado');
-  D().getElementById('btn-apariencia').click(); await espera(150);
+  await abrirMas(D()); D().getElementById('btn-apariencia').click(); await espera(150); // ---- ligera: Apariencia está dentro de «Más» ----
   afirmar('calmado: el interruptor aparece encendido al volver', D().getElementById('opcion-calmado').checked);
   D().getElementById('opcion-calmado').click(); await espera(250);
   afirmar('calmado: al apagarlo todo vuelve', !D().documentElement.dataset.movimiento && dur(D().querySelector('main .btn') || D().querySelector('.franja .btn'), 'transitionDuration') > 0.05);
@@ -833,7 +861,7 @@ async function flujoDemostracion() {
   const sinComentarios = sw.replace(/\/\*[\s\S]*?\*\//g, '');
   afirmar('sin red: el service worker no usa rutas absolutas (el sitio vive en la subruta /mosaicotelar/)', !/['"`]\/[a-z]/i.test(sinComentarios), (sinComentarios.match(/['"`]\/[a-z][^'"`]*/i) || [''])[0]);
   const man = JSON.parse((await texto('../manifest.webmanifest')) || '{}');
-  afirmar('sin red: el manifiesto trae nombre, inicio y alcance relativos, modo de aplicación e íconos de 192 y 512 px', man.name === 'Mosaico Telar' && man.start_url === './' && man.scope === './' && man.display === 'standalone' && ['192x192', '512x512'].every((t) => (man.icons || []).some((i) => i.sizes === t)), JSON.stringify(man).slice(0, 120));
+  afirmar('sin red: el manifiesto trae nombre, inicio y alcance relativos, modo de aplicación e íconos de 192 y 512 px', man.name === 'Sinapsis Education' && man.start_url === './' && man.scope === './' && man.display === 'standalone' && ['192x192', '512x512'].every((t) => (man.icons || []).some((i) => i.sizes === t)), JSON.stringify(man).slice(0, 120)); // ---- ligera: el nombre público cambió a Sinapsis Education ----
   const iconosOk = await Promise.all((man.icons || []).map(async (i) => (await fetch('../' + i.src, { method: 'HEAD' })).ok));
   afirmar('sin red: los íconos del manifiesto existen', iconosOk.length > 0 && iconosOk.every(Boolean));
   const csp = idx.match(/Content-Security-Policy" content="([^"]+)"/)[1];
@@ -908,7 +936,7 @@ async function flujoDemostracion() {
   await MTw().barra.empezarDeNuevo({ confirmar: false }); await espera(300);
   const restantes = Object.keys(localStorage);
   afirmar('reinicio: borra lo que Wisfox y Kinesis guardan en este navegador (wisfo*, firebase:, kinesis-)', !restantes.some((k) => /^(wisfo|firebase:|kinesis-)/.test(k)), restantes.join());
-  afirmar('reinicio: no toca lo que no es de ellos (otra clave y la apariencia de Mosaico Telar)', localStorage.getItem('otraApp') === 'queda' && localStorage.getItem('mosaicotelar.apariencia') === '{"texto":"grande"}');
+  afirmar('reinicio: no toca lo que no es de ellos (otra clave y la apariencia de la plataforma)', localStorage.getItem('otraApp') === 'queda' && localStorage.getItem('mosaicotelar.apariencia') === '{"texto":"grande"}');
   const despuesBases = (await ventana().indexedDB.databases()).map((d) => d.name);
   afirmar('reinicio: borra las bases de sesión de Firebase', antesBases.includes('firebaseLocalStorageDb') && !despuesBases.includes('firebaseLocalStorageDb'), antesBases.join() + ' -> ' + despuesBases.join());
   localStorage.removeItem('otraApp');
@@ -974,9 +1002,10 @@ async function flujoFrontend() {
   salto.click(); await espera(200);
   afirmar('QA-04: al usarlo desde Hoja de ruta la dirección NO cambia (antes iba a #app y pintaba la bienvenida)', ventana().location.hash === '#/hoja/propuesta', ventana().location.hash);
   afirmar('QA-04: el foco queda en el contenido principal', D().activeElement === D().getElementById('app'), D().activeElement && D().activeElement.tagName);
-  afirmar('QA-04: la pantalla sigue siendo la misma (el h1 no cambió a la bienvenida)', !/^Mosaico Telar$/.test((D().querySelector('main h1') || {}).textContent || ''));
+  afirmar('QA-04: la pantalla sigue siendo la misma (el h1 no cambió a la bienvenida)', !/^(Mosaico Telar|Sinapsis Education)$/.test((D().querySelector('main h1') || {}).textContent || '')); // ---- ligera: vale con cualquiera de los dos nombres ----
 
   /* QA-05: el título de la pestaña distingue cada pantalla */
+  ventana().MT.config.mostrarRegistro = true;   // ---- ligera: con el registro apagado, #/registro/* redirige al piloto y su título se repetiría; aquí se mide encendido ----
   const hashes = ['#/portales/general', '#/portales/kinesis', '#/portales/wisfox', '#/portales/valeria', '#/guia/docente', '#/guia/estudiante', '#/planes/formas', '#/planes/acompanamiento',
     '#/registro/lista', '#/registro/conversar', '#/hoja/propuesta', '#/hoja/arquitectura', '#/hoja/etapas', '#/mapa/conexiones', '#/mapa/distingue', '#/recorrido/camino', '#/recorrido/roles', '#/recorrido/datos', '#/valeria/chat', '#/valeria/conexion'];
   const titulos = {};
@@ -984,9 +1013,9 @@ async function flujoFrontend() {
   const lista = Object.values(titulos);
   const repetidos = [...new Set(lista.filter((t, i) => lista.indexOf(t) !== i))];
   afirmar('QA-05: ninguna de las pantallas con secciones comparte título de pestaña con otra', repetidos.length === 0, repetidos.join(' | '));
-  afirmar('QA-05: todos los títulos terminan en "· Mosaico Telar" y ninguno queda vacío', lista.every((t) => / · Mosaico Telar$/.test(t)), lista.filter((t) => !/ · Mosaico Telar$/.test(t)).join(' | '));
+  afirmar('QA-05: todos los títulos terminan en "· Sinapsis Education" y ninguno queda vacío', lista.every((t) => / · Sinapsis Education$/.test(t)), lista.filter((t) => !/ · Sinapsis Education$/.test(t)).join(' | ')); // ---- ligera: nombre nuevo (MT.nombre) ----
   await ir('#/'); await espera(200);
-  afirmar('QA-05: la bienvenida conserva el título "Mosaico Telar"', D().title === 'Mosaico Telar', D().title);
+  afirmar('QA-05: la bienvenida conserva el título "Sinapsis Education"', D().title === 'Sinapsis Education', D().title); // ---- ligera ----
 
   /* QA-06: formularios con tipo y autocompletado correctos, Enter que envía, error marcado */
   await ir('#/registro/lista'); await espera(300);
@@ -1069,7 +1098,7 @@ async function flujoFrontend() {
   localStorage.clear();
   await cargar('#/', 1280, 800); await espera(400);
   afirmar('estilos: la bandera MT.config.mostrarEstilos existe y está apagada', MTw().config.mostrarEstilos === false);
-  D().getElementById('btn-apariencia').click(); await espera(120);
+  await abrirMas(D()); D().getElementById('btn-apariencia').click(); await espera(120); // ---- ligera: Apariencia está dentro de «Más» ----
   afirmar('estilos: con la bandera apagada el menú de Apariencia no muestra ningún selector de estilo y <html> no lleva data-estilo', !D().getElementById('opcion-estilo') && !('estilo' in D().documentElement.dataset));
   localStorage.setItem('mosaicotelar.apariencia', JSON.stringify({ estilo: 'piezas' }));
   await cargar('#/', 1280, 800); await espera(400);
@@ -1120,9 +1149,9 @@ async function flujoMovil() {
       !!r && h1.top >= 0 && h1.bottom <= topeBarra && r.top >= 0 && r.bottom <= topeBarra, r ? `botón ${Math.round(r.top)}-${Math.round(r.bottom)}, barra en ${Math.round(topeBarra)}` : 'sin botón');
     if (ancho === 360) {
       afirmar('móvil: el botón principal de la primera pantalla mide al menos 44 px de alto y el ancho de la columna', !!r && r.height >= 44 && r.width >= ancho - 48, r ? `${Math.round(r.width)}x${Math.round(r.height)}` : '');
-      const peques = [...D().querySelectorAll('.riel a, .franja .btn, .lienzo .btn, .barra-portales a')].filter(visible).filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.height < 40 || b.width < 44) && !e.matches('.riel-logo'); });
+      const peques = [...D().querySelectorAll('.riel .riel-item, .franja .btn, .lienzo .btn')].filter(visible).filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.height < 40 || b.width < 44) && !e.matches('.riel-logo'); });
       afirmar('móvil: la barra inferior, la franja, los botones de la bienvenida y las pestañas tienen objetivos de al menos 40 px de alto (la franja) y 44 de ancho', peques.length === 0, peques.map((e) => (e.className || e.tagName) + ' ' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height)).join(' | '));
-      const barraAlto = [...D().querySelectorAll('.riel a')].filter(visible).map((a) => a.getBoundingClientRect().height);
+      const barraAlto = [...D().querySelectorAll('.riel .riel-item')].filter(visible).map((a) => a.getBoundingClientRect().height);
       afirmar('móvil: cada acceso de la barra inferior mide al menos 44 px de alto', barraAlto.length > 0 && barraAlto.every((x) => x >= 44), barraAlto.map(Math.round).join());
     }
   }
@@ -1132,6 +1161,20 @@ async function flujoMovil() {
   let cssMovil = await fetch('../css/movil.css', { cache: 'no-store' }).then((r) => (r.ok ? r.text() : '')).catch(() => '');
   if (!/safe-area-inset-bottom/.test(cssMovil)) cssMovil = await (await fetch('../css/mosaico.css', { cache: 'no-store' })).text();   // copia empaquetada
   afirmar('móvil: la barra inferior respeta el área segura (usa env(safe-area-inset-bottom))', /\.riel \{[^}]*safe-area-inset-bottom/.test(cssMovil));
+
+  // ---- ligera ---- Móvil: una sola navegación de máximo cuatro ítems, sin desborde, en los dos estados (sin rol y con rol).
+  for (const [rolM, esperado] of [[null, 'Inicio|Elegir rol|Niky|Más'], ['docente', 'Kinesis|Mi espacio|Niky|Más'], ['estudiante', 'Wisfox|Mi espacio|Niky|Más']]) {
+    localStorage.clear(); await cargar('#/mapa', 390, 844); await espera(300);
+    if (rolM) { ventana().MT.store.cambiar((s) => { s.rol = rolM; }); await espera(150); }
+    const items = [...D().querySelectorAll('.riel .riel-item')].filter(visible);
+    const fuera = items.filter((x) => { const r = x.getBoundingClientRect(); return r.right > ventana().innerWidth + 1 || r.left < -1; });
+    afirmar(`móvil 390 (${rolM || 'sin rol'}): la barra inferior tiene ${esperado.split('|').length} ítems, todos dentro de la pantalla y de al menos 44 px`, items.map((x) => x.textContent.trim()).join('|') === esperado && items.length <= 4 && fuera.length === 0 && items.every((x) => x.getBoundingClientRect().height >= 44), items.map((x) => x.textContent.trim()).join('|'));
+    afirmar(`móvil 390 (${rolM || 'sin rol'}): sin desborde horizontal`, sinDesborde());
+  }
+  await abrirMas(D());
+  { const m = D().getElementById('menu-mas').getBoundingClientRect(); afirmar('móvil 390: el menú «Más» cabe en la pantalla, por encima de la barra inferior', m.left >= 0 && m.right <= ventana().innerWidth + 1 && m.bottom <= D().querySelector('.riel').getBoundingClientRect().top + 1, JSON.stringify([m.left, m.right, m.bottom])); }
+  D().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  // ---- fin ligera ----
 
   /* La tabla de Participar se desplaza dentro de su propio contenedor (no ensancha la página) */
   await cargar('#/planes/formas', 320, 568); await espera(400);

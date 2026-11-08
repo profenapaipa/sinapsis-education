@@ -39,7 +39,7 @@
     MT.dlg.abrir({ titulo: f.titulo, cuerpo: h('div', null,
       h('p', null, f.que),
       h('p', null, h('span', { class: 'sello sello--e' }, 'En desarrollo'), ' ', h('span', { class: 'suave' }, f.desde + '.')),
-      h('p', { class: 'suave' }, 'Lo que ves abierto en la demostración ya funciona. Esto llega con el servidor: deja tu correo y te avisamos cuando esté listo.')),
+      h('p', { class: 'suave' }, 'Lo que ves abierto en la demostración ya funciona. Esto llega con el servidor.' + (MT.config && MT.config.mostrarRegistro ? ' Deja tu correo y te avisamos cuando esté listo.' : ' Si quieres saber cuándo esté listo, escríbenos desde la página de piloto.'))),
     acciones: [{ texto: 'Quiero que me avisen', onclick: (c) => { c(); location.hash = '#/registro/lista'; } }, { texto: 'Ver las formas de participar', suave: true, onclick: (c) => { c(); location.hash = '#/planes'; } }] });
   }
 

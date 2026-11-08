@@ -490,3 +490,5 @@ input[type="file"] { width: 100%; font: 400 1rem var(--fuente); color: var(--tin
   .nav-pronto[open] { display: flex; align-items: center; gap: .3rem; }
 }
 .paso-siguiente { background: var(--papel); border: 1px solid var(--linea); }
+.plegable--tarjeta { margin-top: .6rem; }
+.plegable--tarjeta > summary { min-height: 44px; font-size: 1rem; }

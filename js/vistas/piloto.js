@@ -35,7 +35,7 @@
       const v = {}; for (const x of campos) { v[x.def.id] = x.leer(); if (!v[x.def.id]) { error.hidden = false; error.textContent = 'Falta: ' + x.def.etiqueta + '.'; return; } }
       error.hidden = true;
       const cuerpo = `Colegio u organización: ${v.org}\nRol: ${v.quien}\n\n${v.texto}`;
-      location.href = `mailto:${destino}?subject=${encodeURIComponent('Piloto de Mosaico Telar')}&body=${encodeURIComponent(cuerpo)}`;
+      location.href = `mailto:${destino}?subject=${encodeURIComponent('Piloto de ' + MT.nombre)}&body=${encodeURIComponent(cuerpo)}`;
     });
     c.append(f);
   }

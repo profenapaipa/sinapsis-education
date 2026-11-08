@@ -19,25 +19,28 @@
     c.append(MT.plan.avisoConstruccion());
     c.append(h('section', { class: 'siguiente-banner' }, h('div', null, h('p', { class: 'etiqueta' }, 'Nuestro sentido'),
       h('h2', null, 'Poner la tecnología al servicio de la diversidad de formas de aprender, acompañando la labor docente.'),
-      h('p', null, 'Mosaico Telar reúne herramientas para que docentes, orientación, familias y estudiantes se encuentren y atiendan, juntos y con claridad, las distintas maneras de percibir y de vivir el mundo que hay en cada aula.'))));
+      h('p', null, MT.nombre + ' reúne herramientas para que docentes, orientación, familias y estudiantes se encuentren y atiendan, juntos y con claridad, las distintas maneras de percibir y de vivir el mundo que hay en cada aula.'))));
     c.append(h('div', { class: 'rejilla rejilla--2', style: 'margin-top:1rem' },
       tarjeta('Lo que vemos en las aulas', h('p', null, 'Cada aula reúne estudiantes que aprenden, perciben y viven el mundo de maneras distintas, y la docencia las acompaña con dedicación. Queremos aportarle herramientas que hagan más sencillo conocer, planear y ajustar.'),
         h('p', null, 'Cada estudiante tiene una experiencia y una realidad de vida diferentes. Por eso el aprendizaje se personaliza, en un entorno inclusivo donde las distintas formas de desarrollarse y de aprender encuentran su lugar.'),
-        h('p', { class: 'suave' }, 'La normatividad de educación inclusiva sigue evolucionando hacia una mirada más humana y empática. Mosaico Telar la toma como punto de partida, no como meta.')),
+        h('p', { class: 'suave' }, 'La normatividad de educación inclusiva sigue evolucionando hacia una mirada más humana y empática. ' + MT.nombre + ' la toma como punto de partida, no como meta.')),
       tarjeta('Para quién es', h('p', null, h('strong', null, 'Quienes la usan: '), 'docentes, orientación, familias, coordinación y estudiantes.'),
         h('p', null, h('strong', null, 'Con quienes la construimos: '), 'rectorías, coordinaciones académicas y entidades del sector educativo.'),
         h('p', { class: 'suave' }, 'El modelo de sostenibilidad está por definir con ellos.'))));
-    c.append(h('div', { class: 'rejilla rejilla--3', style: 'margin-top:1rem' },
+    // Plegado (sinergia de contenido, sección 4): valor, sostenibilidad y riesgos son tema de conversación y el pitch ya los dice; siguen aquí, a un clic.
+    const mas = h('details', { class: 'plegable' }, h('summary', null, 'Saber más: valor, sostenibilidad y riesgos'));
+    mas.append(h('div', { class: 'rejilla rejilla--3' },
       tarjeta('Valor para el colegio', lista(['Un registro claro del proceso, que acompaña al equipo', 'Menos trabajo repetido entre docente y orientación, y más tiempo para el encuentro', 'Un lenguaje común para hablar de los apoyos de cada estudiante'])),
       tarjeta('Valor para la familia', lista(['Ve el proceso mientras ocurre', 'Entiende qué cambió y por qué', 'Sabe cómo acompañar en casa'])),
       tarjeta('Valor para un aliado', lista(['Una necesidad real de las aulas, con respaldo en la normatividad', 'Un producto construido por estudiantes y docentes, con sentido pedagógico', 'Aprendizajes de un piloto antes de crecer']))));
-    c.append(h('div', { class: 'rejilla rejilla--2', style: 'margin-top:1rem' },
+    mas.append(h('div', { class: 'rejilla rejilla--2', style: 'margin-top:1rem' },
       tarjeta('Cómo podría sostenerse (por definir)', lista(['El sentido pedagógico va primero; la sostenibilidad es lo que permite seguir', 'Un piloto acompañado en un curso, sin costo', 'Luego, un modelo que se definirá con los primeros colegios', 'Aliados que apoyen el servidor, la revisión de seguridad y el contenido'])),
       tarjeta('Cómo sabremos que funciona', lista(['Cuánto tiempo gana el equipo para el encuentro con los estudiantes', 'Porcentaje de ajustes propuestos que orientación aprueba', 'Uso por rol (docentes, familias, estudiantes)', 'Percepción de docentes, familias y estudiantes, con una encuesta corta']))));
-    c.append(h('div', { class: 'rejilla rejilla--2', style: 'margin-top:1rem' },
+    mas.append(h('div', { class: 'rejilla rejilla--2', style: 'margin-top:1rem' },
       tarjeta('Riesgos y cómo se manejan', lista(['Datos de menores: ningún dato real hasta que todo esté en regla', 'La IA se equivoca: solo propone, decide quien enseña, y nunca ve información clínica', 'Que se sienta como una carga más: se conversa con el equipo y se ajusta; la herramienta debe acompañar, no sumar tareas', 'Que no se adopte: guía de inicio rápido por rol y un piloto con acompañamiento'])),
       tarjeta('Qué necesitamos', lista(['Un colegio piloto y un curso', 'Revisión legal de protección de datos (Ley 1581)', 'Las autorizaciones de familias, colegio y demás entidades', 'Definir el modelo de empresa', 'Un servidor y su mantenimiento']),
         h('div', { class: 'acciones' }, h('a', { class: 'btn', href: '#/piloto' }, 'Conversar sobre un piloto')))));
+    c.append(mas);
   }
 
   const CAPAS = [

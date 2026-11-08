@@ -50,7 +50,7 @@
     { ruta: 'hoja', hash: '#/hoja', etiqueta: 'Hoja de ruta', icono: 'estado' },
     { ruta: 'glosario', hash: '#/glosario', etiqueta: 'Glosario', icono: 'libro' },
     { ruta: 'piloto', hash: '#/piloto', etiqueta: 'Solicitar un piloto', icono: 'coordinacion' },
-    { ruta: 'identidad', hash: '#/identidad', etiqueta: 'Identidad de marca', icono: 'identidad' },
+    { ruta: 'identidad', hash: '#/identidad', etiqueta: 'Identidad', icono: 'identidad' },
     { ruta: 'creditos', hash: '#/creditos', etiqueta: 'Créditos', icono: 'familia' },
   ];
   // Las rutas que viven bajo «Más»: cuando se está en una, el botón «Más» se marca como actual.

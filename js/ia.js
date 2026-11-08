@@ -103,7 +103,7 @@
     const chips = h('div', { class: 'chat__sugerencias' });
     const campo = h('textarea', { rows: '2', maxlength: '300', 'aria-label': 'Escribe tu mensaje para Niky', placeholder: 'Escribe aquí lo que necesitas…' });
     const boton = h('button', { class: 'btn', type: 'submit' }, 'Enviar');
-    const form = h('form', { class: 'chat__form', 'aria-label': 'Mensaje para ValerIA', onsubmit: (e) => { e.preventDefault(); mandar(campo.value); } }, campo, boton);
+    const form = h('form', { class: 'chat__form', 'aria-label': 'Mensaje para Niky', onsubmit: (e) => { e.preventDefault(); mandar(campo.value); } }, campo, boton);
     campo.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); mandar(campo.value); } });
 
     async function mandar(texto, tarea) {
@@ -123,7 +123,7 @@
     function pintarMensajes(s) {
       const nodos = [];
       if (!s.ia.length) {
-        nodos.push(h('div', { class: 'msg msg--ia' }, ricoTexto('Hola, soy **Niky**, la guía de Mosaico Telar. Puedo ayudar al docente a diseñar una actividad y al estudiante a resolver sus dudas. Todo lo que respondo es una propuesta: decide quien enseña.')));
+        nodos.push(h('div', { class: 'msg msg--ia' }, ricoTexto('Hola, soy **Niky**, la guía de ' + MT.nombre + '. Puedo ayudar al docente a diseñar una actividad y al estudiante a resolver sus dudas. Todo lo que respondo es una propuesta: decide quien enseña.')));
       }
       for (const m of s.ia) {
         nodos.push(h('div', { class: 'msg msg--' + m.rol }, ricoTexto(m.texto),

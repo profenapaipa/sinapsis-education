@@ -8,12 +8,10 @@
 @media (min-width: 1600px) { html[data-presentacion="activa"] { font-size: 150%; } }
 /* En el celular no se agranda nada: el modo es para proyectar, y una letra mayor allí desbordaría la pantalla. */
 
-/* Menos navegación: se quedan el riel de arriba, la barra de portales y el rol. Lo demás (planes, hoja de ruta, marca, pie)
-   no hace falta en la mesa y le quita espacio a la demostración. */
-html[data-presentacion="activa"] .riel-abajo,
+/* Menos navegación: se quedan el riel (con «Más», donde están el modo presentación y la apariencia) y el rol. Lo demás (el enlace de Participa,
+   el botón de Niky del riel, la guía y el pie) no hace falta en la mesa y le quita espacio a la demostración. */
 html[data-presentacion="activa"] .pie,
-html[data-presentacion="activa"] .barra-portales__ayuda,
-html[data-presentacion="activa"] .plan-chip,
+html[data-presentacion="activa"] #plan-chip,
 html[data-presentacion="activa"] .franja-guia,
 html[data-presentacion="activa"] #btn-ia { display: none; }
 
@@ -28,9 +26,7 @@ html[data-presentacion="activa"] #btn-ia { display: none; }
   html[data-presentacion="activa"] .aviso-conexion { font-size: .78rem; padding: .2rem .7rem; }
   html[data-presentacion="activa"] .aviso-conexion .btn { min-height: 32px; }
   html[data-presentacion="activa"] .riel a { font-size: .74rem; }
-  html[data-presentacion="activa"] .pestana__ir { padding-top: .6rem; padding-bottom: .6rem; }
-  html[data-presentacion="activa"] .pestana__texto small { font-size: .78rem; }
-  html[data-presentacion="activa"] .menu-portal,
+  html[data-presentacion="activa"] .menu-mas,
   html[data-presentacion="activa"] .menu-rol { font-size: 1rem; }
 }
 /* Con más letra, cinco tarjetas de rol en una fila no caben: pasan a tres, salvo en pantallas muy anchas (donde la base de 24 px equivale a 1280 px). */

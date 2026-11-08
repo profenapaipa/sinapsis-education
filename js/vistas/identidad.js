@@ -39,7 +39,7 @@
   MT.router.registrar({
     id: 'identidad', titulo: 'Identidad', espacio: '',
     render(main) {
-      const c = pagina(main, { etiqueta: 'Identidad', titulo: 'Mosaico Telar: identidad',
+      const c = pagina(main, { etiqueta: 'Identidad', titulo: MT.nombre + ': identidad',
         descripcion: 'Cómo se ve y cómo habla la plataforma. Todo lo que ves aquí está hecho con los mismos componentes que usa el resto del sitio.' });
 
       c.append(h('nav', { class: 'toc', 'aria-label': 'Contenido de la identidad' }, h('ul', null,
@@ -62,7 +62,7 @@
           const grande = MT.tejido.logo({ animar: false, clase: 'logo-heroe__svg' });
           return h('div', { class: 'logo-heroe' },
             h('div', { class: 'logo-heroe__logo' }, grande.el),
-            h('div', { class: 'logo-heroe__texto' }, h('p', { class: 'etiqueta' }, 'Mosaico Telar'), h('p', { class: 'manual-grande' }, 'Tejemos caminos para aprender.'),
+            h('div', { class: 'logo-heroe__texto' }, h('p', { class: 'etiqueta' }, MT.nombre), h('p', { class: 'manual-grande' }, 'Tejemos caminos para aprender.'),
               h('p', { class: 'suave' }, 'Las fichas llegan sueltas, se unen y los hilos las tejen: así se arma el mosaico.'),
               h('button', { class: 'btn btn--chico', type: 'button', onclick: () => grande.repetir() }, 'Ver otra vez')));
         })(),
@@ -76,7 +76,7 @@
           lockup('logo-mono'), h('span', { class: 'logo-color__rotulo' }, f.nombre)))),
         h('h3', { class: 'manual-subtitulo' }, 'Dónde se ve'),
         h('div', { class: 'logo-usos' },
-          h('div', { class: 'logo-uso' }, h('div', { class: 'uso-pestana' }, h('img', { src: 'assets/favicon.svg', alt: '', width: 16, height: 16 }), h('span', null, 'Mosaico Telar')), h('p', { class: 'suave' }, 'Pestaña del navegador: solo el logo circular, sin contorno.')),
+          h('div', { class: 'logo-uso' }, h('div', { class: 'uso-pestana' }, h('img', { src: 'assets/favicon.svg', alt: '', width: 16, height: 16 }), h('span', null, MT.nombre)), h('p', { class: 'suave' }, 'Pestaña del navegador: solo el logo circular, sin contorno.')),
           h('div', { class: 'logo-uso' }, h('div', { class: 'uso-riel' }, h('span', { class: 'uso-riel__boton' }, h('img', { src: 'assets/favicon.svg', alt: '' }))), h('p', { class: 'suave' }, 'Botón de inicio: el logo dentro de un círculo con contorno blanco, para que resalte.')),
           h('div', { class: 'logo-uso' }, h('div', { class: 'uso-tamanos' }, [16, 32, 64].map((n) => h('img', { src: 'assets/favicon.svg', alt: '', width: n, height: n }))), h('p', { class: 'suave' }, 'Tamaños de uso: 16, 32 y 64 px.')),
           h('div', { class: 'logo-uso' }, h('div', { class: 'uso-sticker' }, h('img', { src: 'assets/favicon.svg', alt: '' })), h('p', { class: 'suave' }, 'Sticker o pegatina: el círculo se corta limpio.'))),

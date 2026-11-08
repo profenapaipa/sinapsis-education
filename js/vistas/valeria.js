@@ -21,7 +21,7 @@
     c.append(h('header', { class: 'saludo' }, h('div', null, h('h1', null, 'Conversa con Niky'),
       h('p', null, 'La guía de la plataforma: ayuda al docente a diseñar y al estudiante a resolver sus dudas. Propone; decide quien enseña.'))),
       caja,
-      h('p', { class: 'suave' }, 'También puedes abrirla desde cualquier espacio con el botón “Hablar con Niky”, y la conversación es la misma.'));
+      h('p', { class: 'suave' }, 'También puedes abrirla desde cualquier espacio con el botón “Niky” del menú, y la conversación es la misma.'));
     const ch = MT.ia.montarChat(caja, MT.ia.panel.sugerenciasPara());
     MT.router.alSalir(() => ch.destruir());
   }
@@ -38,7 +38,7 @@
       h('div', { class: 'rejilla rejilla--2' }, estado,
         h('div', { class: 'tarjeta' }, h('p', { class: 'etiqueta' }, 'Dónde se muestra'),
           h('p', null, 'En su propio espacio y en un panel que se abre desde cualquier pantalla, para el docente y para el estudiante. Comparten la misma conversación.'))),
-      h('div', { class: 'tarjeta', style: 'margin-top:1rem' }, h('p', { class: 'etiqueta' }, 'Cómo se protege'),
+      h('details', { class: 'plegable', style: 'margin-top:1rem' }, h('summary', null, 'Cómo se protege'),   // plegado: en el chat basta el sello de ejemplo
         h('ul', null,
           h('li', null, 'Niky propone y no decide: lo que responde se muestra como texto y nunca se ejecuta.'),
           h('li', null, 'No recibe información clínica ni el perfil de ningún estudiante.'),

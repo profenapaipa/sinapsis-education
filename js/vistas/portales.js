@@ -34,7 +34,8 @@
       h('span', { class: 'sello sello--' + p.estado[1] }, p.estado[0]),
       h('p', null, p.que),
       h('p', { class: 'etiqueta' }, 'Para quién'), h('p', null, p.paraQuien),
-      h('p', { class: 'etiqueta' }, 'Qué haces ahí'), h('ul', null, p.haces.map((x) => h('li', null, x))),
+      // Plegado (sinergia de contenido): cada tarjeta dice primero qué es y para quién; lo que se hace ahí queda a un clic.
+      h('details', { class: 'plegable plegable--tarjeta' }, h('summary', null, 'Qué haces ahí'), h('ul', null, p.haces.map((x) => h('li', null, x)))),
       h('p', { class: 'portal__entrega' }, p.entrega),
       h('div', { class: 'acciones' }, botonPortal(id), id === 'valeria' ? null : h('a', { class: 'btn btn--suave', href: id === 'kinesis' ? '#/guia' : '#/guia/estudiante' }, 'Cómo usarlo'))); })));
 

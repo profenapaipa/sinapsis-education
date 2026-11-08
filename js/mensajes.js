@@ -7,6 +7,10 @@
 (function (MT) {
   'use strict';
 
+  // El nombre público de la plataforma, en un solo lugar. Pasó de «Mosaico Telar» a «Sinapsis Education» (nov 2026). Los identificadores
+  // internos (MT, el repositorio, las claves de almacenamiento) conservan el nombre de código para no romper datos guardados ni enlaces.
+  MT.nombre = MT.nombre || 'Sinapsis Education';
+
   MT.mensajes = {
     presentacion: {
       activar: 'Modo presentación',
@@ -32,9 +36,9 @@
     },
 
     sinConexion: {
-      aviso: 'Sin conexión. Mosaico Telar sigue funcionando: los datos de ejemplo están en este dispositivo. Los portales de Kinesis y Wisfox necesitan internet y se abren de nuevo cuando regrese.',
+      aviso: 'Sin conexión. ' + MT.nombre + ' sigue funcionando: los datos de ejemplo están en este dispositivo. Los portales de Kinesis y Wisfox necesitan internet y se abren de nuevo cuando regrese.',
       volvio: 'Volvió la conexión.',
-      versionNueva: 'Hay una versión nueva de Mosaico Telar.',
+      versionNueva: 'Hay una versión nueva de ' + MT.nombre + '.',
       recargar: 'Recargar',
       cerrar: 'Cerrar el aviso',
     },
@@ -90,7 +94,7 @@
     guion: {
       aprobado: false,
       pasos: [
-        { rol: '', hash: '#/', titulo: 'Empezamos por el aula', texto: 'Presenta el proyecto en una frase: Mosaico Telar acompaña la variedad de formas de aprender en el aula y reúne en un mismo tejido a quienes la viven.' },
+        { rol: '', hash: '#/', titulo: 'Empezamos por el aula', texto: 'Presenta el proyecto en una frase: ' + MT.nombre + ' acompaña la variedad de formas de aprender en el aula y reúne en un mismo tejido a quienes la viven.' },
         { rol: 'coordinacion', hash: '#/mi/cursos', titulo: 'Coordinación deja el colegio listo', texto: 'Se crea el curso y se registra a cada estudiante solo con un código, sin nombres.' },
         { rol: 'orientacion', hash: '#/mi/estudiantes', titulo: 'Orientación registra los apoyos', texto: 'En el perfil de cada estudiante se marca lo que le ayuda a aprender. Aquí no hay diagnósticos.' },
         { rol: 'docente', hash: '#/mi/actividades', titulo: 'La docencia planea la clase', texto: 'Se planea la actividad con los tres principios del DUA. Niky propone ideas; quien enseña decide.' },

@@ -11,7 +11,7 @@
   MT.router.registrar({
     id: 'creditos', titulo: 'Créditos', espacio: '',
     render(main) {
-      const c = pagina(main, { etiqueta: 'Créditos', titulo: 'Quiénes tejen Mosaico Telar', descripcion: 'Un trabajo colectivo, hecho con estudiantes y para las aulas.' });
+      const c = pagina(main, { etiqueta: 'Créditos', titulo: 'Quiénes tejen ' + MT.nombre, descripcion: 'Un trabajo colectivo, hecho con estudiantes y para las aulas.' });
       c.append(h('div', { class: 'tarjeta tarjeta--borde' }, h('h2', null, 'El semillero'),
         h('p', { class: 'creditos__lema' }, 'Un proyecto del Semillero Maker de Tecnología con Sentido, liderado por Néstor Andrés Paipa y sus estudiantes.')));
       c.append(h('div', { class: 'rejilla rejilla--2', style: 'margin-top:1rem' },
