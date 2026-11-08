@@ -67,6 +67,10 @@
   ];
 
   /* ---------------- Formas de participar y de acompañamiento ---------------- */
+  // El registro de correo está detrás de MT.config.mostrarRegistro (ver js/config.js): sin un lugar a dónde enviarlo, ofrecerlo sería prometer algo falso.
+  const registroActivo = () => !!(MT.config && MT.config.mostrarRegistro);
+  const rutaConversar = () => (registroActivo() ? '#/registro/conversar' : '#/piloto');
+
   function vistaPlanes(main, sub) {
     const c = pagina(main, { etiqueta: 'Participar', titulo: sub === 'acompanamiento' ? 'Formas de acompañamiento' : 'Formas de acercarte y de participar',
       descripcion: sub === 'acompanamiento' ? 'Implementar bien es tan importante como la herramienta. Esto es lo que podemos ofrecer a una comunidad para recorrer el camino juntos.'
@@ -75,24 +79,27 @@
     c.append(h('nav', { class: 'pestanas-pagina', 'aria-label': 'Participar' }, [['formas', 'Formas de participar'], ['acompanamiento', 'Acompañamiento']].map(([id, t]) => h('a', { href: '#/planes/' + id, 'aria-current': id === sub ? 'page' : null }, t))));
     if (sub === 'acompanamiento') return acompanamiento(c);
 
-    c.append(h('div', { class: 'rejilla rejilla--4 planes' }, ETAPAS.map((p) => h('article', { class: 'tarjeta plan-tarjeta' + (p.proximo ? ' plan-tarjeta--pro' : ''), 'data-plan': p.id },
+    const cols = ETAPAS.map((p, i) => i).filter((i) => ETAPAS[i].id !== 'lista' || registroActivo());   // columnas visibles (sin «lista» si el registro está apagado)
+    const etapas = cols.map((i) => ETAPAS[i]);
+    c.append(h('div', { class: 'rejilla rejilla--4 planes' }, etapas.map((p) => h('article', { class: 'tarjeta plan-tarjeta' + (p.proximo ? ' plan-tarjeta--pro' : ''), 'data-plan': p.id },
       h('p', { class: 'etiqueta' }, p.nombre), h('p', { class: 'plan-precio' }, p.etiqueta), h('p', { class: 'suave plan-sub' }, p.sub), h('p', null, p.para),
       h('ul', { class: 'plan-lista' }, p.incluye.map((x) => h('li', null, x))),
-      h('a', { class: 'btn' + (p.accion.principal ? '' : ' btn--suave'), href: p.accion.href }, p.accion.texto)))));
+      h('a', { class: 'btn' + (p.accion.principal ? '' : ' btn--suave'), href: p.id === 'compartido' ? rutaConversar() : p.accion.href }, p.accion.texto)))));
 
-    c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-comp' }, h('h2', { id: 'h-comp' }, 'Qué incluye cada forma'),
+    // La tabla comparativa y las preguntas frecuentes van plegadas: la pantalla propone primero las cuatro formas de participar.
+    c.append(h('details', { class: 'plegable', id: 'h-comp' }, h('summary', null, 'Qué incluye cada forma'),
       h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla tabla-planes' },
-        h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Función'), ETAPAS.map((p) => h('th', { scope: 'col' }, p.nombre)))),
-        h('tbody', null, TABLA.map(([f, ...v]) => h('tr', null, h('th', { scope: 'row' }, f), v.map((k) => h('td', { class: 'celda-' + CELDA[k][1] }, h('span', { 'aria-hidden': 'true' }, icono(k)), h('span', { class: k === '-' ? 'solo-lectores' : 'celda-texto' }, ' ' + CELDA[k][0]))))))))));
+        h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Función'), etapas.map((p) => h('th', { scope: 'col' }, p.nombre)))),
+        h('tbody', null, TABLA.map(([f, ...v0]) => h('tr', null, h('th', { scope: 'row' }, f), cols.map((i) => v0[i]).map((k) => h('td', { class: 'celda-' + CELDA[k][1] }, h('span', { 'aria-hidden': 'true' }, icono(k)), h('span', { class: k === '-' ? 'solo-lectores' : 'celda-texto' }, ' ' + CELDA[k][0]))))))))));
 
-    c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-faq' }, h('h2', { id: 'h-faq' }, 'Preguntas frecuentes'),
+    c.append(h('details', { class: 'plegable', id: 'h-faq' }, h('summary', null, 'Preguntas frecuentes'),
       h('div', { class: 'rejilla rejilla--2' }, [
         ['¿Qué puedo hacer hoy?', 'Recorrer la demostración completa con datos de ejemplo: los cinco roles, actividades, ajustes, archivos y la ruta de Inglés. Todo lo que ya funciona está abierto.'],
-        ['¿Para qué dejar mi correo?', 'Para poder avisarte cuando abramos el espacio compartido y conversar contigo sobre un primer piloto. Solo pedimos tu correo, y puedes retirarlo cuando quieras.'],
+        ...(registroActivo() ? [['¿Para qué dejar mi correo?', 'Para poder avisarte cuando abramos el espacio compartido y conversar contigo sobre un primer piloto. Solo pedimos tu correo, y puedes retirarlo cuando quieras.']] : []),
         ['¿Cómo se sostiene el proyecto?', 'Lo estamos pensando con calma, junto a las comunidades educativas que quieran caminar con nosotros. Preferimos construirlo con ellas antes que definirlo solos.'],
         ['¿Se pueden usar datos reales de estudiantes?', 'Todavía no. Primero llegan las autorizaciones de las familias, los acuerdos con el colegio y una revisión de seguridad. Ese camino también se recorre juntos.'],
       ].map(([q, a]) => h('div', { class: 'tarjeta' }, h('h3', null, q), h('p', null, a))))));
-    c.append(h('div', { class: 'acciones' }, h('a', { class: 'btn', href: '#/registro/lista' }, 'Dejar mi correo'), h('a', { class: 'btn btn--suave', href: '#/registro/conversar' }, 'Conversar sobre mi colegio'), h('a', { class: 'btn btn--suave', href: '#/planes/acompanamiento' }, 'Ver formas de acompañamiento')));
+    c.append(h('div', { class: 'acciones' }, registroActivo() ? h('a', { class: 'btn', href: '#/registro/lista' }, 'Dejar mi correo') : null, h('a', { class: registroActivo() ? 'btn btn--suave' : 'btn', href: rutaConversar() }, 'Conversar sobre mi colegio'), h('a', { class: 'btn btn--suave', href: '#/planes/acompanamiento' }, 'Ver formas de acompañamiento')));
   }
 
   function acompanamiento(c) {
@@ -115,7 +122,7 @@
     const inst = MT.dlg.campo({ id: 'institucion', etiqueta: 'Colegio u organización (opcional)', autocompletar: 'organization', max: 100 });
     const msg = tipo === 'conversar' ? MT.dlg.campo({ id: 'mensaje', etiqueta: 'Qué te gustaría contarnos (opcional)', tipo: 'area', filas: 3, max: 500, ayuda: 'Por ejemplo: cuántos cursos, qué rol usaría la plataforma y qué te inquieta.' }) : null;
     const consent = h('label', { class: 'casilla casilla--consent' }, h('input', { type: 'checkbox', id: 'consentimiento' }),
-      h('span', null, 'Autorizo el tratamiento de mi correo para que me contacten sobre Mosaico Telar. Puedo pedir que lo borren cuando quiera.'));
+      h('span', null, 'Autorizo el tratamiento de mi correo para que me contacten sobre ' + MT.nombre + '. Puedo pedir que lo borren cuando quiera.'));
     const error = h('p', { class: 'aviso', role: 'alert', hidden: true });
     const boton = h('button', { class: 'btn', type: 'submit' }, tipo === 'conversar' ? 'Enviar' : 'Dejar mi correo');
     const f = h('form', { class: 'tarjeta formulario formulario--registro', novalidate: true },
@@ -123,7 +130,7 @@
         h('a', { class: 'chip-plan' + (tipo === 'lista' ? ' chip-plan--on' : ''), href: '#/registro/lista', 'aria-current': tipo === 'lista' ? 'page' : null }, 'Dejar mi correo'),
         h('a', { class: 'chip-plan' + (tipo === 'conversar' ? ' chip-plan--on' : ''), href: '#/registro/conversar', 'aria-current': tipo === 'conversar' ? 'page' : null }, 'Conversar sobre mi colegio')),
       error, correo.el, rol.el, inst.el, msg ? msg.el : null, consent, boton,
-      h('p', { class: 'suave' }, 'Tu correo se usa solo para escribirte sobre Mosaico Telar. No lo compartimos ni lo usamos para otra cosa.'));
+      h('p', { class: 'suave' }, 'Tu correo se usa solo para escribirte sobre ' + MT.nombre + '. No lo compartimos ni lo usamos para otra cosa.'));
     f.addEventListener('submit', async (e) => {
       e.preventDefault(); error.hidden = true; boton.disabled = true; correo.marcar(false);
       try {
@@ -160,6 +167,7 @@
   });
   MT.router.registrar({
     id: 'registro', titulo: 'Participar', espacio: '', subs: [{ id: 'lista' }, { id: 'conversar' }],
-    render(main, { sub }) { vistaRegistro(main, sub); },
+    // Apagado el registro, quien llegue por un enlace viejo (#/registro/lista) va a la página de piloto, que sí tiene a dónde escribir.
+    render(main, { sub }) { if (!registroActivo()) { location.replace('#/piloto'); return; } vistaRegistro(main, sub); },
   });
 })(window.MT = window.MT || {});

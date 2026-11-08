@@ -176,7 +176,7 @@
   // El símbolo de Mosaico Telar es el logo circular de js/tejido.js (el elegido por el dueño), quieto y a color; los otros tres son teselas.
   const marca = (nombre, clase) => (nombre === 'mosaico' && MT.tejido ? MT.tejido.logoColor(clase || '') : svg(MARCAS[nombre](clase || '')));
   // Símbolo + nombre. Es la forma horizontal del logo.
-  const lockup = (clase) => h('span', { class: 'logo-lockup ' + (clase || '') }, marca('mosaico', 'logo-simbolo'), h('span', { class: 'logo-nombre' }, 'Mosaico Telar'));
+  const lockup = (clase) => h('span', { class: 'logo-lockup ' + (clase || '') }, marca('mosaico', 'logo-simbolo'), h('span', { class: 'logo-nombre' }, MT.nombre));
   const icono = (nombre) => svg(ICONOS[nombre]);
 
   MT.ui = { h, ricoTexto, htmlSeguro, esIngles, conIdiomas, svg, telar, marca, lockup, icono, HILOS };

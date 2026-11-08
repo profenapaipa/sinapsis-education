@@ -413,3 +413,82 @@ input[type="file"] { width: 100%; font: 400 1rem var(--fuente); color: var(--tin
 .rol-opcion .suave { font-size: .9rem; line-height: 1.35; }
 .rol-opcion:hover { border-color: var(--c); }
 .rol-opcion:focus-visible { outline: 3px solid var(--c); outline-offset: 2px; }
+
+/* =====================================================================================================================================
+   Versión ligera (8 nov 2026). La plataforma se sentía sobrecargada: demasiados bordes, tarjetas dentro de tarjetas, etiquetas y avisos
+   a la vez. Este bloque va al final a propósito: no cambia ningún contenido ni estructura de fondo, solo el aire y la jerarquía.
+   Escala tipográfica única para las pantallas: título 1,9 a 2,6 rem, sección 1,4 a 1,8 rem, subtítulo 1,1 rem, texto 1 rem, apoyo 0,88 rem.
+   Reglas: una sola caja por idea (sin tarjeta dentro de tarjeta), líneas finas en vez de recuadros, y lo de referencia plegado en <details>.
+   ===================================================================================================================================== */
+
+/* Plegables accesibles: <details><summary> nativos (teclado, lector de pantalla y sin JS). La flecha es CSS, no texto, así no se lee dos veces. */
+.plegable { border-top: 1px solid var(--linea); margin-top: 1.6rem; }
+.plegable:last-child { border-bottom: 1px solid var(--linea); }
+.plegable + .plegable { margin-top: 0; }
+.plegable > summary { display: flex; align-items: center; gap: .6rem; min-height: 52px; cursor: pointer; list-style: none; font: 800 1.1rem var(--fuente); color: var(--tinta); }
+.plegable > summary::-webkit-details-marker { display: none; }
+.plegable > summary::after { content: ""; flex: none; margin-left: auto; width: .55rem; height: .55rem; border-right: 2.5px solid currentColor; border-bottom: 2.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .15s; }
+.plegable[open] > summary { margin-bottom: .6rem; }
+.plegable[open] > summary::after { transform: translateY(2px) rotate(-135deg); }
+.plegable > summary:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.plegable > .tabla-scroll, .plegable > .rejilla, .plegable > ol, .plegable > h2:first-child { margin-top: 0; }
+.plegable > :last-child { margin-bottom: 1.2rem; }
+
+/* Una caja por idea: las tarjetas pierden la sombra y las anidadas pierden el recuadro. */
+.tarjeta { box-shadow: none; }
+.tarjeta .tarjeta, .tarjeta .tarjeta--plana { border: 0; background: var(--lino); }
+.pagina-cab { padding: 2rem 0 .4rem; }
+.pagina-cab h1, .tarjeta-cab h1 { font-size: clamp(1.9rem, 4.4vw, 2.6rem); }
+.seccion { padding: 2.2rem 0; }
+.seccion > h2, .bloque > h2 { font-size: clamp(1.4rem, 2.6vw, 1.8rem); }
+.pestanas-pagina { margin: .8rem 0 1.6rem; }
+.pestanas-pagina a { border-width: 1px; }
+.aviso--construccion { border: 0; border-left: 4px solid var(--ambar-texto); }
+
+/* Encabezado de rol en Mi espacio: sin recuadro, solo el filete del hilo. El «siguiente paso» es la única caja y la única acción principal. */
+.hero { background: none; border: 0; border-left: 4px solid var(--e-vivo); border-radius: 0; padding: .2rem 0 .2rem 1.5rem; gap: 2rem; }
+.hero__cab { display: flex; align-items: center; gap: .8rem; margin-bottom: .8rem; }
+.hero .rol { margin-bottom: 0; }
+.companero-rol:empty { display: none; }   /* sitio de la mascota del rol: sin nada dentro, no ocupa lugar */
+.hero h1 { font-size: clamp(1.8rem, 3.6vw, 2.4rem); }
+.hero p { max-width: 54ch; }
+.paso-siguiente { padding: 1.2rem 1.3rem; }
+.panel-cifras { background: none; border: 0; border-top: 1px solid var(--linea); border-radius: 0; padding: 1.4rem 0 .2rem; margin-top: 1.8rem; }
+.panel-cifras strong { font-size: 2rem; }
+.panel-cifras small { font-size: .88rem; }
+.contenido { padding: 1.6rem 2rem 3.5rem; }
+.espacio-cuerpo > .tarjeta, .espacio-cuerpo > article.tarjeta { margin-top: 1.2rem; }
+/* La guía de inicio rápido, dentro de las secciones: una línea tranquila, no un recuadro con borde grueso. */
+.franja-guia { background: none; border: 0; border-left: 3px solid var(--linea); border-radius: 0; padding: .1rem .9rem; margin-bottom: 1.4rem; font-size: .88rem; color: var(--tinta-suave); }
+.franja-guia strong { color: var(--tinta); }
+
+/* Barra lateral de Mi espacio: solo las secciones. El nombre del espacio ya está en el título, y quién eres, en la franja de arriba. */
+.lateral-panel { gap: .15rem; }
+.usuario { display: none; }
+.lockup { padding-bottom: .6rem; }
+.nav-pronto { margin-top: .8rem; border-top: 1px solid var(--linea); padding-top: .3rem; }
+.nav-pronto > summary { display: flex; align-items: center; min-height: 44px; padding: .3rem .9rem; cursor: pointer; font-weight: 700; color: var(--tinta-suave); list-style: none; }
+.nav-pronto > summary::-webkit-details-marker { display: none; }
+.nav-pronto[open] > summary { color: var(--tinta); }
+.nav-pronto:focus-within { outline: none; }
+
+/* Listas de pasos y de recorrido: línea de color a la izquierda sobre fondo suave, sin recuadro completo. */
+.recorrido li, .flujo-nodo { border: 0; background: var(--lino); }
+.carril-celda--activa { border: 0; border-left: 5px solid var(--e-vivo); background: var(--lino); }
+.guia-paso { border: 0; border-left: 6px solid var(--e-vivo); background: var(--lino); }
+.siguiente-banner { background: var(--lino); border: 0; border-left: 6px solid var(--verde); }
+.portal-franja { border: 0; border-left: 6px solid var(--e-vivo); }
+.mapa-col { border-left: 0; border-right: 0; border-bottom: 0; }
+
+@media (max-width: 860px) {
+  .contenido { padding: 1rem 1rem 2.5rem; }
+  .hero { padding: .1rem 0 .1rem 1rem; }
+  /* En el celular la barra de secciones es una tira horizontal: el logo y el nombre del espacio solo le quitan ancho al primer ítem. */
+  .lockup { display: none; }
+  .lateral-panel { padding: .4rem .6rem; }
+  .nav-pronto { margin: 0 0 0 .4rem; border-top: 0; padding-top: 0; border-left: 1px solid var(--linea); padding-left: .4rem; flex: none; }
+  .nav-pronto[open] { display: flex; align-items: center; gap: .3rem; }
+}
+.paso-siguiente { background: var(--papel); border: 1px solid var(--linea); }
+.plegable--tarjeta { margin-top: .6rem; }
+.plegable--tarjeta > summary { min-height: 44px; font-size: 1rem; }

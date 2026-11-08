@@ -1,18 +1,26 @@
-/* barra.js: lo que está siempre a la vista arriba, en cualquier pantalla.
+/* barra.js: la única navegación de la plataforma y el selector de rol.
 
-   1. La barra de portales: pestañas horizontales (Mi espacio, Kinesis, Niky, Wisfox) en el orden del flujo de trabajo.
-      Cada portal tiene una lista desplegable con lo que le toca hacer a tu rol ahí y las secciones de Mi espacio donde
-      puedes trabajarlo ahora mismo. Los portales que ya abriste quedan marcados y siguen vivos al cambiar de pestaña.
-   2. El selector de rol, que cambia de rol sin perder el lugar, y la opción de empezar de nuevo.
+   Por qué una sola. Antes había dos navegaciones a la vez (la barra de portales bajo la franja y el riel lateral con seis ítems), y cada
+   portal traía además su lista desplegable. Quien llegaba por el QR del pendón veía diez destinos a la vez y no sabía por cuál empezar.
+   Ahora el riel (a la izquierda en pantalla grande, abajo en el celular) es lo único, y cambia con el rol:
+     - sin rol: «Inicio» y «Elegir rol» (lo mínimo para empezar);
+     - con rol: su portal (estudiante ve Wisfox; docente, orientación, familia y coordinación ven Kinesis) y «Mi espacio»;
+     - siempre: un único botón de Niky y un único «Más».
+   Máximo cuatro ítems, que es lo que cabe en la barra del celular con objetivos de 44 px o más.
+   «Más» reúne todo lo secundario (mapa, roles y datos, hoja de ruta, glosario, participar, piloto, identidad, créditos) y lo de uso
+   ocasional (modo presentación, apariencia). No se borró ninguna ruta: los enlaces profundos, las pruebas y los casos de la exposición
+   guiada siguen llegando a donde llegaban; solo dejaron de competir por la atención en cada pantalla.
    Es teclado-primero: Enter abre, Escape cierra y devuelve el foco, y solo hay un menú abierto a la vez. */
 (function (MT) {
   'use strict';
   const { h, marca, icono } = MT.ui;
-  const { PORTALES, ORDEN } = MT.guias;
+  const { PORTALES } = MT.guias;
   const st = MT.store;
   let abierto = null; // { boton, menu }
 
   const rolActual = () => st.obtener().rol;
+  // El portal de cada rol: el estudiante trabaja en Wisfox; el resto del equipo adulto, en Kinesis. Es la misma regla de roles.js (campo marca).
+  const portalDe = (rol) => { const r = rol ? MT.roles.por(rol) : null; return r ? r.marca : null; };
 
   function cerrar(devolverFoco) {
     if (!abierto) return;
@@ -20,66 +28,82 @@
     if (devolverFoco) abierto.boton.focus();
     abierto = null;
   }
-  /* La barra de pestañas se desplaza si no cabe, y eso recortaría un menú que se posiciona dentro de ella. Por eso el menú de un
-     portal va con posición fija, colocado justo debajo de su pestaña. En el celular lo coloca el CSS. */
-  function posicionar(boton, menu) {
-    const pestana = boton.closest('.pestana');
-    if (!pestana || window.matchMedia('(max-width: 860px)').matches) return;
-    const r = pestana.getBoundingClientRect();
-    menu.style.top = r.bottom + 2 + 'px';
-    menu.style.left = Math.max(8, Math.min(r.left, window.innerWidth - menu.offsetWidth - 8)) + 'px';
-  }
-  function alternar(boton, menu, alAbrir) {
+  function alternar(boton, menu, alAbrir, enfocarAlAbrir) {
     const abre = menu.hidden;
     cerrar(false);
     if (abre) {
       if (alAbrir) alAbrir();
       menu.hidden = false; boton.setAttribute('aria-expanded', 'true'); abierto = { boton, menu };
-      posicionar(boton, menu);
+      // El menú «Más» está al final del documento: sin mover el foco, el teclado tendría que recorrer toda la página para llegar a él.
+      if (enfocarAlAbrir) { const primero = menu.querySelector('a, button'); if (primero) primero.focus(); }
     }
   }
 
-  /* ---------------- Barra de portales ---------------- */
-  function contenidoMenu(id) {
-    const p = PORTALES[id]; const rol = rolActual(); const r = rol ? MT.roles.por(rol) : null;
-    const pasos = rol ? MT.guias.pasosEn(rol, id) : [];
-    const secciones = rol ? MT.guias.seccionesEn(rol, id) : [];
-    const alLado = MT.vivos.activo() && MT.vivos.activo() !== id;
-    const sal = (f) => () => { cerrar(false); f(); };
+  /* ---------------- La navegación: riel y barra inferior ---------------- */
+  // Las páginas secundarias, en el orden en que se necesitan. Cada una conserva su ruta de siempre.
+  const PAGINAS_MAS = [
+    { ruta: 'inicio', hash: '#/', etiqueta: 'Inicio', icono: 'inicio' },
+    { ruta: 'portales', hash: '#/portales', etiqueta: 'Los tres portales', icono: 'mapa' },
+    { ruta: 'mapa', hash: '#/mapa', etiqueta: 'Mapa', icono: 'mapa' },
+    { ruta: 'recorrido', hash: '#/recorrido', etiqueta: 'Roles y datos', icono: 'docente' },
+    { ruta: 'planes', hash: '#/planes', etiqueta: 'Participa', icono: 'logros', id: 'plan-chip' },
+    { ruta: 'hoja', hash: '#/hoja', etiqueta: 'Hoja de ruta', icono: 'estado' },
+    { ruta: 'glosario', hash: '#/glosario', etiqueta: 'Glosario', icono: 'libro' },
+    { ruta: 'piloto', hash: '#/piloto', etiqueta: 'Solicitar un piloto', icono: 'coordinacion' },
+    { ruta: 'identidad', hash: '#/identidad', etiqueta: 'Identidad', icono: 'identidad' },
+    { ruta: 'creditos', hash: '#/creditos', etiqueta: 'Créditos', icono: 'familia' },
+  ];
+  // Las rutas que viven bajo «Más»: cuando se está en una, el botón «Más» se marca como actual.
+  const RUTAS_MAS = ['portales', 'mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos', 'guia'];
+
+  let dinamico; let botonMas; let menuMas;
+
+  // Lo que depende del rol. Se vuelve a pintar solo cuando cambia el rol (no en cada cambio de datos, para no quitarle el foco a nadie).
+  function itemsDelRol() {
+    const rol = rolActual(); const portal = portalDe(rol);
+    if (!portal) {
+      return [
+        h('a', { href: '#/', class: 'riel-item', 'data-ruta': 'inicio' }, icono('inicio'), 'Inicio'),
+        h('a', { href: '#/mi', class: 'riel-item', 'data-ruta': 'mi' }, icono('docente'), 'Elegir rol'),
+      ];
+    }
     return [
-      h('p', { class: 'menu-portal__que' }, p.que),
-      r ? h('div', null, h('p', { class: 'etiqueta' }, 'Para tu rol: ' + r.nombre),
-        pasos.length
-          ? h('ol', { class: 'menu-portal__pasos' }, pasos.map((s) => h('li', null, h('span', null, s.t), s.aqui ? h('button', { class: 'enlace-boton', type: 'button', onclick: sal(() => MT.guias.irAqui(rol, s.aqui)) }, 'Hacerlo en Mi espacio') : null)))
-          : h('p', { class: 'suave' }, 'Aquí no tienes pasos propios. Tu guía te dice dónde trabajas.'))
-        : h('div', null, h('p', { class: 'suave' }, 'Elige tu rol para ver qué te toca hacer aquí.'), h('button', { class: 'btn btn--chico', type: 'button', onclick: sal(() => document.getElementById('rol-actual').click()) }, 'Elegir mi rol')),
-      secciones.length ? h('div', null, h('p', { class: 'etiqueta' }, 'En Mi espacio'),
-        h('ul', { class: 'menu-portal__secciones' }, secciones.map((s) => h('li', null, h('a', { href: '#/mi/' + s.id, onclick: () => { cerrar(false); } }, icono(s.icono), s.etiqueta))))) : null,
-      h('div', { class: 'acciones' },
-        h('a', { class: 'btn btn--chico', href: '#/portales/' + id, onclick: () => cerrar(false) }, 'Ir a ' + p.nombre),
-        alLado ? h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: sal(() => MT.vivos.dividir(id)) }, 'Abrir al lado') : null,
-        h('a', { class: 'btn btn--chico btn--suave', href: '#/guia' + (rol ? '/' + rol : ''), onclick: () => cerrar(false) }, 'Mi guía')),
+      h('a', { href: '#/portales/' + portal, class: 'riel-item', 'data-portal': portal, 'data-espacio': portal }, marca(portal), PORTALES[portal].nombre, h('i', { class: 'riel-vivo', 'aria-hidden': 'true' })),
+      h('a', { href: '#/mi', class: 'riel-item', 'data-ruta': 'mi' }, icono('inicio'), 'Mi espacio'),
     ];
   }
+  let rolPintado;
+  function pintarNavegacion() {
+    const rol = rolActual() || null;
+    if (rol === rolPintado && dinamico.childElementCount) return;
+    rolPintado = rol;
+    dinamico.replaceChildren(...itemsDelRol());
+    actualizar();
+  }
 
-  function construirBarra() {
-    const nav = document.getElementById('barra-portales');
-    const pestanas = ORDEN.map((id) => {
-      const p = PORTALES[id];
-      const boton = h('button', { class: 'pestana__abrir', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'menu-portal-' + id, 'aria-label': `Qué puedes hacer en ${p.nombre}` }, MT.ui.svg('<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'));
-      const menu = h('div', { class: 'menu-portal', id: 'menu-portal-' + id, hidden: true, role: 'group', 'aria-label': `Lo que puedes hacer en ${p.nombre}` });
-      boton.addEventListener('click', (e) => { e.stopPropagation(); alternar(boton, menu, () => menu.replaceChildren(...contenidoMenu(id))); });
-      return h('li', { class: 'pestana', 'data-espacio': id, 'data-portal': id },
-        h('a', { class: 'pestana__ir', href: '#/portales/' + id }, marca(id, 'pestana__marca'), h('span', { class: 'pestana__texto' }, h('strong', null, p.nombre), h('small', null, p.rotulo)), h('i', { class: 'pestana__vivo', 'aria-hidden': 'true', title: 'Abierto: conserva lo que estabas haciendo' })),
-        boton, menu);
-    });
-    nav.replaceChildren(h('ul', { class: 'pestanas' },
-      h('li', { class: 'pestana pestana--mi' }, h('a', { class: 'pestana__ir', id: 'tab-mi', href: '#/mi' }, icono('inicio'), h('span', { class: 'pestana__texto' }, h('strong', null, 'Mi espacio'), h('small', null, 'Tu trabajo')))),
-      ...pestanas),
-      h('a', { class: 'barra-portales__ayuda', href: '#/portales' }, 'Qué hace cada portal'));
-    document.addEventListener('click', (e) => { if (abierto && !abierto.menu.contains(e.target)) cerrar(false); });
+  function construirNavegacion() {
+    const items = document.getElementById('riel-items'); const abajo = document.getElementById('riel-abajo');
+    dinamico = h('span', { class: 'riel-dinamico' });
+    // Niky: un único botón, siempre el mismo. Abre el panel lateral de la IA (el lugar fijo de Niky), que se trabaja aparte.
+    const niky = h('button', { class: 'riel-item', id: 'btn-ia', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'slot-ia', 'data-espacio': 'valeria' }, marca('valeria'), 'Niky');
+    niky.addEventListener('click', () => MT.ia.panel.alternar());
+    items.append(dinamico, niky);
+    menuMas = document.getElementById('menu-mas');
+    botonMas = h('button', { class: 'riel-item', id: 'btn-mas', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'menu-mas' },
+      MT.ui.svg('<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>'), 'Más');
+    abajo.append(botonMas);
+    document.getElementById('mas-paginas').replaceChildren(...PAGINAS_MAS.map((p) => h('li', null,
+      h('a', Object.assign({ href: p.hash, 'data-ruta': p.ruta }, p.id ? { id: p.id } : {}), icono(p.icono), h('span', { class: 'mas-texto' }, p.etiqueta)))));
+    botonMas.addEventListener('click', (e) => { e.stopPropagation(); alternar(botonMas, menuMas, null, true); });
+    // Elegir una página o activar el modo presentación cierra el menú: ya hizo lo que había que hacer.
+    menuMas.addEventListener('click', (e) => { if (e.target.closest('a, #btn-presentacion')) cerrar(false); });
+    // Si el foco sale del menú (Tab hacia afuera), se cierra: no queda abierto tapando la página sin que se vea.
+    menuMas.addEventListener('focusout', (e) => { if (abierto && abierto.menu === menuMas && e.relatedTarget && !menuMas.contains(e.relatedTarget) && e.relatedTarget !== botonMas) cerrar(false); });
+    document.addEventListener('click', (e) => { if (abierto && !abierto.menu.contains(e.target) && !abierto.boton.contains(e.target)) cerrar(false); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && abierto) cerrar(true); });
     window.addEventListener('resize', () => cerrar(false));
+    pintarNavegacion();
+    st.suscribir(pintarNavegacion);
   }
 
   /* ---------------- Selector de rol ---------------- */
@@ -108,9 +132,7 @@
   function construirRol() {
     const boton = document.getElementById('rol-actual'); const menu = document.getElementById('menu-rol');
     const pintar = () => {
-      const r = MT.roles.por(rolActual());
-      boton.textContent = r ? 'Rol: ' + r.nombre : 'Elegir mi rol';
-      boton.append(' ▾');
+      pintarEtiqueta();
       menu.replaceChildren(h('p', { class: 'etiqueta' }, 'Ver la plataforma como'),
         h('ul', { class: 'menu-rol__lista' }, MT.roles.lista.map((x) => h('li', null, h('button', { type: 'button', 'aria-pressed': String(x.id === rolActual()), onclick: () => { cerrar(true); cambiarRol(x.id); } }, icono(x.icono), h('span', null, h('strong', null, x.nombre), h('small', null, x.lema)))))),
         h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => { cerrar(false); empezarDeNuevo(); } }, 'Empezar de nuevo'),
@@ -122,20 +144,23 @@
     pintarEtiqueta();
   }
 
-  /* ---------------- Estado: qué pestaña está activa y cuáles portales están abiertos ---------------- */
+  /* ---------------- Estado: qué ítem es el actual y cuáles portales están abiertos ---------------- */
   function actualizar() {
-    const nav = document.getElementById('barra-portales'); if (!nav) return;
-    const { id } = MT.router.actual(); const activo = MT.vivos.activo(); const abiertos = MT.vivos.abiertos(); const lado = MT.vivos.lado();
-    nav.querySelectorAll('.pestana').forEach((li) => {
-      const portal = li.dataset.portal; const ir = li.querySelector('.pestana__ir');
-      const actual = portal ? portal === activo : id === 'mi';
-      if (actual) ir.setAttribute('aria-current', 'page'); else ir.removeAttribute('aria-current');
-      li.classList.toggle('pestana--lado', !!portal && portal === lado);
-      li.classList.toggle('pestana--abierta', !!portal && abiertos.includes(portal));
+    const riel = document.getElementById('riel'); if (!riel) return;
+    const { id } = MT.router.actual(); const activo = MT.vivos.activo(); const abiertos = MT.vivos.abiertos();
+    // Los ítems del rol que son páginas (Inicio, Mi espacio) se marcan aquí; los de «Más» los marca el router en cada pantalla.
+    riel.querySelectorAll('[data-ruta]').forEach((a) => { if (a.dataset.ruta === id) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+    riel.querySelectorAll('[data-portal]').forEach((a) => {
+      const portal = a.dataset.portal;
+      if (portal === activo) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+      a.classList.toggle('riel-item--abierto', abiertos.includes(portal));
     });
+    // Niky solo se marca como actual cuando es el portal que se está viendo (el panel lateral lleva su propio estado).
+    const niky = document.getElementById('btn-ia'); if (niky) niky.classList.toggle('riel-item--actual', activo === 'valeria');
+    if (botonMas) botonMas.classList.toggle('riel-item--actual', RUTAS_MAS.includes(id) && !activo);
   }
 
-  function pintarPlan() { const a = document.getElementById('plan-chip'); if (a) a.textContent = MT.plan.etiquetaPro ? MT.plan.etiquetaPlan() : ''; }
-  function construir() { construirBarra(); construirRol(); pintarPlan(); st.suscribir(pintarPlan); actualizar(); }
+  function pintarPlan() { const a = document.getElementById('plan-chip'); const t = a && a.querySelector('.mas-texto'); if (t) t.textContent = MT.plan.etiquetaPro ? MT.plan.etiquetaPlan() : ''; }
+  function construir() { construirNavegacion(); construirRol(); pintarPlan(); st.suscribir(pintarPlan); actualizar(); }
   MT.barra = { construir, actualizar, cerrar, empezarDeNuevo };
 })(window.MT = window.MT || {});

@@ -1,8 +1,8 @@
 /* layout.css: el marco de la plataforma.
 
-   Dos niveles de navegación, como en Slack o en Google Workspace:
-   1. El RIEL (izquierda, siempre igual): el colectivo. Mapa, los tres hilos y la demostración.
-   2. La BARRA LATERAL de cada espacio de la demostración: los roles.
+   UNA sola navegación: el RIEL (a la izquierda en pantalla grande, abajo en el celular). Cambia con el rol (js/barra.js) y lleva siempre
+   Niky y «Más». Antes había además una barra de portales bajo la franja; se quitó para que no hubiera dos caminos a lo mismo.
+   Dentro de «Mi espacio» queda la barra lateral de secciones del rol, que es contenido de la pantalla y no navegación del sitio.
    Los proyectos reales (Kinesis y Wisfox) se muestran INTACTOS, dentro de un marco, con su propia cara. */
 
 /* ---------- Riel: tinta con íconos blancos ---------- */
@@ -19,46 +19,49 @@
 .riel a.riel-logo svg { display: block; width: 46px; height: 46px; margin: 0; color: #1A1714; }
 .riel a.riel-logo::before { display: none; }   /* el botón de inicio no lleva la barra de «página actual»: el contorno blanco ya lo marca */
 .riel a.riel-logo:hover, .riel a.riel-logo[aria-current="page"] { background: #1A1714; box-shadow: none; }
-.riel-items { display: flex; flex-direction: column; gap: .2rem; align-items: center; }
+.riel-items { display: flex; flex-direction: column; gap: .35rem; align-items: center; }
 .riel-abajo { margin-top: auto; display: flex; flex-direction: column; gap: .2rem; align-items: center; }
-.riel a {
-  position: relative; display: flex; flex-direction: column; align-items: center; gap: .2rem;
-  width: 70px; padding: .5rem .2rem .4rem; border-radius: 12px;
-  color: var(--riel-texto); text-decoration: none; font: 800 .68rem/1.1 var(--fuente);
+.riel-dinamico { display: contents; }   /* los ítems del rol se reparten como si fueran hijos directos del riel */
+.riel a, .riel button {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: .25rem;
+  width: 70px; padding: .55rem .2rem .45rem; border-radius: 12px; border: 0; background: none; cursor: pointer;
+  color: var(--riel-texto); text-decoration: none; font: 800 .74rem/1.1 var(--fuente);
 }
-.riel a svg { width: 28px; height: 28px; flex: none; color: #FFFFFF; --logo-fondo: var(--riel-bg); }
-.riel a:hover { background: rgba(255, 255, 255, .09); color: var(--riel-fuerte); }
-.riel a[aria-current="page"] { background: rgba(255, 255, 255, .14); color: var(--riel-fuerte); }
-.riel a[aria-current="page"]::before { content: ""; position: absolute; left: -7px; top: 22%; bottom: 22%; width: 4px; border-radius: 4px; background: var(--l-vivo, #FFFFFF); }
-.riel .e-kinesis { --l-vivo: #5CC08A; }
-.riel .e-wisfox { --l-vivo: #E8A13C; }
-.riel .e-valeria { --l-vivo: #5AA5E0; }
+.riel a svg, .riel button svg { width: 28px; height: 28px; flex: none; color: #FFFFFF; --logo-fondo: var(--riel-bg); }
+.riel a:hover, .riel button:hover { background: rgba(255, 255, 255, .09); color: var(--riel-fuerte); }
+.riel a[aria-current="page"], .riel .riel-item--actual { background: rgba(255, 255, 255, .14); color: var(--riel-fuerte); }
+.riel a[aria-current="page"]::before, .riel .riel-item--actual::before { content: ""; position: absolute; left: -7px; top: 22%; bottom: 22%; width: 4px; border-radius: 4px; background: var(--l-vivo, #FFFFFF); }
+.riel [data-espacio="kinesis"] { --l-vivo: #5CC08A; }
+.riel [data-espacio="wisfox"] { --l-vivo: #E8A13C; }
+.riel [data-espacio="valeria"] { --l-vivo: #5AA5E0; }
+/* El punto de «portal abierto»: Kinesis y Wisfox siguen vivos al cambiar de pantalla (js/vivos.js) y el punto lo dice sin texto. */
+.riel-vivo { display: none; position: absolute; top: .5rem; right: 1rem; width: 8px; height: 8px; border-radius: 50%; background: var(--l-vivo, #FFFFFF); }
+.riel .riel-item--abierto .riel-vivo { display: block; }
 .riel :focus-visible { outline-color: #FFFFFF; }
 
 /* ---------- Cuerpo, franja y pie ---------- */
 .cuerpo { margin-left: var(--riel-ancho); min-width: 0; }
+/* La franja es una línea calmada: el aviso de demostración, pequeño y en tinta suave, y el rol. Antes era una banda negra con cinco botones;
+   todo lo que no es rol vive en «Más» y en el botón de Niky del riel. */
 .franja {
-  display: flex; align-items: center; justify-content: space-between; gap: .5rem 1rem; flex-wrap: wrap;
-  padding: .35rem 1rem; background: var(--tinta); color: var(--papel); font-size: .84rem; font-weight: 700;
-  position: relative; z-index: 30;
+  display: flex; align-items: center; justify-content: space-between; gap: .4rem 1rem;
+  padding: .4rem 1.2rem; background: var(--lino); color: var(--tinta-suave); font-size: .82rem; font-weight: 600;
+  border-bottom: 1px solid var(--linea); position: relative; z-index: 30;
 }
 .franja p { margin: 0; }
-.franja-acciones { display: flex; gap: .4rem; align-items: center; position: relative; flex-wrap: wrap; }
-.franja .btn { min-height: 30px; padding: .1rem .8rem; font-size: .8rem; color: var(--papel); border-color: color-mix(in srgb, var(--papel) 60%, transparent); background: transparent; }
-.franja .btn:hover { background: var(--papel); color: var(--tinta); }
-.menu-apariencia {
-  position: absolute; right: 0; top: calc(100% + .4rem); z-index: 60; width: 17rem; text-align: left;
-  background: var(--papel); color: var(--tinta); border: 1px solid var(--linea); border-radius: var(--radio);
-  box-shadow: var(--sombra); padding: 1rem 1.1rem; font-weight: 400;
-}
+.franja-aviso { flex: 1 1 auto; min-width: 0; }
+.franja-logo { display: none; flex: none; width: 34px; height: 34px; border-radius: 50%; background: #1A1714; border: 2px solid #FFFFFF; --logo-fondo: #1A1714; --hilo-kinesis: #1FA36B; --hilo-valeria: #4A6FE0; --hilo-wisfox: #F2A33A; --hilo-mosaico: #F0558A; color: #1A1714; }
+.franja-logo svg { display: block; width: 30px; height: 30px; color: #1A1714; }
+.franja-rol { position: relative; flex: none; }
+.menu-apariencia { text-align: left; font-weight: 400; }
 .menu-apariencia fieldset { border: 0; padding: 0; margin: 0 0 .8rem; }
 .menu-apariencia legend { font-weight: 900; padding: 0; margin-bottom: .3rem; }
 main { display: block; min-height: 70vh; }
 main:focus { outline: none; }
 .contenedor { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 1.4rem; }
-.pie { max-width: 1140px; margin: 2rem auto 0; padding: 1.5rem 1.4rem 2.5rem; border-top: 1px solid var(--linea); color: var(--tinta-suave); font-size: .92rem; display: flex; gap: 1rem; align-items: flex-start; }
+.pie { max-width: 1140px; margin: 2rem auto 0; padding: 1.2rem 1.4rem 2rem; border-top: 1px solid var(--linea); color: var(--tinta-suave); font-size: .88rem; display: flex; gap: 1rem; align-items: center; }
 .pie svg { width: 34px; height: 34px; flex: none; color: var(--tinta); }
-.pie p { margin: 0 0 .25rem; }
+.pie p { margin: 0; }
 
 /* ---------- Páginas del colectivo ---------- */
 .pagina-cab { padding: 2.4rem 0 .6rem; }
@@ -132,13 +135,15 @@ main:focus { outline: none; }
 @media (max-width: 860px) {
   .cuerpo { margin-left: 0; padding-bottom: 5.6rem; }
   .riel { top: auto; left: .6rem; right: .6rem; bottom: .6rem; width: auto; flex-direction: row; justify-content: space-around; padding: .3rem; border-radius: 22px; box-shadow: 0 8px 26px rgba(0, 0, 0, .35); }
-  .riel a.riel-logo, .riel .riel-abajo { display: none; }
-  .riel-items { flex-direction: row; width: 100%; justify-content: space-around; }
-  .riel a { width: auto; min-width: 58px; padding: .35rem .3rem; font-size: .66rem; }
-  .riel a svg { width: 24px; height: 24px; }
-  .riel a[aria-current="page"]::before { display: none; }
+  .riel a.riel-logo { display: none; }
+  /* Los grupos del riel dejan de ser cajas: así los cuatro ítems (rol, Mi espacio, Niky, Más) se reparten el ancho por igual. */
+  .riel-items, .riel-abajo { display: contents; }
+  .riel a, .riel button { flex: 1 1 0; width: auto; min-width: 0; padding: .35rem .3rem; font-size: .72rem; }
+  .riel a svg, .riel button svg { width: 24px; height: 24px; }
+  .riel a[aria-current="page"]::before, .riel .riel-item--actual::before { display: none; }
   .contenedor { padding: 0 1rem; }
-  .franja { padding: .3rem .8rem; font-size: .78rem; }
+  .franja { padding: .3rem .8rem; font-size: .76rem; gap: .5rem; }
+  .franja-logo { display: block; }
   .espacio { grid-template-columns: minmax(0, 1fr); min-height: 0; align-content: start; }
   .lateral { position: static; height: auto; min-width: 0; }
   .lateral-panel { height: auto; flex-direction: row; align-items: center; gap: .6rem; padding: .5rem .8rem; border-right: 0; border-bottom: 1px solid var(--linea); overflow-x: auto; max-width: 100%; }

@@ -34,13 +34,13 @@
      el mismo. Ahora se antepone el título de la pantalla (su h1), que ya es texto público de la página: no se inventa ninguna palabra,
      solo se repite lo que la persona ve. Si el h1 coincide con la sección, no se duplica. */
   function titulo(def, main) {
-    if (def.titulo === 'Inicio') return 'Mosaico Telar';
+    if (def.titulo === 'Inicio') return MT.nombre;
     const t = main.querySelector('h1') || main.querySelector('.vivos:not([hidden]) [role="heading"]');
     const limpio = (x) => (x ? x.textContent.replace(/\s+/g, ' ').trim() : '');
     // Las guías por rol y las pestañas de página (Roles y datos, Mapa...) comparten h1: lo que las distingue es la pestaña activa.
     const pestana = limpio(main.querySelector('.pestanas-pagina [aria-current="page"]'));
     const partes = [pestana, limpio(t), def.titulo].filter((x, i, a) => x && a.indexOf(x) === i);
-    return partes.join(' · ') + ' · Mosaico Telar';
+    return partes.join(' · ') + ' · ' + MT.nombre;
   }
 
   function render(opciones) {

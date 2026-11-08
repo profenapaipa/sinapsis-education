@@ -276,7 +276,7 @@
     // cuando el logo ya está montado en la página.
     const defs = circular ? `<defs><clipPath id="${idr}"><circle cx="32" cy="32" r="${RADIO}"/></clipPath><clipPath id="${idg}"><circle cx="32" cy="32" r="${flojo ? RADIO_SUELTO : RADIO}"/></clipPath></defs>` : '';
     const grupo = circular ? ` clip-path="url(#${idg})"` : '';
-    const el = document.adoptNode(svg(`<svg class="logo-tejido ${o.clase}" viewBox="0 0 64 64" role="img" aria-label="Mosaico Telar: nueve piezas unidas por cuatro hilos de colores que se cruzan" focusable="false">${defs}
+    const el = document.adoptNode(svg(`<svg class="logo-tejido ${o.clase}" viewBox="0 0 64 64" role="img" aria-label="${MT.nombre}: nueve piezas unidas por cuatro hilos de colores que se cruzan" focusable="false">${defs}
       <g class="lienzo" style="transform-origin:32px 32px">
       <g class="hilos"${grupo}>${tips}${hilos}</g>
       <path class="tela-unica" fill="currentColor"${grupo} d="${unica}"/>

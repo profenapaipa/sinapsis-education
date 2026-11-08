@@ -1,35 +1,21 @@
-/* navegacion.css: lo que está siempre a la vista arriba (barra de portales y menú de rol), la guía dentro de cada sección,
-   el glosario y los portales vivos. Usa solo las variables de tokens.css, así sigue el tema claro, oscuro y el texto grande. */
+/* navegacion.css: los menús que abre la navegación («Más» y el rol), la guía dentro de cada sección, el glosario y los portales vivos.
+   Usa solo las variables de tokens.css, así sigue el tema claro, oscuro y el texto grande.
+   La barra de portales y las listas desplegables de cada portal ya no existen: la navegación es una sola (ver js/barra.js). */
 
-/* ---- Barra de portales ---- */
-.barra-portales { position: sticky; top: 0; z-index: 40; display: flex; align-items: stretch; justify-content: space-between; gap: .6rem; background: var(--papel); border-bottom: 1px solid var(--linea); padding: 0 1rem; }
-.pestanas { display: flex; gap: .2rem; list-style: none; margin: 0; padding: 0; overflow-x: auto; scrollbar-width: none; }
-.pestana { position: relative; display: flex; align-items: stretch; flex: none; }
-.pestana__ir { display: flex; align-items: center; gap: .55rem; padding: .55rem .5rem .55rem .8rem; color: var(--tinta); text-decoration: none; border-bottom: 4px solid transparent; font-size: .95rem; }
-.pestana__ir svg { width: 26px; height: 26px; flex: none; color: var(--tinta); }
-.pestana__texto { display: grid; line-height: 1.15; }
-.pestana__texto small { color: var(--tinta-suave); font-weight: 600; font-size: .74rem; }
-.pestana__ir:hover { background: var(--lino); }
-.pestana__ir[aria-current="page"] { border-bottom-color: var(--e-vivo, var(--tinta)); background: var(--lino); }
-.pestana--mi .pestana__ir[aria-current="page"] { border-bottom-color: var(--tinta); }
-.pestana__vivo { display: none; width: 8px; height: 8px; border-radius: 50%; background: var(--e-vivo); flex: none; }
-.pestana--abierta .pestana__vivo { display: block; }
-.pestana--lado .pestana__ir { border-bottom: 4px dashed var(--e-vivo); }
-.pestana__abrir { background: none; border: 0; cursor: pointer; padding: 0 .55rem 0 .1rem; color: var(--tinta); min-width: 28px; display: grid; place-items: center; }
-.pestana__abrir svg { width: 16px; height: 16px; transition: transform .15s; }
-.pestana__abrir[aria-expanded="true"] svg { transform: rotate(180deg); }
-.pestana__abrir:hover { background: var(--lino); }
-.barra-portales__ayuda { align-self: center; font-size: .85rem; font-weight: 700; white-space: nowrap; }
+/* ---- «Más»: el único menú de páginas secundarias y de lo de uso ocasional ---- */
+.menu-mas { position: fixed; z-index: 60; left: calc(var(--riel-ancho) + .6rem); bottom: .9rem; width: min(21rem, calc(100vw - 2rem)); max-height: calc(100dvh - 1.8rem); overflow-y: auto; background: var(--papel); color: var(--tinta); border: 1px solid var(--linea); border-radius: var(--radio); box-shadow: 0 14px 40px rgba(0, 0, 0, .22); padding: .5rem; }
+.menu-mas__paginas { list-style: none; margin: 0; padding: 0; display: grid; }
+.menu-mas__paginas a { display: flex; align-items: center; gap: .75rem; min-height: 44px; padding: .4rem .7rem; border-radius: var(--radio-chico); color: var(--tinta); font-weight: 800; text-decoration: none; }
+.menu-mas__paginas a svg { width: 22px; height: 22px; flex: none; color: var(--tinta-suave); }
+.menu-mas__paginas a:hover { background: var(--lino); }
+.menu-mas__paginas a[aria-current="page"] { background: var(--tinta); color: var(--papel); }
+.menu-mas__paginas a[aria-current="page"] svg { color: var(--papel); }
+.menu-mas__herramientas { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .4rem; padding: .7rem .6rem .4rem; border-top: 1px solid var(--linea); }
+/* La apariencia se despliega dentro del menú, no como un segundo menú flotante encima del primero. */
+.menu-mas .menu-apariencia { position: static; flex: 1 1 100%; width: 100%; background: transparent; border: 0; box-shadow: none; padding: .4rem 0 0; }
 
-/* ---- Menús desplegables: portal y rol ---- */
-.menu-portal, .menu-rol { position: absolute; z-index: 60; background: var(--papel); color: var(--tinta); border: 1px solid var(--linea); border-radius: var(--radio); box-shadow: 0 14px 40px rgba(0, 0, 0, .2); padding: 1rem 1.1rem; }
-.menu-portal { position: fixed; top: 6rem; left: .5rem; width: min(26rem, calc(100vw - 2rem)); max-height: 75vh; overflow-y: auto; }
-.menu-portal__que { margin: 0 0 .6rem; font-size: .92rem; }
-.menu-portal__pasos { padding-left: 1.2rem; margin: 0 0 .6rem; display: grid; gap: .4rem; }
-.menu-portal__pasos li span { display: block; font-weight: 700; }
-.menu-portal__secciones { list-style: none; padding: 0; margin: 0 0 .5rem; display: grid; grid-template-columns: 1fr 1fr; gap: .1rem .6rem; }
-.menu-portal__secciones a { display: flex; align-items: center; gap: .45rem; padding: .3rem .2rem; font-weight: 700; text-decoration: none; min-height: 32px; }
-.menu-portal__secciones svg { width: 18px; height: 18px; flex: none; }
+/* ---- Menú del rol ---- */
+.menu-rol { position: absolute; z-index: 60; background: var(--papel); color: var(--tinta); border: 1px solid var(--linea); border-radius: var(--radio); box-shadow: 0 14px 40px rgba(0, 0, 0, .2); padding: 1rem 1.1rem; }
 .enlace-boton { background: none; border: 0; padding: 0; min-height: 24px; color: var(--verde-texto); font: 800 .85rem var(--fuente); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .menu-rol { top: calc(100% + .4rem); right: 0; width: 22rem; max-width: calc(100vw - 1.5rem); text-align: left; font-weight: 400; }
 .menu-rol__lista { list-style: none; padding: 0; margin: 0 0 .7rem; display: grid; gap: .2rem; }
@@ -56,16 +42,13 @@
 /* ---- Portales vivos: se quedan abiertos mientras se cambia de pestaña ---- */
 
 @media (max-width: 860px) {
-  .barra-portales { padding: 0 .4rem; }
-  .barra-portales__ayuda { display: none; }
-  .pestana__texto small { display: none; }
-  .menu-portal { position: fixed; left: .6rem; right: .6rem; top: 7.6rem; width: auto; }
-  .menu-portal__secciones { grid-template-columns: 1fr; }
+  /* En el celular «Más» sube desde la barra inferior y ocupa el ancho, con sitio para el dedo. */
+  .menu-mas { left: .6rem; right: .6rem; width: auto; bottom: calc(5.4rem + env(safe-area-inset-bottom)); max-height: calc(100dvh - 7.5rem); }
 }
 
 /* ---- Impresión: solo el contenido, sin menús ---- */
 @media print {
-  .riel, .franja, .barra-portales, .pie, .franja-guia, .pestanas-pagina, .btn, .acciones { display: none !important; }
+  .riel, .franja, .menu-mas, .pie, .franja-guia, .pestanas-pagina, .btn, .acciones { display: none !important; }
   .cuerpo { margin-left: 0 !important; }
   body { background: #fff; color: #000; }
   .tarjeta { box-shadow: none; break-inside: avoid; border-color: #999; }

@@ -1,6 +1,6 @@
 /* portales.js: la vista general de los tres portales y la guía de inicio rápido de cada rol.
 
-   Los portales en sí (Kinesis, Niky, Wisfox) viven en las pestañas de arriba y en js/vivos.js: aquí solo está la página
+   Los portales en sí (Kinesis, Niky, Wisfox) se abren desde el riel (el de tu rol) y viven en js/vivos.js: aquí solo está la página
    que los explica en paralelo y la guía paso a paso. Los datos de qué hace cada portal y cada rol están en js/guias.js. */
 (function (MT) {
   'use strict';
@@ -27,19 +27,21 @@
 
   function vistaPortales(main) {
     const c = pagina(main, { etiqueta: 'Portales', titulo: 'Tres portales, una sola plataforma',
-      descripcion: 'Kinesis, Niky y Wisfox trabajan en paralelo y se pasan el trabajo entre sí. Están siempre en las pestañas de arriba: puedes tener varios abiertos y volver a cada uno sin perder lo que hacías.' });
+      descripcion: 'Kinesis, Niky y Wisfox trabajan en paralelo y se pasan el trabajo entre sí. Desde el menú lateral entras al portal de tu rol; aquí están los tres, y puedes tener varios abiertos y volver a cada uno sin perder lo que hacías.' });
 
     c.append(h('div', { class: 'rejilla rejilla--3 portales' }, ORDEN.map((id) => { const p = PORTALES[id]; return h('article', { class: 'tarjeta portal', 'data-espacio': id },
       h('div', { class: 'proyecto-cab' }, marca(id), h('div', null, h('h2', null, p.nombre), h('small', null, p.rotulo))),
       h('span', { class: 'sello sello--' + p.estado[1] }, p.estado[0]),
       h('p', null, p.que),
       h('p', { class: 'etiqueta' }, 'Para quién'), h('p', null, p.paraQuien),
-      h('p', { class: 'etiqueta' }, 'Qué haces ahí'), h('ul', null, p.haces.map((x) => h('li', null, x))),
+      // Plegado (sinergia de contenido): cada tarjeta dice primero qué es y para quién; lo que se hace ahí queda a un clic.
+      h('details', { class: 'plegable plegable--tarjeta' }, h('summary', null, 'Qué haces ahí'), h('ul', null, p.haces.map((x) => h('li', null, x)))),
       h('p', { class: 'portal__entrega' }, p.entrega),
       h('div', { class: 'acciones' }, botonPortal(id), id === 'valeria' ? null : h('a', { class: 'btn btn--suave', href: id === 'kinesis' ? '#/guia' : '#/guia/estudiante' }, 'Cómo usarlo'))); })));
 
-    c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-flujo' },
-      h('h2', { id: 'h-flujo' }, 'Un ajuste recorre los tres portales'),
+    // Plegado: la pantalla ofrece primero los tres portales; el recorrido paso a paso queda a un clic.
+    c.append(h('details', { class: 'plegable', id: 'h-flujo' },
+      h('summary', null, 'Un ajuste recorre los tres portales'),
       h('p', { class: 'bajada' }, 'Cada fila es un paso, en el portal donde ocurre. Lee de arriba hacia abajo: el trabajo baja de un portal al siguiente.'),
       MT.guias.notaAjuste(),
       h('div', { class: 'carriles-cab', 'aria-hidden': 'true' }, ORDEN.map((id) => h('div', { 'data-espacio': id }, marca(id, 'carril-marca'), h('strong', null, PORTALES[id].nombre)))),
@@ -49,8 +51,8 @@
             h('span', { class: 'carril-n' }, String(i + 1)), h('p', { class: 'etiqueta' }, quien + ' · ' + PORTALES[id].nombre), h('p', null, texto))
           : h('div', { class: 'carril-celda', 'aria-hidden': 'true' }))))))));
 
-    c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-une' },
-      h('h2', { id: 'h-une' }, 'Qué los une'),
+    c.append(h('details', { class: 'plegable', id: 'h-une' },
+      h('summary', null, 'Qué los une'),
       h('div', { class: 'rejilla rejilla--4' }, [
         ['Un rol, un camino', 'Eliges quién eres una vez y cada portal te muestra lo tuyo.'],
         ['Los mismos datos', 'Un ajuste aprobado en Kinesis es el que ve el estudiante en Wisfox.'],
@@ -78,7 +80,7 @@
       h('div', { class: 'acciones' },
         p.aqui ? h('button', { class: 'btn btn--chico', type: 'button', onclick: () => MT.guias.irAqui(rol, p.aqui) }, 'Hacerlo aquí') : null,
         h('button', { class: 'btn btn--chico btn--suave', type: 'button', 'aria-label': 'Ir a ' + PORTALES[p.portal].nombre + ', paso ' + (i + 1), onclick: () => irPortal(p.portal) }, 'Ir a ' + PORTALES[p.portal].nombre))))));
-    c.append(h('p', { class: 'suave' }, '“Ir a” muestra el portal aquí mismo, en su pestaña de arriba. “Hacerlo aquí” lo hace en Mi espacio, la versión que reúne los tres. ', h('a', { href: '#/portales' }, 'Ver qué hace cada portal')));
+    c.append(h('p', { class: 'suave' }, '“Ir a” muestra el portal aquí mismo, dentro de la plataforma. “Hacerlo aquí” lo hace en Mi espacio, la versión que reúne los tres. ', h('a', { href: '#/portales' }, 'Ver qué hace cada portal')));
   }
 
   const TABS = [{ id: 'general' }, { id: 'kinesis' }, { id: 'valeria' }, { id: 'wisfox' }];

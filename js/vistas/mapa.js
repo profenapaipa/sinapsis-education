@@ -163,7 +163,8 @@
     cont.querySelector('[data-hilo="valeria"]').style.alignSelf = 'center';
 
     const leyenda = h('div', { class: 'mapa-leyenda' }, Object.entries(ESTADOS).map(([k, [t]]) => h('span', null, h('i', { class: 'punto punto--' + k }), t)));
-    c.append(h('div', { class: 'tarjeta tarjeta--plana', style: 'margin-bottom:1rem' }, h('h2', null, 'Cómo leer este mapa'),
+    // Plegado: el mapa se entiende tocándolo; la explicación queda a un clic para quien la necesite.
+    c.append(h('details', { class: 'plegable', style: 'margin-bottom:1rem' }, h('summary', null, 'Cómo leer este mapa'),
       h('ol', { class: 'como-leer' },
         h('li', null, h('strong', null, 'Tres columnas, tres portales. '), 'Kinesis (el aula), Niky (la guía) y Wisfox (el estudiante) trabajan en paralelo. Cada recuadro es una función.'),
         h('li', null, h('strong', null, 'Las flechas son trabajo que pasa de una función a otra. '), 'Por ejemplo: el docente ajusta (Ajustes) y eso viaja a Aprobación; al aprobarse, viaja a la Familia y a las Rutas del estudiante.'),

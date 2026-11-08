@@ -1,5 +1,4 @@
-/* main.js: arranque. Construye la navegación a partir de UNA lista (así el menú de escritorio y
-   la barra del celular nunca se contradicen), conecta la apariencia y el botón de Niky, y
+/* main.js: arranque. Pone los logos, conecta la apariencia y el «saltar al contenido», y
    registra cualquier error para que las pruebas automáticas puedan verlo. */
 (function (MT) {
   'use strict';
@@ -11,24 +10,16 @@
   document.addEventListener('securitypolicyviolation', (e) => window.__errores.push('CSP: ' + e.violatedDirective + ' ' + e.blockedURI));
   window.addEventListener('unhandledrejection', (e) => window.__errores.push('promesa: ' + ((e.reason && e.reason.message) || e.reason)));
 
-  // La lista única del riel. "abajo" son las páginas de la plataforma; el resto es donde se trabaja.
-  const ESPACIOS = [
-    { id: 'mi', hash: '#/mi', etiqueta: 'Mi espacio', cls: 'e-marca', icono: () => icono('inicio') },
-    { id: 'mapa', hash: '#/mapa', etiqueta: 'Mapa', cls: 'e-marca', icono: () => icono('mapa') },
-    { id: 'recorrido', hash: '#/recorrido', etiqueta: 'Roles', cls: 'e-marca', icono: () => icono('docente') },
-    { id: 'planes', hash: '#/planes', etiqueta: 'Participar', cls: 'e-marca', icono: () => icono('logros'), abajo: true },
-    { id: 'hoja', hash: '#/hoja', etiqueta: 'Hoja de ruta', cls: 'e-marca', icono: () => icono('estado'), abajo: true },
-    { id: 'identidad', hash: '#/identidad', etiqueta: 'Identidad', cls: 'e-marca', icono: () => icono('identidad'), abajo: true },
-  ];
-
-  function construirNavegacion() {
-    const enlace = (e) => h('a', { href: e.hash, class: e.cls, 'data-ruta': e.id }, e.icono(), e.etiqueta);
+  /* Los logos: el del riel (pantalla grande), el de la franja (celular, donde el riel pasa abajo y pierde su logo) y el del pie.
+     La navegación en sí (qué ítems hay según el rol, el botón de Niky y «Más») la arma js/barra.js. */
+  function construirLogos() {
     // El botón de inicio es el único ícono del riel a color: los demás van en blanco y negro para que el logo tenga el protagonismo.
     const logoRiel = MT.tejido.logoColor('', { contorno: 'circulo' });
     logoRiel.setAttribute('viewBox', '2 2 60 60');   // recorta el lienzo al disco del logo para que llene el círculo del botón
     document.getElementById('riel-logo').append(logoRiel);
-    document.getElementById('riel-items').append(...ESPACIOS.filter((e) => !e.abajo).map(enlace));
-    document.getElementById('riel-abajo').append(...ESPACIOS.filter((e) => e.abajo).map(enlace));
+    const logoFranja = MT.tejido.logoColor('', { contorno: 'circulo' });
+    logoFranja.setAttribute('viewBox', '2 2 60 60');
+    document.getElementById('franja-logo').append(logoFranja);
     document.getElementById('logo-pie').replaceChildren(marca('mosaico'));
   }
 
@@ -92,12 +83,11 @@
 
   MT.apariencia = { llenarMenu, aplicar: aplicarApariencia, leer: leerApariencia, ESTILOS };
   if (!MT.config.mostrarEstilos) delete document.documentElement.dataset.estilo;
-  construirNavegacion();
+  construirLogos();
   conectarSaltar();
   construirApariencia();
   MT.vivos.iniciar(document.getElementById('app'));
   MT.barra.construir();
-  document.getElementById('btn-ia').addEventListener('click', () => MT.ia.panel.alternar());
   MT.ia.detectar();
   MT.router.iniciar();
   if (MT.presentacion && MT.presentacion.desdeUrl) MT.presentacion.desdeUrl();
