@@ -1,2 +1,53 @@
-/* mascotas.css: estilos de las mascotas (las cuatro comparten contorno, ojos y proporciones). */
-.mascota { display: block; flex: none; overflow: visible; }
+/* mascotas.css: estilos de las mascotas. Las cuatro comparten contorno, ojos, nariz y proporciones; aquí está todo lo que las hace de una misma mano.
+
+   Las reglas van en clases (m-t, m-d, m-piel...) y no dentro del dibujo, para que un cambio de grosor o de tinta se haga una sola vez y valga para las cuatro. */
+
+.mascota {
+  display: block; flex: none; overflow: visible;
+  /* Contorno: la tinta del tema (oscura en claro, clara en oscuro) para que la silueta se lea sobre cualquier fondo. */
+  --m-trazo: var(--tinta);
+  /* Detalles de la cara (ojos, nariz, boca, gafas): tinta fija, porque siempre van sobre un color de la mascota y no sobre el fondo. */
+  --m-detalle: #1A1714;
+  --m-brillo: #FAF7F2;
+  --m-crema: #F5EBDA;
+  /* Los colores de lana aclarados un poco con blanco: así los ojos oscuros se leen también sobre el verde y el azul, y la mascota se ve cálida y no seria.
+     La segunda declaración es la de respaldo para navegadores que no conocen color-mix (se queda con el color del hilo, sin aclarar). */
+  --m-verde: var(--hilo-kinesis);  --m-verde: color-mix(in srgb, var(--hilo-kinesis) 78%, #ffffff);
+  --m-ambar: var(--hilo-wisfox);   --m-ambar: color-mix(in srgb, var(--hilo-wisfox) 92%, #ffffff);
+  --m-azul: var(--hilo-valeria);   --m-azul: color-mix(in srgb, var(--hilo-valeria) 74%, #ffffff);
+  --m-oso: #4A3326;  /* marrón negruzco cálido: el único color que no sale de un hilo */
+  /* Grosor del contorno. Va en el svg y se hereda, así los trazos que traen su propio stroke-width (miembros, hilos) lo conservan. */
+  stroke-width: 3;
+}
+.mascota--sinapso { --piel: var(--m-oso); }
+.mascota--kinesis { --piel: var(--m-verde); }
+.mascota--wisfox { --piel: var(--m-ambar); }
+.mascota--niky { --piel: var(--m-azul); }
+
+/* Trazos: extremos y uniones siempre redondos. Todo lo que no es relleno se declara aquí sin relleno. */
+.mascota path, .mascota ellipse, .mascota circle, .mascota rect { stroke-linecap: round; stroke-linejoin: round; }
+.mascota path { fill: none; }
+.mascota .m-t { stroke: var(--m-trazo); }
+.mascota .m-d { stroke: var(--m-detalle); stroke-width: 2.4; fill: none; }
+.mascota .m-piel { fill: var(--piel); }
+.mascota .m-crema { fill: var(--m-crema); stroke: none; }
+.mascota .m-gafa { fill: var(--m-crema); stroke: var(--m-detalle); stroke-width: 2.6; }
+.mascota .m-ojo { fill: var(--m-detalle); }
+.mascota .m-brillo { fill: var(--m-brillo); }
+.mascota .m-nariz { fill: var(--m-detalle); }
+.mascota .m-boca { fill: var(--m-detalle); stroke: var(--m-detalle); stroke-width: 2; }
+.mascota .m-pt { fill: var(--m-trazo); }
+.mascota .m-confeti { stroke: var(--m-trazo); stroke-width: 1.6; }
+/* Las rayas de la bufanda y las vueltas del hilo llevan su contorno en .m-t; que el relleno propio no lo pise. */
+.mascota rect.m-t { stroke-width: 2.4; }
+
+/* Fila de mascotas (MT.mascotas.escena). */
+.mascotas-escena { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: .5rem; }
+
+/* Reposo: un parpadeo lento, solo si se pide (clase mascota--viva) y solo si la persona no pidió menos movimiento.
+   Por defecto las mascotas están quietas. Se duplica la regla de calmado.css a propósito: aquí se apaga del todo (animation: none),
+   porque el parpadeo no tiene un estado final que "alcanzar" y no queremos ni siquiera un cuadro de más. */
+.mascota--viva .m-ojos { transform-box: fill-box; transform-origin: center; animation: m-parpadeo 6s ease-in-out infinite; }
+@keyframes m-parpadeo { 0%, 92%, 100% { transform: scaleY(1); } 95.5% { transform: scaleY(.12); } }
+html[data-movimiento="calmado"] .mascota--viva .m-ojos { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .mascota--viva .m-ojos { animation: none !important; } }
