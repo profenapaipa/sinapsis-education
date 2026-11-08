@@ -40,8 +40,9 @@
 <body>
 <a class="saltar" href="#app">Saltar al contenido</a>
 
-<!-- Riel del colectivo: siempre igual, lleva a cada hilo. Lo construye js/main.js desde una sola lista. -->
-<nav class="riel" aria-label="Plataforma">
+<!-- Una sola navegación: el riel (a la izquierda en pantallas grandes, abajo en el celular). Lo arma js/barra.js según el rol:
+     sin rol, lo mínimo (inicio y elegir rol); con rol, solo lo suyo (su portal y Mi espacio). Niky y «Más» van siempre. -->
+<nav class="riel" id="riel" aria-label="Principal">
   <a class="riel-logo" href="#/" data-ruta="inicio" aria-label="Mosaico Telar, inicio" id="riel-logo"></a>
   <div class="riel-items" id="riel-items"></div>
   <div class="riel-abajo" id="riel-abajo"></div>
@@ -49,17 +50,13 @@
 
 <div class="cuerpo">
   <header class="franja">
-    <p>Versión de demostración: los datos son de ejemplo y lo que creas se guarda solo en este dispositivo.</p>
-    <div class="franja-acciones">
-      <a class="btn btn--chico plan-chip" id="plan-chip" href="#/planes">Participa</a>
+    <a class="franja-logo" id="franja-logo" href="#/" aria-label="Mosaico Telar, inicio"></a>
+    <p class="franja-aviso">Versión de demostración: los datos son de ejemplo y lo que creas se guarda solo en este dispositivo.</p>
+    <div class="franja-rol">
       <button class="btn btn--chico btn--suave rol-actual" id="rol-actual" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-rol">Elegir mi rol</button>
       <div class="menu-rol" id="menu-rol" hidden></div>
-      <button class="btn btn--chico btn--suave" id="btn-ia" type="button" aria-expanded="false" aria-controls="slot-ia">Hablar con Niky</button>
-      <button class="btn btn--chico btn--suave" id="btn-apariencia" type="button" aria-expanded="false" aria-controls="menu-apariencia">Apariencia</button>
-      <div class="menu-apariencia" id="menu-apariencia" hidden></div>
     </div>
   </header>
-  <nav class="barra-portales" id="barra-portales" aria-label="Portales y mi espacio"></nav>
 
   <main id="app" tabindex="-1">
     <noscript><div class="contenedor"><p class="aviso">Esta plataforma necesita JavaScript para funcionar. No envía datos a ningún sitio.</p></div></noscript>
@@ -70,9 +67,18 @@
     <div>
       <p><strong>Mosaico Telar</strong> · Tejemos caminos para aprender.</p>
       <p>Semillero Maker de Tecnología con Sentido.</p>
-      <p><a href="#/mapa">Mapa</a> · <a href="#/recorrido">Roles y datos</a> · <a href="#/planes">Formas de participar</a> · <a href="#/hoja">Hoja de ruta</a> · <a href="#/glosario">Glosario</a> · <a href="#/piloto">Solicitar un piloto</a> · <a href="#/identidad">Identidad de marca</a> · <a href="#/creditos">Créditos</a></p>
     </div>
   </footer>
+</div>
+
+<!-- El único menú «Más»: las páginas secundarias (las rutas siguen siendo las mismas) y lo de uso ocasional (participar, modo presentación,
+     apariencia). Las páginas las pinta js/barra.js; lo demás está aquí para que js/presentacion.js encuentre su sitio al cargar. -->
+<div class="menu-mas" id="menu-mas" hidden role="group" aria-label="Más">
+  <ul class="menu-mas__paginas" id="mas-paginas"></ul>
+  <div class="menu-mas__herramientas franja-acciones" id="mas-herramientas">
+    <button class="btn btn--chico btn--suave" id="btn-apariencia" type="button" aria-expanded="false" aria-controls="menu-apariencia">Apariencia</button>
+    <div class="menu-apariencia" id="menu-apariencia" hidden></div>
+  </div>
 </div>
 
 <aside class="panel-ia" id="slot-ia" hidden></aside>

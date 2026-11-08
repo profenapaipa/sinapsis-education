@@ -323,7 +323,8 @@
   function vistaResumen(c, rol) {
     const r = resumenDe(rol);
     c.append(MT.comun.hero({ rol: MT.roles.por(rol).nombre, titulo: r.titulo, texto: r.texto, siguiente: { titulo: r.sig[0], texto: r.sig[1], boton: { texto: r.sig[3], onclick: () => { location.hash = r.sig[2]; } } } }), r.panel);
-    c.append(caja(h('h2', null, 'Qué puedes hacer y qué no'), h('div', { class: 'rejilla rejilla--2' },
+    // Plegado: es referencia, no la acción de la pantalla (la acción es el «siguiente paso» de arriba). Sigue a un clic.
+    c.append(h('details', { class: 'plegable' }, h('summary', null, 'Qué puedes hacer y qué no'), h('div', { class: 'rejilla rejilla--2' },
       h('div', null, h('p', { class: 'etiqueta' }, 'Puedes'), h('ul', null, MT.roles.por(rol).haces.map((x) => h('li', null, x)))),
       h('div', null, h('p', { class: 'etiqueta' }, 'No puedes (a propósito)'), h('ul', null, MT.roles.por(rol).noHaces.map((x) => h('li', null, x)))))));
   }

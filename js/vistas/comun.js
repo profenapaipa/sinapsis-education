@@ -10,11 +10,15 @@
   const { h, marca, icono } = MT.ui;
 
   function espacio(main, { marca: nombreMarca, nombre, descripcion, ruta, tabs, sub, usuario }) {
+    const enlace = (t) => h('a', { href: t.href || `#/${ruta}/${t.id}`, 'aria-current': t.id === sub ? 'page' : null },
+      icono(t.icono), t.etiqueta, t.nuevo ? h('span', { class: 'nuevo' }, t.nuevo) : null);
+    const proximo = (t) => h('button', { class: 'nav-pro', type: 'button', 'aria-label': `${t.etiqueta}: próximamente`, onclick: () => MT.plan.abrirPro(t.pro) }, icono(t.icono), t.etiqueta, MT.plan.candadoSvg(), MT.plan.etiquetaPro());
+    // Lo que todavía no existe («próximamente») va plegado: la barra lateral muestra primero lo que ya se puede usar, y lo que viene
+    // sigue a un clic, con el mismo aviso honesto de que está en desarrollo.
+    const pronto = tabs.filter((t) => t.pro);
     const nav = h('nav', { class: 'nav-lateral', 'aria-label': 'Secciones de ' + nombre },
-      tabs.map((t) => (t.pro
-        ? h('button', { class: 'nav-pro', type: 'button', 'aria-label': `${t.etiqueta}: próximamente`, onclick: () => MT.plan.abrirPro(t.pro) }, icono(t.icono), t.etiqueta, MT.plan.candadoSvg(), MT.plan.etiquetaPro())
-        : h('a', { href: t.href || `#/${ruta}/${t.id}`, 'aria-current': t.id === sub ? 'page' : null },
-          icono(t.icono), t.etiqueta, t.nuevo ? h('span', { class: 'nuevo' }, t.nuevo) : null))));
+      tabs.filter((t) => !t.pro).map(enlace),
+      pronto.length ? h('details', { class: 'nav-pronto' }, h('summary', null, 'Próximamente (' + pronto.length + ')'), pronto.map(proximo)) : null);
     const lateral = h('aside', { class: 'lateral', 'aria-label': nombre }, h('div', { class: 'lateral-panel' },
       h('a', { class: 'lockup', href: '#/' + ruta, 'aria-label': nombre + ', inicio' }, marca(nombreMarca),
         h('span', null, h('b', null, nombre), h('small', null, descripcion))),
@@ -38,8 +42,11 @@
 
   // siguiente: { etiqueta, titulo, texto, boton: { texto, onclick } } (opcional)
   function hero({ rol, titulo, texto, siguiente }) {
+    // .companero-rol: sitio previsto para la mascota del rol (pulpo, zorro o venado). Llega con MT.mascotas.mascota(id, { tamano: 56 }) y, mientras
+    // esté vacío, no ocupa lugar (:empty en css/layout.css). Lleva data-rol para que quien la monte sepa de qué rol es la vista.
+    const rolId = MT.store.obtener().rol || '';
     return h('section', { class: 'hero' + (siguiente ? '' : ' hero--solo') },
-      h('div', null, h('span', { class: 'rol' }, rol), h('p', { class: 'fecha' }, fechaHoy()), h('h1', null, titulo), h('p', null, texto)),
+      h('div', { class: 'hero__texto' }, h('div', { class: 'hero__cab' }, h('span', { class: 'rol' }, rol), h('div', { class: 'companero-rol', 'data-rol': rolId })), h('p', { class: 'fecha' }, fechaHoy()), h('h1', null, titulo), h('p', null, texto)),
       siguiente ? h('div', { class: 'paso-siguiente' },
         h('p', { class: 'etiqueta' }, siguiente.etiqueta || 'Siguiente paso'), h('h2', null, siguiente.titulo), h('p', null, siguiente.texto),
         siguiente.boton ? h('button', { class: 'btn btn--chico', type: 'button', onclick: siguiente.boton.onclick }, siguiente.boton.texto) : null) : null);

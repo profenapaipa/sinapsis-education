@@ -80,12 +80,13 @@
       h('ul', { class: 'plan-lista' }, p.incluye.map((x) => h('li', null, x))),
       h('a', { class: 'btn' + (p.accion.principal ? '' : ' btn--suave'), href: p.accion.href }, p.accion.texto)))));
 
-    c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-comp' }, h('h2', { id: 'h-comp' }, 'Qué incluye cada forma'),
+    // La tabla comparativa y las preguntas frecuentes van plegadas: la pantalla propone primero las cuatro formas de participar.
+    c.append(h('details', { class: 'plegable', id: 'h-comp' }, h('summary', null, 'Qué incluye cada forma'),
       h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla tabla-planes' },
         h('thead', null, h('tr', null, h('th', { scope: 'col' }, 'Función'), ETAPAS.map((p) => h('th', { scope: 'col' }, p.nombre)))),
         h('tbody', null, TABLA.map(([f, ...v]) => h('tr', null, h('th', { scope: 'row' }, f), v.map((k) => h('td', { class: 'celda-' + CELDA[k][1] }, h('span', { 'aria-hidden': 'true' }, icono(k)), h('span', { class: k === '-' ? 'solo-lectores' : 'celda-texto' }, ' ' + CELDA[k][0]))))))))));
 
-    c.append(h('section', { class: 'seccion', 'aria-labelledby': 'h-faq' }, h('h2', { id: 'h-faq' }, 'Preguntas frecuentes'),
+    c.append(h('details', { class: 'plegable', id: 'h-faq' }, h('summary', null, 'Preguntas frecuentes'),
       h('div', { class: 'rejilla rejilla--2' }, [
         ['¿Qué puedo hacer hoy?', 'Recorrer la demostración completa con datos de ejemplo: los cinco roles, actividades, ajustes, archivos y la ruta de Inglés. Todo lo que ya funciona está abierto.'],
         ['¿Para qué dejar mi correo?', 'Para poder avisarte cuando abramos el espacio compartido y conversar contigo sobre un primer piloto. Solo pedimos tu correo, y puedes retirarlo cuando quieras.'],
