@@ -993,7 +993,7 @@ async function flujoDemostracion() {
   afirmar('QA-07: la tabla de Participar mide 14 px o más en todas sus celdas', celdas.length > 10 && pequenas.length === 0, `${celdas.length} celdas; pequeñas: ${pequenas.slice(0, 3).join(', ')}`);
   await cargar('#/', 1280, 720); await espera(500);
   // ---- entrada ---- (cambió: ya no hay capturas con rótulo; la misma regla (14 px o más) se aplica a los textos pequeños de la portada: rótulo, mascotas del camino y de las pestañas)
-  const rotulos = [...D().querySelectorAll('.ent-portada .etiqueta, .ent-estacion span, .ent-pestana span, .ent-rol__texto small')].filter(visible);
+  const rotulos = [...D().querySelectorAll('.ent-habla, .ent-estacion span, .ent-pestana span, .ent-rol__texto small')].filter(visible);
   // ---- fin entrada ----
   afirmar('QA-07: los rótulos de la bienvenida miden 14 px o más', rotulos.length > 0 && rotulos.every((x) => parseFloat(ventana().getComputedStyle(x).fontSize) >= 13.99), rotulos.map((x) => ventana().getComputedStyle(x).fontSize).join());
   const hay = ventana().MT.ia.puedeHaberServidor;
@@ -1261,6 +1261,44 @@ async function flujoEntrada() {
   [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(300);
   afirmar('entrada: coordinación sigue disponible como enlace discreto', W().location.hash === '#/guia/coordinacion');
 
+  // ---- historia ---- Por qué: la entrada y las guías cuentan una sola historia (bienvenida, reto, guía, acción, logro) con la voz de MT.narrativa; se mide que
+  // responda en todos los contextos y roles, que sea corta y sin nombres viejos, y que cada ejemplo recorra el arco en pequeño.
+  {
+    const N = MTw().narrativa; const G = MTw().guias.GUIA;
+    const EMO = ['contento', 'curioso', 'pensando', 'celebra', 'animo', 'sorprendido', 'duda']; const QUIEN = ['sinapso', 'kinesis', 'wisfox', 'niky'];
+    const roles = MTw().roles.lista.map((r) => r.id);
+    const contextos = ['bienvenida', 'reto', 'exito', 'espera', 'error', 'vacio', 'portal:kinesis', 'portal:wisfox', 'portal:niky',
+      ...roles.map((r) => 'rol:' + r), ...Object.entries(G).flatMap(([r, g]) => g.pasos.map((_, i) => `paso:${r}:${i + 1}`)),
+      ...['sinapso', 'kinesis', 'wisfox', 'niky'].flatMap((id) => ['reto', 'accion', 'logro'].map((k) => `demo:${id}:${k}`))];
+    const malos = contextos.filter((c) => { const l = N.linea(c); return !l || typeof l.texto !== 'string' || !l.texto || l.texto.trim().split(/\s+/).length > 12 || !EMO.includes(l.emocion) || !QUIEN.includes(l.quien); });
+    afirmar('historia: MT.narrativa.linea responde en los contextos y roles (texto de 12 palabras o menos, emoción y mascota válidas)', malos.length === 0 && contextos.length > 40, malos.join(', ') || contextos.length + ' contextos');
+    afirmar('historia: los cinco roles y cada paso de su guía tienen frase, y un paso que no existe o un contexto desconocido devuelven null', roles.length === 5 && N.linea('paso:docente:99') === null && N.linea('paso:inventado:1') === null && N.linea('algo') === null && N.linea() === null);
+    afirmar('historia: la mascota de cada frase coincide con el portal del paso (Niky en los pasos con IA) y el último paso celebra', G.docente.pasos.every((p, i) => N.linea(`paso:docente:${i + 1}`).quien === (p.portal === 'valeria' ? 'niky' : p.portal)) && N.linea(`paso:docente:${G.docente.pasos.length}`).emocion === 'celebra' && N.linea('paso:estudiante:1').emocion === 'curioso');
+    afirmar('historia: ningún texto de la narrativa nombra «Mosaico Telar» ni «ValerIA», ni usa ∞', !/Mosaico Telar|ValerIA|∞/i.test(JSON.stringify(N.TEXTOS)));
+    afirmar('historia: «exito», «espera», «error» y «vacio» aceptan datos.quien para que otra mascota hable', ['exito', 'espera', 'error', 'vacio'].every((c) => N.linea(c, { quien: 'wisfox' }).quien === 'wisfox'));
+    // Bienvenida: Sinapso te recibe con su frase; el reto y los tres pasos están en el camino.
+    afirmar('historia: Sinapso da la bienvenida en la portada con la frase de la narrativa', (D().querySelector('.ent-habla') || {}).textContent === N.linea('bienvenida').texto);
+    afirmar('historia: el camino trae la frase del reto y tres pasos para empezar', D().querySelector('.ent-reto') && D().querySelectorAll('.ent-pasos3 li').length === 3 && !/Mosaico Telar|ValerIA/.test(D().querySelector('.ent-camino').innerText));
+    // Cada ejemplo recorre el arco: abre en «Paso 2 de 5: Reto» y termina en «Paso 5 de 5: Logro».
+    const momento = (id) => (D().querySelector(`#ent-panel-${id} .ent-momento strong`) || {}).textContent || '';
+    const abre = ['sinapso', 'kinesis', 'wisfox', 'niky'].map((id) => momento(id));
+    afirmar('historia: los cuatro ejemplos abren en «Paso 2 de 5: Reto» con una frase de su mascota', abre.every((t) => t === 'Paso 2 de 5: Reto') && ['sinapso', 'kinesis', 'wisfox', 'niky'].every((id) => (D().querySelector(`#ent-panel-${id} .ent-panel__linea`) || {}).textContent));
+    tabs()[0].click(); { const b = D().querySelector('#ent-panel-sinapso .ent-demo .btn'); b.click(); await espera(40); const medio = momento('sinapso'); b.click(); await espera(40);
+      afirmar('historia: Sinapsis pasa por la acción y termina en el logro', /Acción/.test(medio) && momento('sinapso') === 'Paso 5 de 5: Logro'); }
+    tabs()[1].click(); D().querySelector('#ent-panel-kinesis .ent-chip').click(); await espera(40); const kAccion = momento('kinesis');
+    [...D().querySelectorAll('#ent-panel-kinesis .ent-demo__salida .btn')].find((b) => /Aprobar/.test(b.textContent)).click(); await espera(40);
+    afirmar('historia: Kinesis pasa a la acción al elegir un apoyo y al logro al aprobar', /Acción/.test(kAccion) && momento('kinesis') === 'Paso 5 de 5: Logro');
+    tabs()[2].click(); const ops = [...D().querySelectorAll('#ent-panel-wisfox .ent-opcion')]; ops[0].click(); await espera(40);
+    afirmar('historia: Wisfox acompaña con ánimo si no acertaste y celebra si acertaste (nunca dice «error»)', /Logro|Acción/.test(momento('wisfox')) && !/error|incorrect/i.test(D().querySelector('#ent-panel-wisfox').innerText));
+    tabs()[3].click(); D().querySelector('#ent-panel-niky .ent-chip').click(); await espera(900);
+    [...D().querySelectorAll('#ent-panel-niky .ent-burbuja .btn')][0].click(); await espera(40);
+    afirmar('historia: Niky propone y la persona decide: al elegir «Usar» o «Cambiar» llega el logro', momento('niky') === 'Paso 5 de 5: Logro');
+    // Las compañeras de las guías dicen, en una frase, qué haces ahí.
+    await cargar('#/guia/docente', 390, 844); await espera(350);
+    afirmar('historia: la compañera de la guía trae la frase del rol', (D().querySelector('.ent-companera') || {}).textContent.includes(N.linea('rol:docente').texto));
+    await cargar('#/', 390, 844); await espera(350);
+  }
+  // ---- fin historia ----
   // Sin desborde en 320, 360 y 390, con todas las pestañas abiertas una a una, y escritorio
   for (const ancho of [320, 360, 390, 1280]) {
     localStorage.clear(); await cargar('#/', ancho, ancho < 600 ? 800 : 800); await espera(450);
