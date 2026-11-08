@@ -13,7 +13,7 @@
 
 /* ---------- Tamaños de mascota (el dibujo no manda) ---------- */
 .ent-masc { display: block; width: var(--m, 96px); height: auto; max-width: 100%; }
-.ent-masc--grande { --m: clamp(150px, 34svh, 300px); }
+.ent-masc--grande { --m: clamp(110px, min(34svh, calc(100svh - 470px)), 300px); }   /* en pantallas bajas cede espacio para que el botón «Empezar» quede a la vista */
 .ent-masc--estacion { --m: 84px; }
 .ent-masc--panel { --m: 88px; }
 .ent-masc--paso { --m: 44px; }
@@ -39,15 +39,19 @@
 .ent-marca { display: flex; align-items: center; justify-content: center; gap: .7rem; margin-bottom: .5rem; }
 .ent-marca > svg { width: 52px; height: 52px; flex: none; }
 .ent-marca .etiqueta { margin: 0; text-align: left; }
+.ent-portada .etiqueta { font-size: .9rem; }
 .ent-portada h1 { margin: 0; font-size: clamp(2.1rem, 8vw, 3.6rem); }
 .ent-lema { font-family: var(--fuente-titulo); font-size: clamp(1.15rem, 4.2vw, 1.5rem); color: var(--tinta-suave); margin: .35rem 0 0; }
 .ent-portada__acciones { display: flex; flex-direction: column; align-items: center; gap: .25rem; margin-top: 1rem; }
-.ent-empezar { min-height: 54px; min-width: min(100%, 15rem); font-size: 1.15rem; padding: .7rem 2.2rem; }
+.ent-empezar { min-height: 54px; width: 100%; max-width: 24rem; font-size: 1.15rem; padding: .7rem 2.2rem; }
+.ent-portada__texto, .ent-portada__acciones { width: 100%; }
 @media (min-width: 861px) {
   .ent-portada__cuerpo { grid-template-columns: 1fr auto; justify-items: start; text-align: left; align-items: center; gap: 3rem; padding-top: 2.4rem; padding-bottom: 2.8rem; min-height: min(70svh, 560px); }
   .ent-portada__texto { order: 1; }
   .ent-portada__masc { order: 2; }
   .ent-portada__acciones { align-items: flex-start; }
+  .ent-portada__texto, .ent-portada__acciones { width: auto; }
+  .ent-empezar { width: auto; min-width: 15rem; }
   .ent-marca { justify-content: flex-start; }
 }
 
@@ -83,8 +87,7 @@
 
 /* Aparecer al desplazarse. La clase ent-oculto solo la pone JavaScript, y no la pone con movimiento calmado. */
 .ent-aparece { transition: opacity .6s ease, transform .6s cubic-bezier(.2, .8, .3, 1); }
-.ent-oculto { opacity: 0; transform: translateX(-26px); }
-.ent-estacion:nth-child(even).ent-oculto { transform: translateX(26px); }
+.ent-oculto { opacity: 0; transform: translateY(22px); }   /* hacia arriba y no de lado: lo que está fuera de pantalla a un costado se lee como desborde */
 html[data-movimiento="calmado"] .ent-oculto { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .ent-oculto { opacity: 1; transform: none; } .ent-flota { transform: none; } }
 html[data-movimiento="calmado"] .ent-flota { transform: none; }
