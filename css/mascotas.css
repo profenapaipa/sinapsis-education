@@ -15,28 +15,40 @@
   --m-verde: var(--hilo-kinesis);  --m-verde: color-mix(in srgb, var(--hilo-kinesis) 78%, #ffffff);
   --m-ambar: var(--hilo-wisfox);   --m-ambar: color-mix(in srgb, var(--hilo-wisfox) 92%, #ffffff);
   --m-azul: var(--hilo-valeria);   --m-azul: color-mix(in srgb, var(--hilo-valeria) 74%, #ffffff);
-  --m-oso: #4A3326;  /* marrón negruzco cálido: el único color que no sale de un hilo */
+  --m-oso: #94603E;  /* marrón miel de oso: más claro que antes para que no se confunda con un mapache; el único color que no sale de un hilo */
   /* Grosor del contorno. Va en el svg y se hereda, así los trazos que traen su propio stroke-width (miembros, hilos) lo conservan. */
   stroke-width: 3;
 }
-.mascota--sinapso { --piel: var(--m-oso); }
-.mascota--kinesis { --piel: var(--m-verde); }
-.mascota--wisfox { --piel: var(--m-ambar); }
-.mascota--niky { --piel: var(--m-azul); }
+.mascota--sinapso { --piel: var(--m-oso); --piel2: #D69470; }
+.mascota--kinesis { --piel: var(--m-verde); --piel2: #EE98A6; }
+.mascota--wisfox { --piel: var(--m-ambar); --piel2: #EE7D5C; }
+.mascota--niky { --piel: var(--m-azul); --piel2: #EBA0C0; }
+/* --piel2 es la UNICA segunda tonalidad de cada mascota (mejillas, interior de orejas, ventosas): un rosado cálido ajustado a su color. */
 
 /* Trazos: extremos y uniones siempre redondos. Todo lo que no es relleno se declara aquí sin relleno. */
 .mascota path, .mascota ellipse, .mascota circle, .mascota rect { stroke-linecap: round; stroke-linejoin: round; }
 .mascota path { fill: none; }
 .mascota .m-t { stroke: var(--m-trazo); }
-.mascota .m-d { stroke: var(--m-detalle); stroke-width: 2.4; fill: none; }
+.mascota .m-d { stroke: var(--m-detalle); stroke-width: 2.8; fill: none; }
+.mascota .m-ceja { stroke-width: 3; }
+.mascota .m-piel2 { fill: var(--piel2); stroke: none; }
+.mascota .m-mejilla { fill: var(--piel2); stroke: none; opacity: .75; }
+/* Luz y sombra planas y mínimas: blanco y negro muy transparentes sobre el color de cada una. */
+.mascota .m-luz { fill: #fff; opacity: .24; stroke: none; }
+.mascota .m-sombra { fill: #000; opacity: .14; stroke: none; }
+.mascota .m-esclera { fill: var(--m-brillo); stroke: var(--m-detalle); stroke-width: 1.6; }
+.mascota .m-destello { stroke: var(--m-trazo); stroke-width: 1.4; }
+.mascota .m-gota { fill: var(--hilo-wisfox); stroke: var(--m-trazo); stroke-width: 2.2; }
+.mascota .m-corazon { fill: var(--hilo-mosaico); stroke: var(--m-trazo); stroke-width: 2; }
 .mascota .m-piel { fill: var(--piel); }
 .mascota .m-crema { fill: var(--m-crema); stroke: none; }
-.mascota .m-gafa { fill: var(--m-crema); stroke: var(--m-detalle); stroke-width: 2.6; }
+.mascota .m-gafa { fill: var(--m-brillo); fill-opacity: .4; stroke: var(--m-detalle); stroke-width: 2.8; }
 .mascota .m-ojo { fill: var(--m-detalle); }
 .mascota .m-brillo { fill: var(--m-brillo); }
 .mascota .m-nariz { fill: var(--m-detalle); }
 .mascota .m-boca { fill: var(--m-detalle); stroke: var(--m-detalle); stroke-width: 2; }
 .mascota .m-pt { fill: var(--m-trazo); }
+.mascota .m-ojo-arco { stroke-width: 3; }
 .mascota .m-confeti { stroke: var(--m-trazo); stroke-width: 1.6; }
 /* Las rayas de la bufanda y las vueltas del hilo llevan su contorno en .m-t; que el relleno propio no lo pise. */
 .mascota rect.m-t { stroke-width: 2.4; }
@@ -51,3 +63,10 @@
 @keyframes m-parpadeo { 0%, 92%, 100% { transform: scaleY(1); } 95.5% { transform: scaleY(.12); } }
 html[data-movimiento="calmado"] .mascota--viva .m-ojos { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .mascota--viva .m-ojos { animation: none !important; } }
+
+
+/* Rebote corto al cambiar de emoción (MT.mascotas.cambiar): solo transform, una vez, y nada más. Se apaga igual que el parpadeo. */
+.mascota--rebota { transform-origin: 50% 92%; animation: m-rebote .42s cubic-bezier(.3, 1.5, .5, 1) 1; }
+@keyframes m-rebote { 0% { transform: none; } 35% { transform: translateY(-4%) scale(.97, 1.04); } 100% { transform: none; } }
+html[data-movimiento="calmado"] .mascota--rebota { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .mascota--rebota { animation: none !important; } }

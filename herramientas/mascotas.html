@@ -4,9 +4,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Revisión de las mascotas</title>
-<!-- Herramienta de revisión (no forma parte del sitio público): muestra las cuatro mascotas en las cinco poses, a 64, 120 y 240 px,
+<!-- Herramienta de revisión (no forma parte del sitio público): muestra la matriz de las cuatro mascotas por las siete emociones (a 120 y a 56 px), algunas combinaciones con pose y los tamaños 56, 120 y 240,
      en tema claro y en tema oscuro. Se abre servida por http, por ejemplo http://127.0.0.1:8000/herramientas/mascotas.html
-     Dirección con opciones: ?viva=1 enciende el parpadeo de reposo; ?calmado=1 pone html[data-movimiento="calmado"]. -->
+     Dirección con opciones: ?tema=claro|oscuro muestra un solo tema; ?viva=1 enciende el parpadeo de reposo; ?calmado=1 pone html[data-movimiento="calmado"]. -->
 <link rel="stylesheet" href="../css/tokens.css">
 <link rel="stylesheet" href="../css/mascotas.css">
 <link rel="stylesheet" href="../css/calmado.css">
@@ -24,11 +24,12 @@
   .fila { display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: .75rem; }
   .celda { display: flex; flex-direction: column; align-items: center; gap: .25rem; font-size: .75rem; opacity: .9; }
   .celda b { font-weight: 600; }
+  .fila--chica { gap: .6rem; }
   .grupo { display: flex; align-items: flex-end; gap: .5rem; padding: .75rem; border: 1px solid color-mix(in srgb, var(--tinta) 18%, transparent); border-radius: 12px; }
 </style>
 <body>
 <h1>Las cuatro mascotas</h1>
-<p class="nota">Sinapso (oso de anteojos), Kinesis (pulpo), Wisfox (zorro) y Niky (venado). Mismo contorno, mismos ojos, misma nariz y boca, mismas proporciones.</p>
+<p class="nota">Sinapso (oso de anteojos), Kinesis (pulpo), Wisfox (zorro) y Niky (venado). Mismo contorno, misma cara con siete emociones, mismas proporciones.</p>
 <div id="paneles"></div>
 <script src="../js/ui.js"></script>
 <script src="../js/mascotas.js"></script>
@@ -38,24 +39,36 @@
   if (q.get('calmado') === '1') document.documentElement.setAttribute('data-movimiento', 'calmado');
   const viva = q.get('viva') === '1';
   const e = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt) n.textContent = txt; return n; };
-  const celda = (id, pose, tam, rotulo) => {
-    const c = e('div', 'celda'); c.append(MT.mascotas.mascota(id, { pose, tamano: tam, viva }));
-    c.append(e('b', '', rotulo || pose)); return c;
+  const celda = (id, pose, emocion, tam, rotulo) => {
+    const c = e('div', 'celda'); c.append(MT.mascotas.mascota(id, { pose, emocion, tamano: tam, viva }));
+    c.append(e('b', '', rotulo)); return c;
   };
-  for (const tema of ['claro', 'oscuro']) {
+  const temas = q.get('tema') ? [q.get('tema')] : ['claro', 'oscuro'];
+  for (const tema of temas) {
     const p = e('section', 'tema tema--' + tema); p.id = 'tema-' + tema;
     p.append(e('h2', '', 'Tema ' + tema));
-    p.append(e('h3', '', 'Cinco poses a 120 px'));
+    p.append(e('h3', '', 'Matriz: 4 mascotas x 7 emociones, a 120 px (pose base)'));
     for (const m of MT.mascotas.lista) {
       const f = e('div', 'fila');
-      for (const pose of MT.mascotas.POSES) f.append(celda(m.id, pose, 120, m.nombre + ' · ' + pose));
+      for (const em of MT.mascotas.EMOCIONES) f.append(celda(m.id, 'base', em, 120, m.nombre + ' · ' + em));
       p.append(f);
     }
-    p.append(e('h3', '', 'Tamaños: 64, 120 y 240 px (pose base)'));
+    p.append(e('h3', '', 'La misma matriz a 56 px, el tamaño del compañero de cada pantalla'));
+    for (const m of MT.mascotas.lista) {
+      const f = e('div', 'fila fila--chica');
+      for (const em of MT.mascotas.EMOCIONES) f.append(celda(m.id, 'base', em, 56, em));
+      p.append(f);
+    }
+    p.append(e('h3', '', 'Emoción combinada con pose (saluda + contento, senala + curioso, piensa + pensando, celebra + celebra, saluda + animo)'));
+    const comb = [['saluda', 'contento'], ['senala', 'curioso'], ['piensa', 'pensando'], ['celebra', 'celebra'], ['saluda', 'animo'], ['senala', 'sorprendido']];
+    const fc = e('div', 'fila');
+    for (const m of MT.mascotas.lista) for (const [po, em] of comb.slice(0, 3)) fc.append(celda(m.id, po, em, 96, po + ' + ' + em));
+    p.append(fc);
+    p.append(e('h3', '', 'Tamaños: 56, 120 y 240 px (contento)'));
     const f = e('div', 'fila');
     for (const m of MT.mascotas.lista) {
       const g = e('div', 'grupo');
-      for (const t of [64, 120, 240]) g.append(celda(m.id, 'base', t, t + ' px'));
+      for (const t of [56, 120, 240]) g.append(celda(m.id, 'base', 'contento', t, t + ' px'));
       f.append(g);
     }
     p.append(f);
