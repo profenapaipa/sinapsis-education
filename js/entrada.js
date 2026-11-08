@@ -31,7 +31,7 @@
       empezar: 'Empezar',                                                     // nuevo (rótulo del botón único)
       yaSe: 'Ya sé quién soy: elegir mi rol',                                 // nuevo
       seguir: (rol) => 'Seguir como ' + rol.toLowerCase() + ': ir a mi guía', // nuevo
-      descriptor: 'Educación inclusiva con tecnología',                       // adaptado del descriptor del inicio anterior («Colectivo de educación inclusiva con tecnología»)
+      // El descriptor («Educación inclusiva con tecnología») salió de la portada: se dice en voz alta y Sinapso ya da la bienvenida (MT.narrativa).
     },
     camino: {
       etiqueta: 'Quién te acompaña',                                          // nuevo (solo para lectores de pantalla)
@@ -39,6 +39,8 @@
       sinapso: ['Sinapsis es donde dos neuronas se conectan para aprender.', 'Nosotros conectamos el colegio, la familia y el estudiante.'],
       // «el aula / el estudiante / la guía» son los rótulos aprobados.
       rotulos: { kinesis: 'el aula', wisfox: 'el estudiante', niky: 'la guía' },
+      pasosTitulo: 'Tres pasos para empezar',                                 // nuevo
+      pasos: [['Pruébalo en un minuto', 'ent-pestanas'], ['Elige tu rol', 'ent-quien'], ['Haz una cosa en tu guía', null]], // nuevo (el tercero es lo que pasa después de elegir: no lleva a ningún lado)
     },
     pestanas: {
       titulo: 'Pruébalo en un minuto',                                        // nuevo
@@ -122,14 +124,39 @@
   const mascotaDeRol = (rol) => (rol === 'estudiante' ? 'wisfox' : 'kinesis');
   const nombreDe = (id) => ((MT.mascotas.lista.find((m) => m.id === id) || {}).nombre) || id;
   // Todas decorativas: el nombre siempre está escrito al lado. El tamaño lo manda el CSS (clases), no el dibujo.
-  const mascota = (id, pose, clase) => MT.mascotas.mascota(id, { pose: pose || 'base', tamano: 120, clase: 'ent-masc ' + (clase || '') });
-  // Cambia la pose de una mascota que ya está en pantalla (celebra, piensa...) sin mover nada más.
-  const cambiarPose = (ranura, id, pose) => ranura.replaceChildren(mascota(id, pose, 'ent-masc--panel'));
+  /* La emoción (contento, curioso, pensando, celebra, animo, sorprendido, duda) la dibuja js/mascotas.js; si esa versión aún no la entiende, la pose
+     parecida hace el mismo trabajo, así la historia se ve con cualquiera de las dos. */
+  const POSE_DE = { contento: 'saluda', curioso: 'senala', pensando: 'piensa', celebra: 'celebra', animo: 'saluda', sorprendido: 'base', duda: 'piensa' };
+  const mascota = (id, pose, clase, emocion) => MT.mascotas.mascota(id, { pose: pose || (emocion && POSE_DE[emocion]) || 'base', emocion, tamano: 120, clase: 'ent-masc ' + (clase || '') });
+
+  /* El estado de un ejemplo: en cuál de los cinco momentos del arco va (Bienvenida, Reto, Guía, Acción, Logro), qué dice la mascota y cómo se siente.
+     Cada ejemplo recorre el arco en pequeño; así «paso X de 5» se ve en todos y la mascota cambia de cara con lo que haces. */
+  function estadoDe(id) {
+    const N = MT.narrativa; const momentos = N.MOMENTOS;
+    const ranura = h('div', { class: 'ent-panel__masc' }, mascota(id, 'base', 'ent-masc--panel', 'contento'));
+    const puntos = momentos.map(() => h('span', { class: 'ent-punto' }));
+    const rotulo = h('strong');
+    const momento = h('p', { class: 'ent-momento' }, h('span', { class: 'ent-puntos', 'aria-hidden': 'true' }, puntos), rotulo);
+    const linea = h('p', { class: 'ent-panel__linea', 'aria-live': 'polite' });
+    /* poner(momento, clave): el momento del arco (por id) y la frase de MT.narrativa ('demo:<id>:<clave>'); la emoción sale de esa frase. */
+    function poner(idMomento, clave) {
+      const i = momentos.findIndex((m) => m.id === idMomento);
+      const l = N.linea('demo:' + id + ':' + clave) || { texto: '', emocion: momentos[i].emocion };
+      puntos.forEach((p, k) => p.classList.toggle('ent-punto--hecho', k <= i));
+      rotulo.textContent = `Paso ${i + 1} de ${momentos.length}: ${momentos[i].rotulo}`;
+      linea.textContent = l.texto;
+      ranura.replaceChildren(mascota(id, null, 'ent-masc--panel', l.emocion));
+    }
+    return { ranura, momento, linea, poner };
+  }
 
   /* La compañera de la guía de cada rol: una fila pequeña sobre el título, sin tapar nada y sin ocupar la pantalla en el celular. */
   function companera(rolId) {
     const id = mascotaDeRol(rolId);
-    return h('p', { class: 'ent-companera', 'data-espacio': ESPACIO[id] }, mascota(id, 'saluda', 'ent-masc--chica'), h('span', null, TEXTOS.guia.acompana(nombreDe(id))));
+    // Bienvenida del rol: la mascota se presenta y dice, en una frase, qué haces aquí (de MT.narrativa, la misma voz que en el resto).
+    const l = MT.narrativa.linea('rol:' + rolId);
+    return h('p', { class: 'ent-companera', 'data-espacio': ESPACIO[id] }, mascota(id, null, 'ent-masc--chica', l ? l.emocion : 'contento'),
+      h('span', null, h('strong', null, TEXTOS.guia.acompana(nombreDe(id))), l ? h('span', { class: 'ent-companera__frase' }, ' ' + l.texto) : null));
   }
 
   /* ---------------------------------------------------------------- datos del caso (solo lectura) */
@@ -149,7 +176,7 @@
   const caja = (guia, ...hijos) => h('div', { class: 'ent-demo' }, h('p', { class: 'ent-demo__guia' }, guia), ...hijos);
 
   // Sinapsis: una actividad viaja de Kinesis a Wisfox, un paso por toque.
-  function demoSinapso(d) {
+  function demoSinapso(d, est) {
     const T = TEXTOS.pestanas.sinapso; let n = 1;
     const pasos = T.pasos.map((f) => f(d));
     const lista = h('ol', { class: 'ent-viaje' }, pasos.map((p) => h('li', { class: 'ent-viaje__paso', 'data-espacio': p.donde === 'Wisfox' ? 'wisfox' : 'kinesis' },
@@ -164,13 +191,15 @@
       });
       boton.textContent = n >= pasos.length ? T.otra : T.paso;
     }
-    boton.addEventListener('click', () => { n = n >= pasos.length ? 1 : n + 1; pintar(); });
-    pintar();
+    // Reto al abrir; Acción mientras viaja; Logro cuando llega al estudiante.
+    const momento = () => (n <= 1 ? est.poner('reto', 'reto') : n >= pasos.length ? est.poner('logro', 'logro') : est.poner('accion', 'accion'));
+    boton.addEventListener('click', () => { n = n >= pasos.length ? 1 : n + 1; pintar(); momento(); });
+    pintar(); momento();
     return caja(T.guia, lista, h('div', { class: 'acciones' }, boton));
   }
 
   // Kinesis: al tocar un apoyo del perfil se ve el cambio concreto de la actividad y su razón.
-  function demoKinesis(d, ranura) {
+  function demoKinesis(d, est) {
     const T = TEXTOS.pestanas.kinesis;
     const apoyos = d.est.apoyos.slice(0, 3);
     const salida = h('div', { class: 'ent-demo__salida', 'aria-live': 'polite' }, h('p', { class: 'suave' }, T.vacio));
@@ -179,17 +208,18 @@
         chips.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
         const a = MT.datos.generarAjuste({ apoyos: [apoyo] })[0];
         const aprobado = h('p', { class: 'ent-demo__ok', 'aria-live': 'polite' });
-        const aprobar = h('button', { class: 'btn btn--chico', type: 'button', onclick: () => { aprobar.disabled = true; aprobado.textContent = T.aprobado(d); cambiarPose(ranura, 'kinesis', 'celebra'); } }, T.aprobar);
+        const aprobar = h('button', { class: 'btn btn--chico', type: 'button', onclick: () => { aprobar.disabled = true; aprobado.textContent = T.aprobado(d); est.poner('logro', 'logro'); } }, T.aprobar);
         salida.replaceChildren(h('p', { class: 'etiqueta' }, T.cambio), h('p', null, a.cambio), h('p', { class: 'etiqueta' }, T.porque), h('p', null, a.porque), h('p', { class: 'suave ent-demo__nota' }, T.nota), h('div', { class: 'acciones' }, aprobar), aprobado);
-        cambiarPose(ranura, 'kinesis', 'senala');
+        est.poner('accion', 'accion');
       } }, apoyo);
       return b;
     });
+    est.poner('reto', 'reto');
     return caja(T.guia(d), h('div', { class: 'ent-chips', role: 'group', 'aria-label': T.grupo(d) }, chips), salida);
   }
 
   // Wisfox: una pregunta del quiz de la actividad, con la explicación de la respuesta, sea cual sea.
-  function demoWisfox(d, ranura) {
+  function demoWisfox(d, est) {
     const T = TEXTOS.pestanas.wisfox; const preguntas = d.actividad.quiz.slice(0, 3); let i = 0;
     const cuerpo = h('div', { class: 'ent-quiz' });
     function pintar() {
@@ -202,19 +232,21 @@
           const ok = k === q.a;
           opciones.forEach((x, j) => { x.disabled = true; x.classList.toggle('ent-opcion--bien', j === q.a); x.classList.toggle('ent-opcion--elegida', j === k && !ok); if (j === q.a) x.setAttribute('aria-label', x.textContent + ', respuesta correcta'); });
           retro.replaceChildren(h('p', null, h('strong', null, ok ? T.bien : T.casi), ' ', q.why),
-            preguntas.length > 1 ? h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => { i = (i + 1) % preguntas.length; pintar(); cambiarPose(ranura, 'wisfox', 'base'); } }, T.otra) : null);
-          cambiarPose(ranura, 'wisfox', ok ? 'celebra' : 'base');
+            preguntas.length > 1 ? h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => { i = (i + 1) % preguntas.length; pintar(); } }, T.otra) : null);
+          // Acertar es el logro; no acertar se acompaña con ánimo (la explicación ya está a la vista), sin tono de error.
+          if (ok) est.poner('logro', 'logro'); else est.poner('accion', 'animo');
         });
         return b;
       });
       cuerpo.replaceChildren(enIngles(h('p', { class: 'ent-quiz__q' }, q.q), q.q), h('div', { class: 'ent-opciones' }, opciones), retro);
+      est.poner('reto', 'reto');
     }
     pintar();
     return caja(T.guia, h('p', null, h('span', { class: 'sello sello--ok' }, T.medida)), cuerpo);
   }
 
   // Niky: dos preguntas de ejemplo (la del docente y la del estudiante) con su respuesta preparada. No es un modelo conectado y se dice.
-  function demoNiky(d, ranura) {
+  function demoNiky(d, est) {
     const T = TEXTOS.pestanas.niky;
     const conversacion = h('div', { class: 'ent-chat', 'aria-live': 'polite' });
     let sec = 0;
@@ -226,16 +258,17 @@
       const mio = ++sec;
       botones.forEach((x) => x.setAttribute('aria-pressed', String(x.textContent === p.etiqueta)));
       conversacion.replaceChildren(h('div', { class: 'ent-burbuja ent-burbuja--yo' }, h('small', null, p.quien), p.texto), h('div', { class: 'ent-burbuja ent-burbuja--ia' }, T.pensando));
-      cambiarPose(ranura, 'niky', 'piensa');
+      est.poner('guia', 'accion');   // Niky piensa: es el momento de la guía y la herramienta
       await new Promise((r) => setTimeout(r, 300));
       if (mio !== sec) return;   // tocó otra pregunta mientras tanto
       const decide = h('p', { class: 'ent-demo__ok', 'aria-live': 'polite' });
-      const elegir = (k) => h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => { decide.textContent = T.decide[k]; } }, T[k]);
+      const elegir = (k) => h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => { decide.textContent = T.decide[k]; est.poner('logro', 'logro'); } }, T[k]);
       const respuesta = h('div', { class: 'ent-burbuja ent-burbuja--ia' }, h('small', null, 'Niky'), h('div', { class: 'ent-burbuja__texto', tabindex: '0', role: 'region', 'aria-label': 'Respuesta de Niky' }, ricoTexto(d.respuestas[p.tarea])), h('span', { class: 'sello sello--aviso' }, T.ejemplo),
         h('div', { class: 'acciones' }, elegir('usar'), elegir('cambiar')), decide);
       conversacion.replaceChildren(conversacion.firstChild, respuesta);
-      cambiarPose(ranura, 'niky', 'base');
+      est.poner('accion', 'respuesta');
     } }, p.etiqueta));
+    est.poner('reto', 'reto');
     return caja(T.guia, h('div', { class: 'ent-chips', role: 'group', 'aria-label': 'Preguntas de ejemplo' }, botones), conversacion, h('p', { class: 'suave ent-demo__nota' }, T.honesto));
   }
 
@@ -252,15 +285,16 @@
       const T = P[id];
       const tab = h('button', { class: 'ent-pestana', role: 'tab', type: 'button', id: 'ent-tab-' + id, 'aria-selected': 'false', 'aria-controls': 'ent-panel-' + id, tabindex: '-1', 'data-espacio': ESPACIO[id] },
         mascota(id, 'base', 'ent-masc--tab'), h('span', null, T.nombre));
-      const ranura = h('div', { class: 'ent-panel__masc' }, mascota(id, 'base', 'ent-masc--panel'));
+      const est = estadoDe(id);
       const sig = ORDEN[k + 1];
       const siguiente = sig
         ? h('button', { class: 'btn btn--suave', type: 'button', onclick: () => elegir(k + 1, true) }, P.siguiente(P[sig].nombre))
         : h('button', { class: 'btn', type: 'button', onclick: alElegirRol }, P.elegirRol);
       const panel = h('div', { class: 'ent-panel', role: 'tabpanel', id: 'ent-panel-' + id, 'aria-labelledby': 'ent-tab-' + id, tabindex: '0', hidden: true, 'data-espacio': ESPACIO[id] },
-        h('div', { class: 'ent-panel__cab' }, ranura, h('div', null, h('h3', null, T.nombre), h('p', { class: 'etiqueta' }, T.rotulo))),
+        h('div', { class: 'ent-panel__cab' }, est.ranura, h('div', null, h('h3', null, T.nombre), est.momento)),
+        est.linea,
         h('p', { class: 'ent-panel__frase' }, T.frase),
-        DEMOS[id](d, ranura),
+        DEMOS[id](d, est),
         h('div', { class: 'acciones ent-panel__pie' }, siguiente));
       paneles.push(panel);
       return tab;

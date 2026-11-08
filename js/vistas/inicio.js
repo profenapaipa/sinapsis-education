@@ -54,11 +54,13 @@
     // El logo (piezas negras con hilos de colores) sigue en la portada, pequeño y sin los botones de demostración que tenía el inicio anterior.
     // Se guarda el manejador en MT.entrada.logo para que las pruebas puedan alternar blanco y negro sin botones en pantalla.
     const logo = MT.tejido.logoTejido(); E.logo = logo;
+    const bien = MT.narrativa.linea('bienvenida') || { texto: '', emocion: 'contento' };
     return h('section', { class: 'ent-portada', 'aria-labelledby': 'ent-h1' },
       h('div', { class: 'ent-ancho ent-portada__cuerpo' },
-        h('div', { class: 'ent-portada__masc' }, E.mascota('sinapso', 'saluda', 'ent-masc--grande')),
+        // Momento 1, Bienvenida: Sinapso te recibe contento y lo dice con su propia frase (MT.narrativa).
+        h('div', { class: 'ent-portada__masc' }, E.mascota('sinapso', null, 'ent-masc--grande', bien.emocion), h('p', { class: 'ent-habla', 'aria-live': 'polite' }, bien.texto)),
         h('div', { class: 'ent-portada__texto' },
-          h('div', { class: 'ent-marca' }, logo.el, h('p', { class: 'etiqueta' }, T.portada.descriptor)),
+          h('div', { class: 'ent-marca' }, logo.el),
           h('h1', { id: 'ent-h1' }, E.MARCA.nombre),
           h('p', { class: 'ent-lema' }, E.MARCA.lema),
           h('div', { class: 'ent-portada__acciones' },
@@ -70,6 +72,7 @@
   // El camino: un hilo con los colores de los cuatro hilos de la plataforma y las tres mascotas que van apareciendo.
   function camino(E, T) {
     const C = T.camino;
+    const reto = MT.narrativa.linea('reto');
     const estacion = (id, texto) => h('li', { class: 'ent-estacion ent-aparece', 'data-espacio': E.ESPACIO[id] },
       h('div', { class: 'ent-flota' }, E.mascota(id, 'saluda', 'ent-masc--estacion')),
       h('p', null, h('strong', null, E.nombreDe(id)), h('span', null, texto)));
@@ -79,7 +82,12 @@
         h('div', { class: 'ent-sinapso ent-aparece', 'data-espacio': E.ESPACIO.sinapso },
           h('div', { class: 'ent-flota' }, E.mascota('sinapso', 'senala', 'ent-masc--estacion')),
           h('p', null, h('strong', null, C.sinapso[0]), ' ', C.sinapso[1])),
-        h('ol', { class: 'ent-estaciones' }, ['kinesis', 'wisfox', 'niky'].map((id) => estacion(id, C.rotulos[id])))));
+        // Momento 2, Reto: lo que le pasa a cualquiera en el aula, dicho por Sinapso, antes de ver quién ayuda.
+        reto ? h('p', { class: 'ent-reto ent-aparece' }, reto.texto) : null,
+        h('ol', { class: 'ent-estaciones' }, ['kinesis', 'wisfox', 'niky'].map((id) => estacion(id, C.rotulos[id]))),
+        // Tres pasos para empezar: lo que sigue, en orden. El tercero es lo que ocurre al elegir tu rol, por eso no es un botón.
+        h('div', { class: 'ent-pasos3' }, h('h3', null, C.pasosTitulo),
+          h('ol', null, C.pasos.map(([t, destino]) => h('li', null, destino ? h('button', { class: 'ent-enlace', type: 'button', onclick: () => ir(destino) }, t) : h('span', null, t)))))));
   }
 
   function saberMas(E, T) {
