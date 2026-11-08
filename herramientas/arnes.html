@@ -133,7 +133,9 @@ async function flujo() {
   // 1. Entrada por rol
   await cargar('#/', 1280); await espera(400);
   afirmar('el inicio pregunta quién eres', textoPagina().includes('¿Quién eres?'));
-  afirmar('hay una tarjeta por rol (5)', doc().querySelectorAll('.rol-tarjeta').length === 5);
+  // ---- entrada ---- (cambió: las tarjetas de rol ahora son cuatro opciones grandes (.ent-rol) más un enlace discreto para coordinación; siguen siendo los 5 roles)
+  afirmar('hay una opción por rol: cuatro grandes y coordinación aparte (5 roles)', doc().querySelectorAll('.ent-rol').length === 4 && [...doc().querySelectorAll('#ent-quien button')].filter((b) => /Soy/.test(b.textContent)).length === 5);
+  // ---- fin entrada ----
   afirmar('el riel lleva a mi espacio, mapa, Niky y roles', ['mi', 'mapa', 'recorrido', 'planes', 'hoja', 'identidad'].every((id) => doc().querySelector(`.riel a[data-ruta="${id}"]`)));
   await pulsar('Soy docente');
   afirmar('elegir docente lleva a su guía de inicio rápido', ventana().location.hash === '#/guia/docente');
@@ -371,19 +373,28 @@ async function flujo() {
   afirmar('abrir un módulo lleva al espacio del rol que lo usa', ventana().location.hash === '#/mi/ajustes' && ventana().MT.store.obtener().rol === 'orientacion');
   // El tono: el sentido humano y pedagógico primero, sin culpar a la docencia ni nombrar a otras empresas
   await ir('#/'); await espera(300);
-  const inicioTxt = textoPagina();
+  // ---- entrada ---- (cambió: el sentido, los tres términos y las leyes pasaron del cuerpo del inicio al plegable «Saber más»; se despliega antes de leer el texto.
+  // Los portales como «hilos» y «Cómo se conectan» se muestran ahora en las pestañas, así que se activan todas antes de leer.)
+  doc().querySelector('.ent-detalle').open = true;
+  for (const t of doc().querySelectorAll('.ent-pestana')) { t.click(); await espera(30); }
+  const inicioTxt = [...doc().querySelectorAll('#app *')].filter((e) => !e.children.length).map((e) => e.textContent).join(' ') + ' ' + textoPagina();
+  // ---- fin entrada ----
   afirmar('el inicio pone primero el sentido humano y pedagógico', /humana, pedagógica, al servicio del encuentro/i.test(inicioTxt) && /diversidad/i.test(inicioTxt));
   afirmar('el inicio no culpa a la docencia del trámite', !/en la práctica, queda en una carpeta|por cumplir|solo por el papeleo|después de darla|no lo hizo a tiempo|por encima de lo económico|segundo plano/i.test(inicioTxt));
-  afirmar('la bienvenida nombra y explica los tres términos: neurodesarrollo, neurodivergencia y neurodiversidad', ['neurodesarrollo', 'neurodivergencia', 'neurodiversidad'].every((t) => new RegExp(t, 'i').test(inicioTxt)) && /Mosaico Telar acompaña esa variedad en el aula/.test(inicioTxt));
+  afirmar('la bienvenida nombra y explica los tres términos: neurodesarrollo, neurodivergencia y neurodiversidad', ['neurodesarrollo', 'neurodivergencia', 'neurodiversidad'].every((t) => new RegExp(t, 'i').test(inicioTxt)) && /acompaña esa variedad en el aula/.test(inicioTxt));
   afirmar('el eje es lo cognitivo y la personalización: sin la cifra de discapacidad en general', /realidad de vida diferentes/.test(inicioTxt) && !/22\.803/.test(inicioTxt));
   afirmar('cada término se explica al tocarlo', doc().querySelectorAll('#app .termino').length >= 1);
-  const confianza = doc().querySelector('.confianza');
+  // ---- entrada ---- (cambió: la lista «confianza» ya no existe; la misma frase y su botón de las leyes viven en el cuerpo de «Saber más»)
+  const confianza = doc().querySelector('.ent-detalle__cuerpo');
+  // ---- fin entrada ----
   afirmar('la bienvenida dice que se piensa desde la pedagogía inclusiva, el DUA y el PIAR, con cada término explicable', !!confianza && /pedagogía inclusiva, el DUA y el PIAR/.test(confianza.innerText) && [...confianza.querySelectorAll('.termino')].map((b) => b.textContent).join('|').includes('DUA') && [...confianza.querySelectorAll('.termino')].map((b) => b.textContent).join('|').includes('PIAR'));
   afirmar('habla de privacidad de la información de cada persona y no de información clínica aislada', /Privacidad en la información de cada persona/.test(inicioTxt) && !/Información clínica aislada/i.test(inicioTxt));
   const marco = [...confianza.querySelectorAll('.termino')].find((b) => /leyes que los respaldan/.test(b.textContent)); if (marco) { marco.click(); await espera(250); }
   afirmar('las leyes que los respaldan abren el marco normativo explicado', !!marco && /Ley 115 de 1994/.test(doc().querySelector('dialog[open]') ? doc().querySelector('dialog[open]').innerText : '') && /Decreto 1421 de 2017/.test(doc().querySelector('dialog[open]') ? doc().querySelector('dialog[open]').innerText : ''));
   if (doc().querySelector('dialog[open]')) { doc().querySelector('dialog[open]').close(); await espera(150); }
-  afirmar('cada portal se presenta como un hilo (estudiante, quien enseña, el que cruza a los otros dos)', /hilo del estudiante/.test(inicioTxt) && /hilo de quien enseña/.test(inicioTxt) && /hilo que cruza a los otros dos/.test(inicioTxt) && /malla curricular de su institución/.test(inicioTxt));
+  // ---- entrada ---- (cambió: las frases de las pestañas son las recomendadas en sinergia-contenido.md; ya no dicen «hilo». Se comprueba que cada pieza se presenta con su idea.)
+  afirmar('cada pieza se presenta en su pestaña: el aula (Kinesis), el estudiante (Wisfox) y la IA que propone (Niky)', /Kinesis es el aula/.test(inicioTxt) && /Wisfox es donde el estudiante practica/.test(inicioTxt) && /Niky es una IA que propone; la persona decide/.test(inicioTxt) && /Tres piezas, un mismo camino/.test(inicioTxt));
+  // ---- fin entrada ----
   afirmar('la bienvenida no afirma que los portales originales ya comparten datos', /compartir los datos es lo que viene con el servidor/.test(inicioTxt));
   // ---- identidad: el logo de la pestaña, el botón de inicio y las cuatro versiones coinciden ----
   {
@@ -509,14 +520,16 @@ async function flujo() {
   afirmar('empezar de nuevo borra el trabajo pero conserva la cuenta', ventana().MT.store.obtener().cuenta && ventana().MT.store.obtener().cuenta.correo === 'docente@colegio.edu.co');
   // El logo: cuatro hilos de colores distintos y sin costuras al terminar
   await ir('#/'); ventana().MT.router.recargar(); await espera(4200);
-  const hilosColor = [...doc().querySelectorAll('.marca-hero .logo-tejido .hilo')].map((r) => ventana().getComputedStyle(r).fill);
+  // ---- entrada ---- (cambió: el logo animado vive ahora pequeño en la portada (.ent-marca) y sin botones de demostración; el blanco y negro se alterna por su manejador MT.entrada.logo)
+  const hilosColor = [...doc().querySelectorAll('.ent-marca .logo-tejido .hilo')].map((r) => ventana().getComputedStyle(r).fill);
   afirmar('el logo trae cuatro hilos de cuatro colores distintos', hilosColor.length >= 4 && new Set(hilosColor).size === 4, hilosColor.join(' | '));
-  const cajas = [...doc().querySelectorAll('.marca-hero .logo-tejido .hilo')].map((r) => ['x', 'y', 'width', 'height'].map((k) => parseFloat(r.getAttribute(k))));
+  const cajas = [...doc().querySelectorAll('.ent-marca .logo-tejido .hilo')].map((r) => ['x', 'y', 'width', 'height'].map((k) => parseFloat(r.getAttribute(k))));
   const solapan = cajas.some((p, i) => cajas.some((q, j) => j > i && p[0] < q[0] + q[2] && q[0] < p[0] + p[2] && p[1] < q[1] + q[3] && q[1] < p[1] + p[3]));
   afirmar('los hilos no se superponen entre sí ni hay cuadritos de cruce (así no quedan rayas del borde)', !solapan && doc().querySelectorAll('.logo-tejido .cruce, .logo-tejido .cruces').length === 0, 'tramos=' + cajas.length);
-  const lg = doc().querySelector('.marca-hero .logo-tejido');
+  const lg = doc().querySelector('.ent-marca .logo-tejido');
   afirmar('al terminar la animación el logo pasa a una sola forma, sin las aristas de las piezas', !lg.classList.contains('tejiendo') && ventana().getComputedStyle(lg.querySelector('.piezas')).display === 'none' && ventana().getComputedStyle(lg.querySelector('.tela-unica')).display !== 'none');
-  doc().querySelectorAll('.marca-hero__controles button')[1].click(); await espera(900);
+  ventana().MT.entrada.logo.alternar(); await espera(900);
+  // ---- fin entrada ----
   afirmar('el logo pasa de color a blanco y negro y vuelve', lg.classList.contains('mono') && ventana().getComputedStyle(lg.querySelector('.hilos')).opacity === '0');
   afirmar('al cambiar de pantalla corre la barra de cuatro hilos', !!doc().getElementById('progreso-hilos') && doc().querySelectorAll('#progreso-hilos span').length === 4);
   // ---- logo (agente de marca) ----
@@ -951,7 +964,9 @@ async function flujoDemostracion() {
   const pequenas = celdas.filter((x) => parseFloat(ventana().getComputedStyle(x).fontSize) < 13.99).map((x) => x.textContent.trim().slice(0, 20) + ' ' + ventana().getComputedStyle(x).fontSize);
   afirmar('QA-07: la tabla de Participar mide 14 px o más en todas sus celdas', celdas.length > 10 && pequenas.length === 0, `${celdas.length} celdas; pequeñas: ${pequenas.slice(0, 3).join(', ')}`);
   await cargar('#/', 1280, 720); await espera(500);
-  const rotulos = [...D().querySelectorAll('.dispositivo-rotulo')].filter(visible);
+  // ---- entrada ---- (cambió: ya no hay capturas con rótulo; la misma regla (14 px o más) se aplica a los textos pequeños de la portada: rótulo, mascotas del camino y de las pestañas)
+  const rotulos = [...D().querySelectorAll('.ent-portada .etiqueta, .ent-estacion span, .ent-pestana span, .ent-rol__texto small')].filter(visible);
+  // ---- fin entrada ----
   afirmar('QA-07: los rótulos de la bienvenida miden 14 px o más', rotulos.length > 0 && rotulos.every((x) => parseFloat(ventana().getComputedStyle(x).fontSize) >= 13.99), rotulos.map((x) => ventana().getComputedStyle(x).fontSize).join());
   const hay = ventana().MT.ia.puedeHaberServidor;
   afirmar('QA-22: en GitHub Pages y desde el disco no se pregunta por /api/estado; en un servidor local sí', hay('profenapaipa.github.io', 'https:') === false && hay('', 'file:') === false && hay('localhost', 'http:') === true && hay('127.0.0.1', 'http:') === true);
@@ -1004,7 +1019,9 @@ async function flujoDemostracion() {
   localStorage.clear();
   await cargar('#/', 1280, 800); await espera(500);
   const pedidos = []; ventana().Element.prototype.scrollIntoView = function (o) { pedidos.push(o && o.behavior); };
-  const entrar = () => [...D().querySelectorAll('a.btn')].find((a) => a.getAttribute('href') === '#roles');
+  // ---- entrada ---- (cambió: el botón de la bienvenida es «Empezar» (un <button>, no un enlace a #roles) y lleva al camino con el mismo desplazamiento)
+  const entrar = () => D().querySelector('.ent-empezar');
+  // ---- fin entrada ----
   afirmar('QA-08: sin calmado, el botón de la bienvenida se desplaza con suavidad y <html> trae scroll-behavior suave', !!entrar() && (entrar().click(), pedidos[pedidos.length - 1] === 'smooth') && ventana().getComputedStyle(D().documentElement).scrollBehavior === 'smooth' && ventana().MT.movimiento.suave() === true, pedidos.join());
   D().documentElement.dataset.movimiento = 'calmado';
   entrar().click();
@@ -1151,6 +1168,102 @@ async function flujoFrontend() {
 }
 
 /* ===== Experiencia móvil: lo que llega por el QR del pendón. Se mide en el tamaño de cada celular, no solo a 390 ===== */
+// ---- entrada ----
+/* La entrada nueva (portada, cuatro pestañas con mini ejemplo, «¿Quién eres?»): teclado, rol hacia la guía, sin desborde en 390 px, calmado sin movimiento,
+   modo presentación sin recorrido y ejemplos que funcionan. Son pruebas nuevas; las que cambiaron por el rediseño están arriba, cada una con su porqué. */
+async function flujoEntrada() {
+  const D = () => doc(); const W = () => ventana(); const MTw = () => ventana().MT;
+  const tecla = (el, key) => el.dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true, cancelable: true }));
+  const tabs = () => [...D().querySelectorAll('[role="tab"]')];
+  const estado = () => tabs().map((t) => t.getAttribute('aria-selected') + t.tabIndex).join(',');
+  localStorage.clear(); await cargar('#/', 390, 844); await espera(500);
+
+  // La portada: un solo botón principal, el nombre de la marca sale de una sola constante, y no se nombra lo que ya no se llama así
+  const marca = MTw().entrada.MARCA.nombre;
+  afirmar('entrada: la portada trae un solo botón principal («Empezar») y el título es el nombre de la marca (constante MARCA.nombre)', D().querySelectorAll('.ent-portada .btn').length === 1 && D().querySelector('.ent-portada h1').textContent === marca && /Tejemos caminos para aprender\./.test(D().querySelector('.ent-lema').textContent));
+  const visibleEntrada = D().querySelector('.entrada').innerText;
+  afirmar('entrada: no aparece «Mosaico Telar», «ValerIA» ni «Dejar mi correo» en la entrada', !/Mosaico Telar|ValerIA|Dejar mi correo/i.test(visibleEntrada));
+  afirmar('entrada: la portada trae el enlace discreto «Ya sé quién soy»', [...D().querySelectorAll('.ent-portada .ent-enlace')].some((b) => /Ya sé quién soy/.test(b.textContent)));
+
+  // Pestañas: ARIA y teclado (flechas, Inicio y Fin, tabindex móvil)
+  const tl = D().querySelector('[role="tablist"]');
+  afirmar('entrada: hay un tablist con cuatro pestañas y cada una controla un panel que existe y se nombra por su pestaña', !!tl && tabs().length === 4 && tabs().every((t) => { const p = D().getElementById(t.getAttribute('aria-controls')); return !!p && p.getAttribute('role') === 'tabpanel' && p.getAttribute('aria-labelledby') === t.id; }));
+  afirmar('entrada: al abrir solo la primera pestaña está activa (tabindex 0) y su panel es el único visible', estado() === 'true0,false-1,false-1,false-1' && [...D().querySelectorAll('[role="tabpanel"]')].filter((p) => !p.hidden).length === 1);
+  tabs()[0].focus(); tecla(tabs()[0], 'ArrowRight'); await espera(60);
+  afirmar('entrada: la flecha derecha pasa a Kinesis y mueve el foco', estado() === 'false-1,true0,false-1,false-1' && D().activeElement === tabs()[1]);
+  tecla(D().activeElement, 'End'); await espera(30);
+  afirmar('entrada: Fin lleva a la última pestaña (Niky)', estado() === 'false-1,false-1,false-1,true0' && D().activeElement === tabs()[3]);
+  tecla(D().activeElement, 'ArrowRight'); await espera(30);
+  afirmar('entrada: la flecha derecha de la última vuelve a la primera', estado() === 'true0,false-1,false-1,false-1');
+  tecla(D().activeElement, 'ArrowLeft'); await espera(30);
+  afirmar('entrada: la flecha izquierda de la primera va a la última', estado() === 'false-1,false-1,false-1,true0');
+  tecla(D().activeElement, 'Home'); await espera(30);
+  afirmar('entrada: Inicio lleva a la primera pestaña', estado() === 'true0,false-1,false-1,false-1');
+  const medidas = tabs().map((t) => t.getBoundingClientRect());
+  afirmar('entrada: en 390 px las cuatro pestañas se tocan bien (44 px o más de alto y de ancho)', medidas.every((r) => r.height >= 44 && r.width >= 44), medidas.map((r) => Math.round(r.width) + 'x' + Math.round(r.height)).join(' '));
+
+  // Los cuatro mini ejemplos funcionan y no escriben en los datos de la persona
+  const antes = JSON.stringify(MTw().store.obtener().actividades) + JSON.stringify(MTw().store.obtener().ajustes);
+  tabs()[0].click(); const paso = D().querySelector('#ent-panel-sinapso .ent-demo .btn'); paso.click(); paso.click(); await espera(60);
+  afirmar('entrada: Sinapsis: los pasos del viaje avanzan de uno en uno hasta Wisfox y vuelven a empezar', D().querySelectorAll('#ent-panel-sinapso .ent-viaje__paso--visto').length === 3 && /Ver otra vez/.test(paso.textContent) && (paso.click(), D().querySelectorAll('#ent-panel-sinapso .ent-viaje__paso--visto').length === 1));
+  tabs()[1].click(); D().querySelector('#ent-panel-kinesis .ent-chip').click(); await espera(60);
+  const salidaK = D().querySelector('#ent-panel-kinesis .ent-demo__salida').innerText;
+  afirmar('entrada: Kinesis: tocar un apoyo muestra el cambio en la actividad y su razón', /Cambio en la actividad/i.test(salidaK) && /Por qué/i.test(salidaK), salidaK);
+  [...D().querySelectorAll('#ent-panel-kinesis .ent-demo__salida .btn')].find((b) => /Aprobar/.test(b.textContent)).click(); await espera(60);
+  afirmar('entrada: Kinesis: orientación puede aprobar y se dice que el estudiante ya puede recibirla (con su código, sin nombre)', /Aprobado: ahora P-\d\d puede recibir/.test(D().querySelector('#ent-panel-kinesis').innerText));
+  tabs()[2].click(); const opciones = [...D().querySelectorAll('#ent-panel-wisfox .ent-opcion')]; opciones[0].click(); await espera(60);
+  const ret = D().querySelector('#ent-panel-wisfox .ent-demo__salida').innerText;
+  afirmar('entrada: Wisfox: responder una pregunta da la retroalimentación (con la explicación) y marca cuál era la correcta', /Correcta|Todavía no/.test(ret) && ret.length > 25 && D().querySelectorAll('#ent-panel-wisfox .ent-opcion--bien').length === 1 && opciones.every((o) => o.disabled));
+  tabs()[3].click(); D().querySelector('#ent-panel-niky .ent-chip').click(); await espera(900);
+  const niky = D().querySelector('#ent-panel-niky').innerText;
+  afirmar('entrada: Niky: tocar una pregunta muestra la respuesta de ejemplo, lo dice, y la persona decide (Usar o Cambiar)', /Respuesta de ejemplo/.test(niky) && /ejemplos preparados/.test(niky) && /Usar/.test(niky) && /Cambiar/.test(niky));
+  afirmar('entrada: los ejemplos no escriben en los datos (actividades y ajustes quedan igual)', antes === JSON.stringify(MTw().store.obtener().actividades) + JSON.stringify(MTw().store.obtener().ajustes));
+  afirmar('entrada: en los ejemplos solo hay códigos de estudiante (P-01...), sin nombres', /P-\d\d/.test(D().querySelector('#ent-panel-kinesis').innerText) && !/[Ss]ofía|[Jj]uan |[Mm]aría/.test(D().querySelector('.entrada').innerText));
+
+  // Rol: una pregunta, cada opción avanza sola a la guía y la mascota del rol acompaña
+  for (const [texto, id, mascota] of [['Soy estudiante', 'estudiante', 'Wisfox'], ['Soy docente', 'docente', 'Kinesis'], ['Soy familia', 'familia', 'Kinesis'], ['Soy de orientación', 'orientacion', 'Kinesis']]) {
+    await cargar('#/', 390, 844); await espera(350);
+    const b = [...D().querySelectorAll('#ent-quien button')].find((x) => x.textContent.includes(texto)); b.click(); await espera(350);
+    afirmar(`entrada: elegir «${texto}» avanza solo a su guía, guarda el rol y la acompaña ${mascota}`, W().location.hash === '#/guia/' + id && MTw().store.obtener().rol === id && new RegExp('Te acompaña ' + mascota).test((D().querySelector('.ent-companera') || {}).textContent || ''), W().location.hash);
+  }
+  const compa = D().querySelector('.ent-companera').getBoundingClientRect();
+  afirmar('entrada: la compañera de la guía es discreta en el celular (menos de 64 px de alto) y no tapa el título', compa.height < 64 && compa.bottom <= D().querySelector('main h1').getBoundingClientRect().top + 2, Math.round(compa.height) + ' px');
+  localStorage.clear(); await cargar('#/', 390, 844); await espera(350);
+  [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(300);
+  afirmar('entrada: coordinación sigue disponible como enlace discreto', W().location.hash === '#/guia/coordinacion');
+
+  // Sin desborde en 320, 360 y 390, con todas las pestañas abiertas una a una, y escritorio
+  for (const ancho of [320, 360, 390, 1280]) {
+    localStorage.clear(); await cargar('#/', ancho, ancho < 600 ? 800 : 800); await espera(450);
+    let malo = '';
+    for (let k = 0; k < 4; k++) { tabs()[k].click(); await espera(40); if (D().documentElement.scrollWidth > W().innerWidth + 1) malo += ' pestaña ' + k + ' ' + D().documentElement.scrollWidth; }
+    afirmar(`entrada: sin desborde horizontal a ${ancho} px (portada, camino, las cuatro pestañas, rol y Saber más)`, !malo, malo);
+  }
+  // Con tema oscuro y texto grande tampoco
+  localStorage.clear(); localStorage.setItem('mosaicotelar.apariencia', JSON.stringify({ tema: 'oscuro', texto: 'grande' })); await cargar('#/', 360, 740); await espera(450);
+  afirmar('entrada: con tema oscuro y texto grande en 360 px no hay desborde', D().documentElement.scrollWidth <= W().innerWidth + 1, String(D().documentElement.scrollWidth));
+
+  // Calmado: nada queda oculto esperando una animación, y nada se mueve
+  localStorage.clear(); localStorage.setItem('mosaicotelar.apariencia', JSON.stringify({ movimiento: 'calmado' })); await cargar('#/', 390, 844); await espera(500);
+  const ocultos = [...D().querySelectorAll('.ent-aparece')].filter((e) => { const cs = W().getComputedStyle(e); return e.classList.contains('ent-oculto') || cs.opacity !== '1' || (cs.transform !== 'none' && cs.transform !== 'matrix(1, 0, 0, 1, 0, 0)'); });
+  afirmar('entrada: con movimiento calmado todo está visible y quieto desde el principio (nada oculto, sin desplazamientos)', D().querySelectorAll('.ent-aparece').length >= 4 && ocultos.length === 0 && [...D().querySelectorAll('.ent-flota')].every((e) => !e.style.getPropertyValue('--py')), ocultos.length + ' ocultos');
+  // Normal: las mascotas del camino empiezan ocultas y aparecen al verlas
+  localStorage.clear(); await cargar('#/', 390, 844); await espera(500);
+  const oculto0 = D().querySelectorAll('.ent-oculto').length;
+  D().getElementById('ent-camino').scrollIntoView(); W().scrollTo(0, D().getElementById('ent-camino').offsetTop); await espera(900);
+  afirmar('entrada: sin calmado, las mascotas del camino aparecen una a una al desplazarse', oculto0 >= 1 && D().querySelectorAll('.ent-oculto').length < oculto0, oculto0 + ' -> ' + D().querySelectorAll('.ent-oculto').length);
+
+  // Modo presentación: el recorrido se omite (la exposición guiada no se altera), también al entrar con ?caso=
+  localStorage.clear(); localStorage.setItem('mosaicotelar.presentacion', JSON.stringify({ activo: true, paso: 0, oculto: false })); await cargar('#/', 1280, 800); await espera(600);
+  afirmar('entrada: en modo presentación no hay camino ni pestañas, pero sí la pregunta de rol', !D().getElementById('ent-pestanas') && !D().getElementById('ent-camino') && !!D().getElementById('ent-quien'));
+  localStorage.clear(); await cargar('&caso=2#/', 1280, 800); await espera(1500);
+  afirmar('entrada: entrar con ?caso=2 activa la presentación y no muestra el recorrido', MTw().presentacion.activo() && !D().getElementById('ent-pestanas'), 'activo=' + MTw().presentacion.activo());
+  localStorage.clear(); await cargar('#/mi/resumen', 390, 844); await espera(500);
+  afirmar('entrada: un enlace profundo (#/mi/...) no pasa por la portada', !D().querySelector('.ent-portada'));
+  localStorage.clear();
+}
+// ---- fin entrada ----
+
 async function flujoMovil() {
   const D = () => doc();
   const sinDesborde = () => D().documentElement.scrollWidth <= ventana().innerWidth + 1;
@@ -1168,14 +1281,16 @@ async function flujoMovil() {
   /* La primera pantalla: UN botón principal a la vista, sin desplazarse, y no tapado por la barra inferior */
   for (const [ancho, alto] of [[320, 568], [360, 640], [375, 667], [390, 844]]) {
     localStorage.clear(); await cargar('#/', ancho, alto); await espera(450);
-    const boton = [...D().querySelectorAll('main .lienzo a.btn')].find((b) => /Entrar con mi rol/.test(b.textContent));
+    // ---- entrada ---- (cambió: el botón único de la primera pantalla es «Empezar»)
+    const boton = D().querySelector('main .ent-empezar');
+    // ---- fin entrada ----
     const barra = D().querySelector('.riel'); const topeBarra = barra ? barra.getBoundingClientRect().top : alto;
     const r = boton && boton.getBoundingClientRect(); const h1 = D().querySelector('main h1').getBoundingClientRect();
-    afirmar(`móvil ${ancho}x${alto}: en la primera pantalla se ven el nombre y el botón «Entrar con mi rol», sin desplazarse y sin quedar tras la barra inferior`,
+    afirmar(`móvil ${ancho}x${alto}: en la primera pantalla se ven el nombre y el botón «Empezar», sin desplazarse y sin quedar tras la barra inferior`,
       !!r && h1.top >= 0 && h1.bottom <= topeBarra && r.top >= 0 && r.bottom <= topeBarra, r ? `botón ${Math.round(r.top)}-${Math.round(r.bottom)}, barra en ${Math.round(topeBarra)}` : 'sin botón');
     if (ancho === 360) {
       afirmar('móvil: el botón principal de la primera pantalla mide al menos 44 px de alto y el ancho de la columna', !!r && r.height >= 44 && r.width >= ancho - 48, r ? `${Math.round(r.width)}x${Math.round(r.height)}` : '');
-      const peques = [...D().querySelectorAll('.riel a, .franja .btn, .lienzo .btn, .barra-portales a')].filter(visible).filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.height < 40 || b.width < 44) && !e.matches('.riel-logo'); });
+      const peques = [...D().querySelectorAll('.riel a, .franja .btn, .ent-portada .btn, .ent-portada .ent-enlace, .barra-portales a')].filter(visible).filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.height < 40 || b.width < 44) && !e.matches('.riel-logo'); });
       afirmar('móvil: la barra inferior, la franja, los botones de la bienvenida y las pestañas tienen objetivos de al menos 40 px de alto (la franja) y 44 de ancho', peques.length === 0, peques.map((e) => (e.className || e.tagName) + ' ' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height)).join(' | '));
       const barraAlto = [...D().querySelectorAll('.riel a')].filter(visible).map((a) => a.getBoundingClientRect().height);
       afirmar('móvil: cada acceso de la barra inferior mide al menos 44 px de alto', barraAlto.length > 0 && barraAlto.every((x) => x >= 44), barraAlto.map(Math.round).join());
@@ -1195,7 +1310,10 @@ async function flujoMovil() {
 
   /* El tamaño del texto de lectura */
   await cargar('#/', 360, 640); await espera(300);
-  const intro = D().querySelector('.lienzo .intro'); const px = parseFloat(ventana().getComputedStyle(intro).fontSize);
+  // ---- entrada ---- (cambió: el párrafo de presentación es ahora la apertura de Sinapso en el camino)
+  const intro = D().querySelector('.ent-sinapso p');
+  const px = parseFloat(ventana().getComputedStyle(intro).fontSize);
+  // ---- fin entrada ----
   afirmar('móvil: el párrafo de presentación mide al menos 16 px', px >= 16, px + ' px');
 
   /* Modo amplio de los portales: el botón existe en un celular y deja el portal a pantalla completa */
@@ -1229,6 +1347,7 @@ async function flujoMovil() {
   } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'recorrido: ' + String(e && e.stack || e); }
   try { await flujoDemostracion(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'demostración: ' + String(e && e.stack || e); }
   try { await flujoFrontend(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'frontend: ' + String(e && e.stack || e); }
+  try { await flujoEntrada(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'entrada: ' + String(e && e.stack || e); }
   try { await flujoMovil(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'móvil: ' + String(e && e.stack || e); }
   document.getElementById('resultado').textContent = JSON.stringify(salida);
   document.title = 'listo';
