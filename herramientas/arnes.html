@@ -757,7 +757,7 @@ async function flujo() {
     const W = ventana(); const M = W.MT.mascotas; const D = doc();
     const IDS = ['sinapso', 'kinesis', 'wisfox', 'niky'];
     afirmar('mascotas: existen las cuatro (sinapso, kinesis, wisfox, niky) con nombre, animal, rol y color', !!M && IDS.every((id) => { const m = M.lista.find((x) => x.id === id); return m && m.nombre && m.animal && m.rol && m.color; }) && M.lista.length === 4);
-    afirmar('mascotas: la API responde (mascota, paraRol, escena, POSES, EMOCIONES, alAzar, cambiar) y paraRol lleva cada rol a su mascota', typeof M.mascota === 'function' && typeof M.escena === 'function' && typeof M.alAzar === 'function' && typeof M.cambiar === 'function' && M.EMOCIONES.join() === 'contento,curioso,pensando,celebra,animo,sorprendido,duda' && M.paraRol('docente') === 'kinesis' && M.paraRol('estudiante') === 'wisfox' && M.paraRol('ia') === 'niky' && M.paraRol('desconocido') === 'sinapso');
+    afirmar('mascotas: la API responde (mascota, paraRol, escena, POSES, EMOCIONES, alAzar, cambiar) y paraRol lleva cada rol a su mascota', typeof M.mascota === 'function' && typeof M.escena === 'function' && typeof M.alAzar === 'function' && typeof M.cambiar === 'function' && typeof M.tejer === 'function' && M.POSES.includes('teje') && M.EMOCIONES.join() === 'contento,curioso,pensando,celebra,animo,sorprendido,duda' && M.paraRol('docente') === 'kinesis' && M.paraRol('estudiante') === 'wisfox' && M.paraRol('ia') === 'niky' && M.paraRol('desconocido') === 'sinapso');
     const caja = D.createElement('div'); caja.style.cssText = 'position:fixed;left:0;top:0;width:900px;opacity:0;pointer-events:none'; D.body.append(caja);
     // Las cinco poses de las cuatro: el contrato pide al menos base, saluda y señala, y que una pose desconocida caiga en base.
     const sinPose = []; const desbordes = []; const sinOjos = [];
@@ -775,7 +775,7 @@ async function flujo() {
       if (emo === 'celebra' ? (arcos !== 2 || el.querySelectorAll('.m-ojo').length !== 0) : (el.querySelectorAll('.m-ojo').length !== 2 || el.querySelectorAll('.m-brillo').length !== 2 || arcos)) sinOjos.push(id + '/' + pose + '/' + emo);
       if (caja.children.length > 60) caja.replaceChildren();
     }
-    afirmar('mascotas: las cuatro existen en las cinco poses y las siete emociones (140 combinaciones) a 56 y 240 px, con lienzo de 120 x 120', sinPose.length === 0, sinPose.slice(0, 6).join(', '));
+    afirmar('mascotas: las cuatro existen en las seis poses (con la de tejer) y las siete emociones (168 combinaciones) a 56 y 240 px, con lienzo de 120 x 120', sinPose.length === 0, sinPose.slice(0, 6).join(', '));
     afirmar('mascotas: ninguna forma se sale del lienzo en ninguna pose ni tamaño', desbordes.length === 0, desbordes.slice(0, 6).join(' | '));
     afirmar('mascotas: en cada emoción los ojos son dos (punto con brillo; en celebra, dos arcos de ojo feliz)', sinOjos.length === 0, sinOjos.join(', '));
     const base = IDS.map((id) => M.mascota(id, {})); base.forEach((e) => caja.append(e));
@@ -823,6 +823,31 @@ async function flujo() {
     raiz.setAttribute('data-tema', 'oscuro'); const enOscuro = lum(W.getComputedStyle(quieta.querySelector('.m-t')).stroke);
     if (tema == null) raiz.removeAttribute('data-tema'); else raiz.setAttribute('data-tema', tema);
     afirmar('mascotas: el contorno es oscuro en el tema claro y claro en el oscuro', enClaro < 80 && enOscuro > 175, 'claro=' + enClaro + ' oscuro=' + enOscuro);
+    // Rediseño: ropa, textura del animal, pulpo con ocho tentáculos en parejas y lana con torsión.
+    const ropa = IDS.map((id) => M.mascota(id, {})); ropa.forEach((e) => caja.append(e));
+    afirmar('mascotas: cada una lleva su prenda de punto (chaleco, delantal, suéter, poncho) con puntadas o costura y lana con marcas de torsión', ropa.every((e) => e.querySelectorAll('.m-prenda').length >= 1) && ropa.filter((e) => e.querySelectorAll('.m-v').length).length >= 3 && ropa.every((e) => e.querySelectorAll('.m-tors').length >= 1));
+    const pulpo = ropa[1];
+    afirmar('mascotas: el pulpo tiene ocho tentáculos en parejas, dos por brazo y dos por pierna', pulpo.querySelectorAll('path[stroke="var(--piel)"]').length === 8, String(pulpo.querySelectorAll('path[stroke="var(--piel)"]').length));
+    afirmar('mascotas: rasgos del animal real: antifaz y nariz grande del oso, iris del pulpo, patas y orejas oscuras del zorro, ojeras y nariz húmeda del venado', !!ropa[0].querySelector('.m-nariz-g') && !!ropa[1].querySelector('.m-iris') && ropa[1].querySelectorAll('.m-mota').length > 5 && ropa[2].querySelectorAll('.m-oscuro').length >= 4 && ropa[3].querySelectorAll('.m-ojera').length === 2 && ropa[3].querySelector('.m-humedo'));
+    // Tejer: la pose existe, trae agujas, pieza y ovillo, y todas las emociones siguen leyéndose
+    const teje = IDS.map((id) => M.mascota(id, { teje: true })); teje.forEach((e) => caja.append(e));
+    afirmar('mascotas: teje:true pone la pose teje con dos agujas, la pieza, el hilo y el ovillo; la pose teje existe sin la opción y el contrato sigue igual', teje.every((e) => e.dataset.pose === 'teje' && e.querySelectorAll('.m-ag-i, .m-ag-d').length === 2 && e.querySelectorAll('.m-pieza').length === 1 && e.querySelectorAll('.m-ovillo').length === 1 && e.querySelectorAll('.m-fila-nueva').length >= 1) && M.mascota('niky', { pose: 'teje' }).dataset.pose === 'teje');
+    const act0 = M.activas(); const vivo = M.mascota('wisfox', { teje: true }); caja.append(vivo); const fria = M.mascota('wisfox', { pose: 'teje' }); caja.append(fria);
+    afirmar('mascotas: solo la que pide teje:true entra al reloj compartido; la pose a secas queda quieta', M.activas() === act0 + 1);
+    const raiz2 = D.documentElement; const antes2 = raiz2.getAttribute('data-movimiento'); raiz2.removeAttribute('data-movimiento');
+    const reduce2 = W.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    M.tejer(vivo);
+    afirmar('mascotas: el ciclo de tejer se dispara (salvo con prefers-reduced-motion) y se apaga solo al terminar', reduce2 ? !vivo.classList.contains('mascota--tejiendo') : vivo.classList.contains('mascota--tejiendo') && W.getComputedStyle(vivo.querySelector('.m-ag-i')).animationName === 'm-aguja-i');
+    raiz2.setAttribute('data-movimiento', 'calmado'); vivo.classList.remove('mascota--tejiendo'); M.tejer(vivo);
+    afirmar('mascotas: en la versión calmada el ciclo de tejer no se dispara y la pieza queda quieta y tejida', !vivo.classList.contains('mascota--tejiendo') && W.getComputedStyle(vivo.querySelector('.m-ag-i')).animationName === 'none');
+    if (antes2 == null) raiz2.removeAttribute('data-movimiento'); else raiz2.setAttribute('data-movimiento', antes2);
+    vivo.remove(); fria.remove(); M.latir();
+    afirmar('mascotas: al quitar el nodo, el reloj compartido suelta la mascota (sin fugas)', M.activas() === act0, M.activas() + ' vs ' + act0);
+    const esc = M.escena(['sinapso', 'niky'], { teje: true, tamano: 64 });
+    afirmar('mascotas: la escena puede pedir que teja, y con teje las cuatro emociones se distinguen en cada una', esc.querySelectorAll('svg[data-pose="teje"]').length === 2 && IDS.every((id) => new Set(M.EMOCIONES.map((em) => M.mascota(id, { teje: true, emocion: em }).innerHTML)).size === 7));
+    // Con la labor puesta, ninguna forma se sale del lienzo (la prueba de las poses ya cubre teje; aquí también el ciclo a mitad)
+    const medio = M.mascota('kinesis', { teje: true, tamano: 240 }); caja.append(medio); const r0m = medio.getBoundingClientRect();
+    afirmar('mascotas: la pose teje cabe en el lienzo de 120 x 120', [...medio.querySelectorAll('path, ellipse, circle, rect')].every((f) => { const r = f.getBoundingClientRect(); return r.left >= r0m.left - 4 && r.right <= r0m.right + 4 && r.top >= r0m.top - 4 && r.bottom <= r0m.bottom + 4; }));
     caja.remove();
   }
   // ---- fin mascotas ----
