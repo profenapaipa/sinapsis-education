@@ -182,7 +182,7 @@
   function resaltar(clave) {
     limpiarAnillo();
     const sel = FOCOS[clave]; if (!sel) return;
-    const el = [...document.querySelectorAll(sel)].find((x) => x.offsetWidth > 0 && x.offsetHeight > 0 && !x.closest('.tut, .tut-sel'));
+    const el = [...document.querySelectorAll(sel)].find((x) => x.offsetWidth > 0 && x.offsetHeight > 0 && (clave === 'niky' || x.offsetHeight < window.innerHeight * 0.7) && !x.closest('.tut, .tut-sel'));   // un anillo del tamaño de toda la pantalla no señala nada
     if (!el) return;
     anillo = el; el.classList.add('tut-foco');
     // Se lleva a la vista sin pelear con la tarjeta flotante: MT.movimiento respeta el modo calmado.
@@ -342,6 +342,8 @@
     const r = rolDe(est.rol); const c = MT.casos.lista[est.caso - 1];
     limpiarAnillo(); MT.casos.cerrarPanel();
     if (tarjeta) { tarjeta.hidden = true; }
+    // Terminado el recorrido la señal se quita: Niky vuelve a aparecer (se oculta mientras el tutorial está activo).
+    delete raiz.dataset.tutorial;
     medir();
     const S = TEXTOS.final;
     const o = ventana(h('div', { class: 'tut-sel__cuerpo tut-final' },
@@ -434,7 +436,13 @@
     guia.render = function (main, ctx) { original.call(this, main, ctx); const c = main.querySelector('.contenedor') || main; c.append(seccionGuia(ctx && ctx.sub)); };
   }
 
-  window.addEventListener('hashchange', () => { if (overlay && !est.activo && location.hash !== '#/tutorial') cerrarOverlay(); });
+  window.addEventListener('hashchange', () => {
+    if (overlay && !est.activo && location.hash !== '#/tutorial') cerrarOverlay();
+    // Si la persona se va por su cuenta a otra pantalla, el tutorial termina limpio: no deja tarjeta ni señal colgadas.
+    const p = est.activo && !ocupado && est.pasos[est.i];
+    if (p && !overlay && location.hash !== p.hash) salir();
+  });
+  window.addEventListener('pagehide', () => { delete raiz.dataset.tutorial; });
 
   MT.tutorial = { TEXTOS, ROLES, abrir: abrirSelector, iniciar, salir, ir, pasosDe, estado: est, final, volverAlInicio, siguiente: () => siguiente() };
 })(window.MT = window.MT || {});
