@@ -1600,6 +1600,8 @@ async function flujoMovil() {
 // ---- recorrido ---- entradas directas al tutorial desde dentro de Kinesis y Wisfox: #/tutorial/<rol> y el mensaje recorrido:abrir.
 // Se prueban aquí porque Kinesis y Wisfox viven en otro repositorio: lo único que la plataforma controla es esta puerta de entrada.
 async function flujoRecorrido() {
+  const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;   // recorrido: los atajos de otros flujos son locales a ellos
+  const tecla = (key) => D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true, cancelable: true }));
   await ir('#/tutorial/orientacion'); await espera(900);
   afirmar('recorrido: #/tutorial/<rol> empieza directo en ese rol, sin pasar por el selector', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'orientacion', JSON.stringify({ activo: MTw().tutorial.estado.activo, rol: MTw().tutorial.estado.rol }));
   tecla('Escape'); await espera(250);
