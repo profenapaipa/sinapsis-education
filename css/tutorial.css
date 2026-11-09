@@ -1,0 +1,139 @@
+/* tutorial.css: el tutorial guiado (js/tutorial.js).
+
+   Tres piezas: la tarjeta flotante que acompaña cada paso (.tut), la ventana grande para elegir ejemplo y ver el resumen (.tut-sel) y el
+   anillo que marca el elemento clave de la pantalla (.tut-foco). Todo sale de los tokens del sitio, así que se ve como una sola aplicación.
+
+   Cuidados de diseño:
+   - La tarjeta no tapa lo importante: en pantalla grande se sienta abajo a la izquierda (Niky vive abajo a la derecha); en el celular se
+     sienta sobre la barra inferior y Niky sube por encima de ella (--tut-alto lo mide el script).
+   - El anillo no bloquea nada: es solo box-shadow, sin pointer-events.
+   - Sin movimiento con prefers-reduced-motion ni con la versión calmada: las animaciones solo existen dentro de la consulta "no-preference"
+     y fuera de html[data-movimiento="calmado"]. */
+
+/* ---------------- El anillo sobre el elemento clave ---------------- */
+.tut-foco { position: relative; border-radius: var(--radio); box-shadow: 0 0 0 3px var(--papel), 0 0 0 6px var(--hilo-mosaico); }
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-movimiento="calmado"]) .tut-foco { animation: tut-pulso 2.4s ease-in-out 2; }
+  @keyframes tut-pulso { 50% { box-shadow: 0 0 0 3px var(--papel), 0 0 0 11px color-mix(in srgb, var(--hilo-mosaico) 45%, transparent); } }
+}
+
+/* ---------------- La tarjeta flotante ---------------- */
+.tut {
+  position: fixed; z-index: 60; left: calc(var(--riel-ancho) + 1rem); bottom: 1rem;
+  width: min(27rem, calc(100vw - var(--riel-ancho) - 7.5rem));
+  background: var(--papel); color: var(--tinta);
+  border: 2px solid var(--tinta); border-top: 5px solid var(--hilo-mosaico); border-radius: var(--radio);
+  box-shadow: 0 10px 34px rgba(26, 23, 20, .22);
+  padding: .8rem 1rem .7rem; display: grid; gap: .45rem;
+  --tut-color: var(--verde);
+}
+.tut[hidden] { display: none; }
+.tut[data-quien="wisfox"] { --tut-color: var(--ambar); }
+.tut[data-quien="niky"] { --tut-color: var(--azul); }
+.tut[data-quien="sinapso"] { --tut-color: var(--hilo-mosaico); }
+.tut { border-top-color: var(--tut-color); }
+.tut__cab { display: flex; align-items: center; gap: .7rem; }
+.tut__masc { flex: none; width: 64px; height: 64px; border-radius: 50%; background: color-mix(in srgb, var(--tut-color) 16%, var(--papel)); display: grid; place-items: center; overflow: hidden; }
+.tut__masc .tut-masc { width: 56px; height: 56px; }
+.tut__cab-texto { flex: 1; min-width: 0; display: grid; gap: .35rem; }
+.tut__meta { margin: 0; font: 800 .74rem var(--fuente); letter-spacing: .04em; color: var(--tinta-suave); }
+.tut__barra { height: 6px; border-radius: 6px; background: var(--hundido); overflow: hidden; }
+.tut__barra-valor { display: block; height: 100%; background: var(--tut-color); border-radius: 6px; }
+.tut__titulo { margin: 0; font: 800 1.12rem/1.2 var(--fuente); color: var(--tinta); }
+.tut__titulo:focus { outline: none; }
+.tut__texto { margin: 0; font-size: .95rem; line-height: 1.4; color: var(--tinta); }
+.tut__opciones { display: grid; gap: .4rem; }
+.tut__opciones[hidden] { display: none; }
+.tut__opcion { display: flex; align-items: center; gap: .7rem; min-height: 52px; padding: .35rem .8rem; text-align: left; cursor: pointer;
+  font: 800 .98rem var(--fuente); color: var(--tinta); background: var(--lino); border: 2px solid var(--linea-fuerte); border-radius: var(--radio); }
+.tut__opcion:hover { background: var(--hundido); }
+.tut__opcion .tut-masc { flex: none; }
+.tut__botones { display: flex; gap: .5rem; }
+.tut__btn { flex: 1; min-height: 44px; }
+.tut__btn--principal { flex: 2; }
+.tut__btn[disabled] { opacity: .45; }
+.tut__extras { display: flex; flex-wrap: wrap; gap: 0 .2rem; justify-content: space-between; }
+.tut__enlace { min-height: 36px; padding: .2rem .45rem; background: none; border: 0; cursor: pointer; font: 700 .8rem var(--fuente); color: var(--verde-texto); text-decoration: underline; text-underline-offset: 3px; }
+.tut__enlace:hover { text-decoration-thickness: 2px; }
+.tut :focus-visible, .tut-sel :focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-movimiento="calmado"]) .tut { animation: tut-entra .28s ease-out; }
+  @keyframes tut-entra { from { opacity: 0; transform: translateY(10px); } }
+}
+
+/* La página deja sitio a la tarjeta y Niky se corre para no quedar debajo. */
+html[data-tutorial="activo"] body { padding-bottom: var(--tut-alto, 0px); }
+
+@media (max-width: 860px) {
+  /* En el celular el riel va abajo: la tarjeta se sienta encima de él, y Niky por encima de la tarjeta. */
+  .tut { left: .5rem; right: .5rem; width: auto; bottom: calc(5.4rem + env(safe-area-inset-bottom)); padding: .6rem .8rem .55rem; gap: .35rem; max-height: 52vh; overflow-y: auto; }
+  .tut__masc { width: 48px; height: 48px; } .tut__masc .tut-masc { width: 42px; height: 42px; }
+  .tut__titulo { font-size: 1.02rem; } .tut__texto { font-size: .9rem; line-height: 1.32; }
+  .tut__enlace { min-height: 44px; font-size: .78rem; padding: .2rem .3rem; }
+  .tut__opcion { min-height: 48px; font-size: .92rem; }
+  html[data-tutorial="activo"] .niky { bottom: calc(5.4rem + env(safe-area-inset-bottom) + var(--tut-alto, 0px) + .6rem); }
+  html[data-tutorial="activo"] body { padding-bottom: calc(var(--tut-alto, 0px) + .5rem); }
+}
+@media print { .tut, .tut-sel { display: none !important; } }
+
+/* ---------------- La ventana grande: elegir ejemplo y resumen final ---------------- */
+.tut-sel { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 1rem; background: rgba(26, 23, 20, .55); overflow-y: auto; }
+.tut-sel__panel { width: min(46rem, 100%); max-height: calc(100dvh - 2rem); overflow-y: auto; background: var(--papel); color: var(--tinta);
+  border: 2px solid var(--tinta); border-top: 6px solid var(--hilo-mosaico); border-radius: calc(var(--radio) + 4px); box-shadow: 0 18px 60px rgba(0, 0, 0, .35); }
+.tut-sel__cuerpo { padding: 1.1rem 1.3rem 1rem; display: grid; gap: .7rem; }
+.tut-sel__cab { display: flex; align-items: center; gap: .9rem; }
+.tut-sel__cab > div { flex: 1; min-width: 0; }
+.tut-sel h2 { margin: 0; font: 800 1.6rem/1.15 var(--fuente); }
+.tut-sel h2:focus { outline: none; }
+.tut-sel__bajada { margin: .25rem 0 0; color: var(--tinta-suave); line-height: 1.4; }
+.tut-sel__cerrar { align-self: flex-start; flex: none; }
+.tut-etiqueta { margin: .2rem 0 0; font: 800 .74rem var(--fuente); letter-spacing: .1em; text-transform: uppercase; color: var(--tinta-suave); }
+.tut-chips { display: flex; flex-wrap: wrap; gap: .45rem; }
+.tut-chip { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; padding: .3rem .9rem; cursor: pointer; font: 800 .9rem var(--fuente);
+  color: var(--tinta); background: var(--papel); border: 2px solid var(--linea-fuerte); border-radius: 999px; }
+.tut-chip svg { width: 20px; height: 20px; flex: none; }
+.tut-chip[aria-pressed="true"] { background: var(--tinta); color: var(--papel); }
+.tut-chip:hover { background: var(--hundido); } .tut-chip[aria-pressed="true"]:hover { background: var(--tinta); }
+.tut-casos { display: grid; gap: .55rem; }
+.tut-caso { display: flex; align-items: center; gap: .85rem; width: 100%; padding: .6rem .8rem; text-align: left; cursor: pointer; font-family: var(--fuente);
+  color: var(--tinta); background: var(--lino); border: 2px solid var(--linea-fuerte); border-left-width: 8px; border-radius: var(--radio); --tut-color: var(--verde); border-left-color: var(--tut-color); }
+.tut-caso[data-quien="wisfox"] { --tut-color: var(--ambar); } .tut-caso[data-quien="niky"] { --tut-color: var(--azul); } .tut-caso[data-quien="sinapso"] { --tut-color: var(--hilo-mosaico); }
+.tut-caso:hover { background: var(--hundido); }
+.tut-caso__masc { flex: none; width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--tut-color) 16%, var(--papel)); }
+.tut-caso__texto { flex: 1; min-width: 0; display: grid; gap: .1rem; }
+.tut-caso__asig { font: 800 .72rem var(--fuente); letter-spacing: .08em; text-transform: uppercase; color: var(--tinta-suave); }
+.tut-caso strong { font-size: 1.02rem; line-height: 1.2; }
+.tut-caso__linea { font-size: .88rem; color: var(--tinta-suave); line-height: 1.3; }
+.tut-caso__ir svg { width: 22px; height: 22px; transform: rotate(-90deg); flex: none; }
+.tut-sel__nota { margin: 0; font-size: .82rem; color: var(--tinta-suave); }
+.tut-sel__pie { display: flex; justify-content: flex-end; }
+/* El resumen final */
+.tut-final__cab { display: flex; align-items: center; gap: 1rem; }
+.tut-logros { list-style: none; margin: .3rem 0; padding: 0; display: grid; gap: .5rem; }
+.tut-logros li { display: flex; align-items: center; gap: .8rem; padding: .6rem .8rem; background: var(--verde-suave); color: var(--ok-texto); border-radius: var(--radio); font-weight: 700; line-height: 1.3; }
+.tut-logros__ic { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--papel); color: var(--verde-texto); }
+.tut-logros__ic svg { width: 22px; height: 22px; }
+.tut-final__botones { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .3rem; }
+.tut-final__botones .btn { flex: 1 1 10rem; min-height: 48px; }
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-movimiento="calmado"]) .tut-sel__panel { animation: tut-entra .28s ease-out; }
+}
+@media (max-width: 860px) {
+  .tut-sel { padding: .5rem; place-items: end center; }
+  .tut-sel__panel { max-height: calc(100dvh - 1rem); }
+  .tut-sel__cuerpo { padding: .9rem .9rem .8rem; }
+  .tut-sel h2 { font-size: 1.35rem; }
+  .tut-sel__cab > .mascota { width: 56px; height: 56px; }
+  .tut-chip { padding: .3rem .7rem; font-size: .84rem; }
+}
+
+/* ---------------- La lista de la Guía (25 recorridos) ---------------- */
+.tut-lista { margin-top: 2rem; display: grid; gap: .6rem; }
+.tut-lista__rol { border: 2px solid var(--linea-fuerte); border-radius: var(--radio); background: var(--papel); }
+.tut-lista__rol summary { display: flex; align-items: center; gap: .6rem; min-height: 48px; padding: .4rem .9rem; cursor: pointer; }
+.tut-lista__rol summary svg { width: 22px; height: 22px; }
+.tut-lista__rol ul { list-style: none; margin: 0; padding: 0 .9rem .6rem; display: grid; gap: .4rem; }
+.tut-lista__rol li { display: flex; align-items: center; justify-content: space-between; gap: .8rem; padding: .4rem 0; border-top: 1px solid var(--linea); }
+.tut-lista__rol li > span { display: grid; min-width: 0; }
+.tut-lista__rol small { color: var(--tinta-suave); }
+@media (max-width: 560px) { .tut-lista__rol li { flex-direction: column; align-items: stretch; } }

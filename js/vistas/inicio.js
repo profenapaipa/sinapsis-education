@@ -66,6 +66,8 @@
           h('div', { class: 'ent-portada__acciones' },
             h('button', { class: 'btn ent-empezar', type: 'button', onclick: () => ir('ent-quien') }, T.portada.empezar),
             h('button', { class: 'ent-enlace', type: 'button', onclick: () => ir('ent-quien') }, T.portada.yaSe),
+            // Entrada discreta al tutorial guiado (js/tutorial.js): elegir rol y ejemplo y recorrer las pantallas reales.
+            h('button', { class: 'ent-enlace', type: 'button', id: 'btn-ver-tutorial', onclick: () => MT.tutorial && MT.tutorial.abrir() }, 'Ver el tutorial'),
             rol ? h('a', { class: 'ent-enlace', href: '#/portales/' + rol.marca }, T.portada.seguir(rol.nombre)) : null))));
   }
 

@@ -146,7 +146,11 @@
   /* ---------------------------------------------------------------- el caso elegido */
   const leer = () => { try { const n = Number(window.localStorage.getItem(CLAVE)); return n >= 1 && n <= CASOS.length ? n : 1; } catch (e) { return 1; } };
   const guardar = (n) => { try { window.localStorage.setItem(CLAVE, String(n)); } catch (e) { /* sin almacenamiento: vale mientras la página esté abierta */ } };
-  const presentando = () => !!(MT.presentacion && MT.presentacion.activo());
+  // El tutorial guiado (js/tutorial.js) usa los mismos casos sin encender el modo presentación: con esta bandera el caso elegido también
+  // define lo que responde Niky y sus sugerencias mientras alguien recorre o explora un ejemplo. Vive solo en memoria: recargar la apaga.
+  let enTutorial = false;
+  const tutorial = (si) => { if (si !== undefined) { enTutorial = !!si; sincronizar(); } return enTutorial; };
+  const presentando = () => enTutorial || !!(MT.presentacion && MT.presentacion.activo());
 
   // Fuera del modo presentación la plataforma no cambia: el caso solo existe mientras se expone.
   const actual = () => CASOS[leer() - 1];
@@ -303,5 +307,5 @@
 
   const total = (pasos) => pasos.reduce((t, x) => t + x.seg, 0);
 
-  MT.casos = { lista: CASOS, numero: leer, actual, activo, cargar, guion, total, accion, sincronizar, sugerencias, cerrarPanel };
+  MT.casos = { lista: CASOS, tutorial, numero: leer, actual, activo, cargar, guion, total, accion, sincronizar, sugerencias, cerrarPanel };
 })(window.MT = window.MT || {});
