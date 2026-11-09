@@ -17,7 +17,7 @@
   /* Cada tema se prueba en su propio panel. Se repiten aquí los valores del tema oscuro de tokens.css, hilos incluidos: los hilos hay que
      ponerlos de nuevo porque --hilo-* se resuelve en :root y no cambiaría al cambiar --verde dentro del panel. */
   .tema { padding: 1rem 1.25rem 1.5rem; background: var(--papel); color: var(--tinta); }
-  .tema--claro { --tinta: #1A1714; --papel: #FFFFFF; --hilo-kinesis: #1B7F56; --hilo-wisfox: #E8A13C; --hilo-valeria: #2B4FA3; --hilo-mosaico: #E0527E; }
+  .tema--claro { --tinta: #1A1714; --papel: #FAF7F2; --hilo-kinesis: #1B7F56; --hilo-wisfox: #E8A13C; --hilo-valeria: #2B4FA3; --hilo-mosaico: #E0527E; }
   .tema--oscuro { --tinta: #F4F0E8; --papel: #141210; --hilo-kinesis: #5CC08A; --hilo-wisfox: #E8A13C; --hilo-valeria: #6F8FE8; --hilo-mosaico: #E0527E; }
   .tema h2 { margin: 0 0 .75rem; font-size: 1.05rem; }
   .tema h3 { margin: 1.25rem 0 .5rem; font-size: .9rem; font-weight: 600; opacity: .75; }
@@ -43,37 +43,50 @@
     const c = e('div', 'celda'); c.append(MT.mascotas.mascota(id, { pose, emocion, tamano: tam, viva }));
     c.append(e('b', '', rotulo)); return c;
   };
+  // ?zoom=1: solo las cuatro a 240 px en pose base y tejiendo, para revisar el detalle de cerca (se usa con las capturas de revisión).
+  if (q.get('zoom')) {
+    const p = e('section', 'tema tema--' + (q.get('tema') || 'claro'));
+    for (const pose of (q.get('zoom') === '2' ? ['teje'] : ['base', 'teje'])) {
+      const f = e('div', 'fila'); for (const m of MT.mascotas.lista) f.append(celda(m.id, pose, 'contento', 300, m.nombre + ' · ' + pose)); p.append(f);
+    }
+    document.getElementById('paneles').append(p); return;
+  }
   const temas = q.get('tema') ? [q.get('tema')] : ['claro', 'oscuro'];
   for (const tema of temas) {
     const p = e('section', 'tema tema--' + tema); p.id = 'tema-' + tema;
     p.append(e('h2', '', 'Tema ' + tema));
-    p.append(e('h3', '', 'Matriz: 4 mascotas x 7 emociones, a 120 px (pose base)'));
+    const secc = (titulo, tam, clase) => {
+      p.append(e('h3', '', titulo));
+      for (const m of MT.mascotas.lista) {
+        const f = e('div', 'fila ' + (clase || ''));
+        for (const em of MT.mascotas.EMOCIONES) f.append(celda(m.id, 'base', em, tam, tam > 100 ? m.nombre + ' · ' + em : em));
+        p.append(f);
+      }
+    };
+    secc('Matriz: 4 mascotas x 7 emociones a 120 px (pose base)', 120);
+    secc('La misma matriz a 56 px, el tamaño del compañero de cada pantalla', 56, 'fila--chica');
+    secc('La misma matriz a 240 px, para mirar la textura, la ropa y la lana', 240);
+    p.append(e('h3', '', 'Cada pose (contento): saluda, señala, piensa, celebra y teje'));
     for (const m of MT.mascotas.lista) {
       const f = e('div', 'fila');
-      for (const em of MT.mascotas.EMOCIONES) f.append(celda(m.id, 'base', em, 120, m.nombre + ' · ' + em));
+      for (const po of MT.mascotas.POSES) f.append(celda(m.id, po, undefined, 120, m.nombre + ' · ' + po));
       p.append(f);
     }
-    p.append(e('h3', '', 'La misma matriz a 56 px, el tamaño del compañero de cada pantalla'));
+    // El ciclo de tejer en cuadros: se congela la animación en cada instante con un retraso negativo y en pausa.
+    p.append(e('h3', '', 'El ciclo de tejer, en cuadros (0, 0,6, 1,2, 1,8, 2,4 y 3,1 s) a 120 px'));
     for (const m of MT.mascotas.lista) {
-      const f = e('div', 'fila fila--chica');
-      for (const em of MT.mascotas.EMOCIONES) f.append(celda(m.id, 'base', em, 56, em));
+      const f = e('div', 'fila');
+      for (const t of [0, 0.6, 1.2, 1.8, 2.4, 3.1]) {
+        const c = e('div', 'celda'); const sv = MT.mascotas.mascota(m.id, { pose: 'teje', tamano: 120 });
+        sv.classList.add('mascota--tejiendo');
+        for (const n of sv.querySelectorAll('.m-ag-i, .m-ag-d, .m-flujo, .m-ovillo, .m-fila-nueva')) { n.style.animationDelay = '-' + t + 's'; n.style.animationPlayState = 'paused'; }
+        c.append(sv, e('b', '', m.nombre + ' · ' + t + ' s')); f.append(c);
+      }
       p.append(f);
     }
-    p.append(e('h3', '', 'Emoción combinada con pose (saluda + contento, senala + curioso, piensa + pensando, celebra + celebra, saluda + animo)'));
-    const comb = [['saluda', 'contento'], ['senala', 'curioso'], ['piensa', 'pensando'], ['celebra', 'celebra'], ['saluda', 'animo'], ['senala', 'sorprendido']];
-    const fc = e('div', 'fila');
-    for (const m of MT.mascotas.lista) for (const [po, em] of comb.slice(0, 3)) fc.append(celda(m.id, po, em, 96, po + ' + ' + em));
-    p.append(fc);
-    p.append(e('h3', '', 'Tamaños: 56, 120 y 240 px (contento)'));
-    const f = e('div', 'fila');
-    for (const m of MT.mascotas.lista) {
-      const g = e('div', 'grupo');
-      for (const t of [56, 120, 240]) g.append(celda(m.id, 'base', 'contento', t, t + ' px'));
-      f.append(g);
-    }
-    p.append(f);
-    p.append(e('h3', '', 'En fila, como las verá quien entra (escena)'));
+    p.append(e('h3', '', 'En fila, como las verá quien entra (escena); la de abajo teje de verdad (cada 12 a 20 s)'));
     p.append(MT.mascotas.escena(null, { tamano: 110, pose: 'saluda' }));
+    p.append(MT.mascotas.escena(null, { tamano: 110, teje: true }));
     document.getElementById('paneles').append(p);
   }
 })();

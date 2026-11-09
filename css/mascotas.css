@@ -15,7 +15,7 @@
   --m-verde: var(--hilo-kinesis);  --m-verde: color-mix(in srgb, var(--hilo-kinesis) 78%, #ffffff);
   --m-ambar: var(--hilo-wisfox);   --m-ambar: color-mix(in srgb, var(--hilo-wisfox) 92%, #ffffff);
   --m-azul: var(--hilo-valeria);   --m-azul: color-mix(in srgb, var(--hilo-valeria) 74%, #ffffff);
-  --m-oso: #A06A42;  /* marrón miel de oso: más claro que antes para que no se confunda con un mapache; el único color que no sale de un hilo */
+  --m-oscuro: #3B2A20; --m-oso: #A06A42;  /* marrón miel de oso: más claro que antes para que no se confunda con un mapache; el único color que no sale de un hilo */
   /* Grosor del contorno. Va en el svg y se hereda, así los trazos que traen su propio stroke-width (miembros, hilos) lo conservan. */
   stroke-width: 3;
 }
@@ -27,7 +27,8 @@
 
 /* Trazos: extremos y uniones siempre redondos. Todo lo que no es relleno se declara aquí sin relleno. */
 .mascota path, .mascota ellipse, .mascota circle, .mascota rect { stroke-linecap: round; stroke-linejoin: round; }
-.mascota path { fill: none; }
+/* Solo los trazos sin relleno propio: un fill="..." puesto en el dibujo (prendas, destellos) debe valer; antes esta regla lo pisaba y la ropa salia del color de la piel. */
+.mascota path:where(:not([fill])) { fill: none; }
 .mascota .m-t { stroke: var(--m-trazo); }
 .mascota .m-d { stroke: var(--m-detalle); stroke-width: 2.8; fill: none; }
 .mascota .m-ceja { stroke-width: 3; }
@@ -72,3 +73,62 @@ html[data-movimiento="calmado"] .mascota--rebota { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .mascota--rebota { animation: none !important; } }
 
 .mascota .m-puente { stroke: #4A2E1C; stroke-width: 2.2; fill: none; }
+
+/* ---------- rediseño: textura, ropa de punto y lana al estilo del pendón ---------- */
+
+/* Pelaje: trazos cortos y finos, siempre la misma tinta translúcida para que valga sobre cualquier color de piel. */
+.mascota .m-pelo { stroke: #000; stroke-opacity: .26; stroke-width: 1.2; fill: none; }
+.mascota .m-pelo--fuerte { stroke: var(--m-oscuro); stroke-opacity: .7; stroke-width: 1.6; }
+.mascota .m-mechon { stroke: #5E3B22; stroke-width: 2.3; fill: none; }
+.mascota .m-oscuro { fill: var(--m-oscuro); }
+.mascota .m-palma { fill: var(--m-crema); }
+.mascota .m-nariz-g { fill: var(--m-detalle); stroke: none; }
+.mascota .m-humedo { fill: #fff; opacity: .85; stroke: none; }
+.mascota .m-ojera { fill: var(--m-crema); opacity: .55; stroke: none; }
+/* Piel del pulpo: moteado oscuro y claro, iris dorado y pupila horizontal (la pupila es el mismo punto de la cara, aplastado). */
+.mascota .m-mota { fill: #000; opacity: .13; stroke: none; }
+.mascota .m-mota-c { fill: #fff; opacity: .26; stroke: none; }
+.mascota .m-iris { fill: #E3B04A; stroke: #7A5A1A; stroke-width: 1; }
+.mascota .m-ventosa { fill: var(--piel2); stroke: none; }
+.mascota--kinesis .m-ojo { transform-box: fill-box; transform-origin: center; transform: scale(1.22, .8); }
+/* Lana: marcas de torsión (rayitas que cruzan el hilo), un hilo de luz y la sombra suave, como las hebras del pendón. */
+.mascota .m-tors { stroke: #000; stroke-opacity: .3; stroke-linecap: butt; fill: none; }
+.mascota .m-luzh { stroke: #fff; stroke-opacity: .55; fill: none; }
+/* Punto: V de punto jersey, trenzado, puntadas de costura y canalé. */
+.mascota .m-v { stroke: #000; stroke-opacity: .3; stroke-width: .85; fill: none; }
+.mascota .m-cable { stroke: #000; stroke-opacity: .34; stroke-width: 1.2; fill: none; }
+.mascota .m-cable--luz { stroke: #fff; stroke-opacity: .5; }
+.mascota .m-rib { stroke: #000; stroke-opacity: .28; stroke-width: .9; fill: none; }
+.mascota .m-costura { stroke: #000; stroke-opacity: .45; stroke-width: .9; stroke-dasharray: 1.4 1.4; fill: none; }
+.mascota .m-prenda { stroke-width: 2.8; }
+.mascota .m-camisa { fill: var(--m-crema); stroke: none; }
+.mascota .m-boton { fill: var(--m-crema); stroke: var(--m-trazo); stroke-width: 1.2; }
+.mascota .m-bandas { stroke: var(--m-crema); stroke-width: 3.2; fill: none; stroke-opacity: .9; }
+.mascota .m-zig { stroke: var(--m-crema); stroke-width: 2.2; fill: none; }
+.mascota .m-fleco { stroke: var(--hilo-valeria); stroke-width: 1.6; fill: none; }
+.mascota .m-pt-lana { stroke: var(--m-trazo); stroke-width: .6; }
+.mascota .m-marcas { stroke: #3B2A20; stroke-linecap: butt; fill: none; }
+/* La labor: pieza tejida, malla y nudos. */
+.mascota .m-franja { stroke: none; }
+.mascota .m-papel { fill: var(--m-crema); stroke: none; }
+.mascota .m-malla { fill: none; }
+.mascota .m-nudo { fill: #0E5A3A; stroke: var(--m-trazo); stroke-width: .7; }
+.mascota .m-ovillo circle { stroke-width: 2.6; }
+.mascota .m-flujo { stroke: #fff; stroke-opacity: .85; stroke-width: 1.2; stroke-dasharray: 2.2 5.8; fill: none; }
+
+/* El ciclo de tejer (MT.mascotas.mascota con teje:true): unos 3 s. Las agujas se mecen una contra otra, un guion de luz corre por el hilo, el ovillo gira
+   un poco y la última fila de la pieza aparece al final. Solo transform, opacity y stroke-dashoffset. La clase mascota--tejiendo la pone y la quita un
+   único reloj en mascotas.js. Con prefers-reduced-motion y con la versión calmada no hay ciclo: la pieza queda quieta y ya tejida. */
+.mascota--tejiendo .m-ag-i { animation: m-aguja-i 3.2s ease-in-out 1; }
+.mascota--tejiendo .m-ag-d { animation: m-aguja-d 3.2s ease-in-out 1; }
+.mascota--tejiendo .m-flujo { animation: m-corre 3.2s linear 1; }
+.mascota--tejiendo .m-ovillo { transform-box: fill-box; transform-origin: center; animation: m-gira 3.2s ease-in-out 1; }
+.mascota--tejiendo .m-fila-nueva { animation: m-fila 3.2s ease-out 1; }
+@keyframes m-aguja-i { 0%, 100% { transform: rotate(0); } 15%, 55% { transform: rotate(-7deg); } 30%, 70% { transform: rotate(3deg); } 85% { transform: rotate(-3deg); } }
+@keyframes m-aguja-d { 0%, 100% { transform: rotate(0); } 15%, 55% { transform: rotate(5deg); } 30%, 70% { transform: rotate(-4deg); } 85% { transform: rotate(2deg); } }
+@keyframes m-corre { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -32; } }
+@keyframes m-gira { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-70deg); } }
+@keyframes m-fila { 0%, 45% { opacity: 0; } 100% { opacity: 1; } }
+html[data-movimiento="calmado"] .mascota--tejiendo .m-ag-i, html[data-movimiento="calmado"] .mascota--tejiendo .m-ag-d, html[data-movimiento="calmado"] .mascota--tejiendo .m-flujo,
+html[data-movimiento="calmado"] .mascota--tejiendo .m-ovillo, html[data-movimiento="calmado"] .mascota--tejiendo .m-fila-nueva { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .mascota--tejiendo .m-ag-i, .mascota--tejiendo .m-ag-d, .mascota--tejiendo .m-flujo, .mascota--tejiendo .m-ovillo, .mascota--tejiendo .m-fila-nueva { animation: none !important; } }
