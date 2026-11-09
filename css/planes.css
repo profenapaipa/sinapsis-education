@@ -17,7 +17,7 @@
 .plan-tarjeta { display: flex; flex-direction: column; gap: .3rem; border-top: 5px solid var(--tinta); }
 .plan-tarjeta--pro { border-top-color: var(--hilo-mosaico); }
 .plan-tarjeta h3 { margin: 0; }
-.plan-precio { font: 700 1.7rem/1.1 var(--fuente-titulo); margin: 0; }
+.plan-etapa { font: 700 1.7rem/1.1 var(--fuente-titulo); margin: 0; }
 .plan-sub { margin: 0 0 .4rem; font-size: .88rem; }
 .plan-lista { padding-left: 1.2rem; margin: .4rem 0 1rem; display: grid; gap: .3rem; flex: 1; }
 .plan-tarjeta .btn { align-self: flex-start; }
@@ -46,3 +46,11 @@
 
 /* Los textos solo para lectores de pantalla se posicionan de forma absoluta: sin un contenedor posicionado desbordaban la página. */
 .tabla-scroll { position: relative; }
+
+/* ---- casos2 ---- «Servicios y planes»: tarjetas sencillas, con el estado a la vista y sin cifras. El estado también va en texto, no solo en el color. */
+.servicios-planes { margin-bottom: 2rem; }
+.servicio-plan { border-top: 5px solid var(--hilo-mosaico); }
+.servicio-plan--hoy { border-top-color: var(--tinta); }
+.servicio-plan h3 { margin: 0 0 .3rem; font-size: 1.2rem; }
+.servicio-plan p:last-child { margin: 0; }
+/* ---- fin casos2 ---- */

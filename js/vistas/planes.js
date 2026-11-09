@@ -11,6 +11,32 @@
   const { pagina } = MT.comun;
   const st = MT.store;
 
+  /* ---- casos2 ---- TEXTOS de «Servicios y planes» (borrador por aprobar por el dueño). Esto es una muestra estudiantil, no una feria de ventas:
+     por eso la plataforma NO muestra precios, rangos ni cifras de dinero, y cada servicio dice con honestidad si ya existe o está en desarrollo.
+     «Contáctanos» lleva a #/piloto, que hoy no promete respuesta por correo mientras MT.config.contacto esté vacío. */
+  const TEXTOS = {
+    titulo: 'Servicios y planes',
+    bajada: 'Esto es lo que el proyecto ofrece para acompañar a una comunidad educativa. Sin cifras: primero conversamos, escuchamos lo que necesitas y lo construimos juntos.',
+    estados: { hoy: 'Funciona hoy', desarrollo: 'En desarrollo' },
+    servicios: [
+      { id: 'demo', estado: 'hoy', nombre: 'Conocer la plataforma', texto: 'Recorre los cinco roles con ejemplos y datos ficticios, y el tutorial guiado te lleva paso a paso.' },
+      { id: 'acompanar', estado: 'desarrollo', nombre: 'Acompañamiento a tu colegio', texto: 'Pensamos un piloto en un curso, con el equipo cerca para escuchar y ajustar lo que haga falta.' },
+      { id: 'formacion', estado: 'desarrollo', nombre: 'Formación para docentes y familias', texto: 'Talleres cortos y materiales en lenguaje sencillo para usar la plataforma con tranquilidad.' },
+      { id: 'compartido', estado: 'desarrollo', nombre: 'Espacio compartido', texto: 'Un lugar donde el equipo del colegio trabaje junto. Todavía lo estamos construyendo.' },
+    ],
+    nota: 'Hoy no usamos datos reales de estudiantes: primero llegan las autorizaciones de las familias y una revisión de seguridad.',
+    contacto: 'Contáctanos',
+  };
+  function seccionServicios() {
+    return h('section', { class: 'seccion servicios-planes', id: 'servicios-y-planes', 'aria-labelledby': 'h-serv-planes' },
+      h('h2', { id: 'h-serv-planes' }, TEXTOS.titulo), h('p', { class: 'bajada' }, TEXTOS.bajada),
+      h('div', { class: 'rejilla rejilla--2' }, TEXTOS.servicios.map((x) => h('article', { class: 'tarjeta servicio-plan servicio-plan--' + x.estado, 'data-servicio': x.id },
+        h('p', { class: 'etiqueta' }, TEXTOS.estados[x.estado]), h('h3', null, x.nombre), h('p', null, x.texto)))),
+      h('p', { class: 'suave' }, TEXTOS.nota),
+      h('div', { class: 'acciones' }, h('a', { class: 'btn', id: 'btn-contactanos', href: '#/piloto' }, TEXTOS.contacto)));
+  }
+  // ---- fin casos2 ----
+
   const ETAPAS = [
     { id: 'demostracion', nombre: 'Demostración', etiqueta: 'Abierta hoy', sub: 'Sin registro', para: 'Conocer la plataforma tal como funciona hoy.',
       incluye: ['Los cinco roles y su flujo de trabajo', 'Actividades con DUA y quiz, ajustes con aprobación, notas', 'Archivos con permisos por rol', 'Ruta de Inglés de grado 8.° con quizes explicados', 'Kinesis y Wisfox dentro de la plataforma, y Niky con ejemplos'],
@@ -79,10 +105,11 @@
     c.append(h('nav', { class: 'pestanas-pagina', 'aria-label': 'Participar' }, [['formas', 'Formas de participar'], ['acompanamiento', 'Acompañamiento']].map(([id, t]) => h('a', { href: '#/planes/' + id, 'aria-current': id === sub ? 'page' : null }, t))));
     if (sub === 'acompanamiento') return acompanamiento(c);
 
+    c.append(seccionServicios());   // casos2: lo primero que se ve es qué acompañamiento hay, sin cifras
     const cols = ETAPAS.map((p, i) => i).filter((i) => ETAPAS[i].id !== 'lista' || registroActivo());   // columnas visibles (sin «lista» si el registro está apagado)
     const etapas = cols.map((i) => ETAPAS[i]);
     c.append(h('div', { class: 'rejilla rejilla--4 planes' }, etapas.map((p) => h('article', { class: 'tarjeta plan-tarjeta' + (p.proximo ? ' plan-tarjeta--pro' : ''), 'data-plan': p.id },
-      h('p', { class: 'etiqueta' }, p.nombre), h('p', { class: 'plan-precio' }, p.etiqueta), h('p', { class: 'suave plan-sub' }, p.sub), h('p', null, p.para),
+      h('p', { class: 'etiqueta' }, p.nombre), h('p', { class: 'plan-etapa' }, p.etiqueta), h('p', { class: 'suave plan-sub' }, p.sub), h('p', null, p.para),
       h('ul', { class: 'plan-lista' }, p.incluye.map((x) => h('li', null, x))),
       h('a', { class: 'btn' + (p.accion.principal ? '' : ' btn--suave'), href: p.id === 'compartido' ? rutaConversar() : p.accion.href }, p.accion.texto)))));
 
