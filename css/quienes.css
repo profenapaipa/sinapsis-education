@@ -1,0 +1,36 @@
+/* quienes.css: «Quiénes somos». Solo modo claro. Sin animación: el esquema es estático, así que no hay nada que calmar,
+   y aun así se respeta prefers-reduced-motion para el despliegue de la subsección. */
+.quienes-seccion { margin: 1.75rem 0; }
+.quienes-seccion > h2 { margin-bottom: .6rem; }
+.quienes-texto { max-width: 62ch; font-size: 1.0625rem; line-height: 1.6; margin: 0 0 .85rem; }
+.quienes-firma { margin: .25rem 0 0; font-weight: 700; color: var(--tinta-suave, #4a443c); }
+
+/* El esquema y las listas: en pantalla ancha van lado a lado; en el celular, una columna (esquema primero). */
+.quienes-metodo { display: grid; gap: 1.5rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 900px) { .quienes-metodo { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); } }
+.quienes-figura { margin: 0; }
+.quienes-esquema { display: block; width: 100%; max-width: 460px; height: auto; margin: 0 auto; font-family: inherit; }
+.quienes-figura figcaption { max-width: 46ch; margin: .75rem auto 0; font-size: .9375rem; line-height: 1.5; text-align: center; }
+.quienes-listas { display: grid; gap: 1rem; min-width: 0; }
+.quienes-listas h3 { margin: 0 0 .6rem; }
+.quienes-componentes, .quienes-fases { margin: 0; padding: 0; list-style: none; display: grid; gap: .6rem; }
+.quienes-componentes li { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr); gap: .6rem; align-items: start; line-height: 1.5; }
+.quienes-chip { width: 1.25rem; height: 1.25rem; margin-top: .15rem; border-radius: 6px; border: 2px solid var(--tinta, #1a1714); box-sizing: border-box; }
+.quienes-fases { counter-reset: fase; }
+.quienes-fases li { counter-increment: fase; line-height: 1.5; }
+.quienes-fases li::before { content: counter(fase); display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 2px solid var(--tinta, #1a1714);
+  background: #fff; font-weight: 800; font-size: .875rem; }
+.quienes-fases li { display: block; position: relative; padding-left: 2.25rem; }
+.quienes-fases li::before { position: absolute; left: 0; top: .1rem; }
+
+/* Identidad desplegable: el resumen es un botón grande (≥44 px) con foco visible. */
+.quienes-identidad { border: 2px solid var(--tinta, #1a1714); border-radius: 14px; background: #fff; overflow: clip; }
+.quienes-identidad > summary { display: grid; gap: .15rem; min-height: 44px; padding: .85rem 3rem .85rem 1rem; cursor: pointer; list-style: none; position: relative; }
+.quienes-identidad > summary::-webkit-details-marker { display: none; }
+.quienes-identidad > summary::after { content: '+'; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.5rem; font-weight: 800; line-height: 1; }
+.quienes-identidad[open] > summary::after { content: '\2212'; }
+.quienes-identidad > summary:focus-visible { outline: 3px solid var(--azul, #2b4fa3); outline-offset: -3px; }
+.quienes-identidad__t { font-weight: 800; font-size: 1.125rem; }
+.quienes-identidad__d { font-size: .9375rem; line-height: 1.45; }
+.quienes-identidad__cuerpo { padding: 0 1rem 1.25rem; border-top: 2px solid var(--tinta, #1a1714); min-width: 0; }
+@media (max-width: 480px) { .quienes-identidad__cuerpo { padding: 0 .5rem 1rem; } }
