@@ -1445,6 +1445,8 @@ async function flujoEntrada() {
   W().document.dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
   await cargar('#/', 390, 844); await espera(350);   // quien2: el tutorial dejó otra pantalla; las siguientes miden la portada
   afirmar('entrada: «¿Quién eres?» deja entrar directo a los portales sin tutorial', !!D().querySelector('#ent-quien a[href="#/portales/kinesis"]') && !!D().querySelector('#ent-quien a[href="#/portales/wisfox"]'));
+  afirmar('quien2: la franja trae «Tutorial guiado» siempre visible y lleva al selector del tutorial', !!D().querySelector('.franja .franja-tutorial[href="#/tutorial"]') && D().querySelector('.franja-tutorial').getBoundingClientRect().height >= 39.5);
+  afirmar('quien2: el botón principal de la portada dice qué ganas y lo explica en una línea', /Recorre la plataforma con un ejemplo/.test(D().querySelector('.ent-empezar').textContent) && D().querySelector('.ent-empezar').getAttribute('aria-describedby') === 'ent-empezar-linea' && !!D().getElementById('ent-empezar-linea'));
   afirmar('entrada: la portada nunca escribe el texto «null» (modo normal)', !/null/.test(D().querySelector('.entrada').innerText));
 
   // ---- historia ---- Por qué: la entrada y las guías cuentan una sola historia (bienvenida, reto, guía, acción, logro) con la voz de MT.narrativa; se mide que

@@ -28,7 +28,8 @@
      todavía no ha visto. La tabla de aprobación del informe sale de aquí. */
   const TEXTOS = {
     portada: {
-      empezar: 'Empezar el tutorial guiado',                                  // quien2: el botón principal lleva al tutorial (pedido del dueño)                                                     // nuevo (rótulo del botón único)
+      empezar: 'Recorre la plataforma con un ejemplo',                        // quien2: el botón principal lleva al tutorial guiado (pedido y textos aprobados por el dueño)
+      empezarLinea: 'Elige tu rol y mira cómo funciona, paso a paso.',       // quien2                                                     // nuevo (rótulo del botón único)
       yaSe: 'Ya sé quién soy: elegir mi rol',                                 // nuevo
       seguir: (rol) => 'Seguir como ' + rol.toLowerCase() + ': ir a mi guía', // nuevo
       // El descriptor («Educación inclusiva con tecnología») salió de la portada: se dice en voz alta y Sinapso ya da la bienvenida (MT.narrativa).

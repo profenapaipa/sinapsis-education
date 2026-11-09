@@ -64,7 +64,8 @@
           h('h1', { id: 'ent-h1' }, E.MARCA.nombre),
           h('p', { class: 'ent-lema' }, E.MARCA.lema),
           h('div', { class: 'ent-portada__acciones' },
-            h('button', { class: 'btn ent-empezar', type: 'button', onclick: () => ir('ent-quien') }, T.portada.empezar),
+            h('button', { class: 'btn ent-empezar', type: 'button', 'aria-describedby': 'ent-empezar-linea', onclick: () => ir('ent-quien') }, T.portada.empezar),
+            h('p', { class: 'ent-empezar-linea', id: 'ent-empezar-linea' }, T.portada.empezarLinea),
             h('button', { class: 'ent-enlace', type: 'button', onclick: () => ir('ent-quien') }, T.portada.yaSe),
             // Entrada discreta al tutorial guiado (js/tutorial.js): elegir rol y ejemplo y recorrer las pantallas reales.
             h('button', { class: 'ent-enlace', type: 'button', id: 'btn-ver-tutorial', onclick: () => MT.tutorial && MT.tutorial.abrir() }, 'Ver el tutorial'),

@@ -279,3 +279,6 @@ html[data-movimiento="calmado"] .ent-flota { transform: none; }
   /* El último rol, si queda solo en su fila (estudiante), ocupa el ancho completo. */
   .ent-roles > .ent-rol:last-child:nth-child(odd) { grid-column: 1 / -1; } }
 /* ---- fin quien2 ---- */
+
+/* quien2: la línea bajo el botón principal dice qué pasa al tocarlo. */
+.ent-empezar-linea { margin: .1rem 0 .2rem; color: var(--tinta-suave); font-size: .95rem; }
