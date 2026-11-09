@@ -27,7 +27,8 @@
 
 /* Trazos: extremos y uniones siempre redondos. Todo lo que no es relleno se declara aquí sin relleno. */
 .mascota path, .mascota ellipse, .mascota circle, .mascota rect { stroke-linecap: round; stroke-linejoin: round; }
-.mascota path { fill: none; }
+/* Solo los trazos sin relleno propio: un fill="..." puesto en el dibujo (prendas, destellos) debe valer; antes esta regla lo pisaba y la ropa salia del color de la piel. */
+.mascota path:where(:not([fill])) { fill: none; }
 .mascota .m-t { stroke: var(--m-trazo); }
 .mascota .m-d { stroke: var(--m-detalle); stroke-width: 2.8; fill: none; }
 .mascota .m-ceja { stroke-width: 3; }

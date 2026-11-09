@@ -346,7 +346,7 @@
       const cola = `<path class="m-t m-piel" d="M44 108 C14 118 1 98 7 78 C11 66 23 68 25 77 C27 89 35 94 46 94 Z"/>`
         + `<path class="m-crema" d="M7 78 C11 66 23 68 25 77 C20 81 12 83 7 78 Z"/>`
         + `<path class="m-t" d="M7 78 C11 66 23 68 25 77" fill="none"/>`
-        + pelaje(24, 96, 20, 16, 14, 5, 120, 250, 3.2);
+        + pelaje(25, 95, 12, 12, 12, 5, 100, 260, 3.2);
       // Si no teje, el hilo ámbar sube desde la punta de la cola (con la textura de lana).
       const hiloCola = p.teje ? '' : lana('M14 68 C11 59 21 56 18 49 C17 44 11 45 13 50', 'var(--hilo-wisfox)', 3);
       // Suéter: cuerpo de punto con puntadas en V, un cuello alto acanalado, puños y una franja de puntos.

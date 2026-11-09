@@ -43,6 +43,14 @@
     const c = e('div', 'celda'); c.append(MT.mascotas.mascota(id, { pose, emocion, tamano: tam, viva }));
     c.append(e('b', '', rotulo)); return c;
   };
+  // ?zoom=1: solo las cuatro a 240 px en pose base y tejiendo, para revisar el detalle de cerca (se usa con las capturas de revisión).
+  if (q.get('zoom')) {
+    const p = e('section', 'tema tema--' + (q.get('tema') || 'claro'));
+    for (const pose of (q.get('zoom') === '2' ? ['teje'] : ['base', 'teje'])) {
+      const f = e('div', 'fila'); for (const m of MT.mascotas.lista) f.append(celda(m.id, pose, 'contento', 300, m.nombre + ' · ' + pose)); p.append(f);
+    }
+    document.getElementById('paneles').append(p); return;
+  }
   const temas = q.get('tema') ? [q.get('tema')] : ['claro', 'oscuro'];
   for (const tema of temas) {
     const p = e('section', 'tema tema--' + tema); p.id = 'tema-' + tema;
