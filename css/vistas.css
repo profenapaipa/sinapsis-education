@@ -533,3 +533,8 @@ input[type="file"] { width: 100%; font: 400 1rem var(--fuente); color: var(--tin
 .cab-pantalla__accion { min-width: 0; }
 .cab-pantalla__accion .acciones { margin-top: 0; justify-content: flex-end; flex-wrap: wrap; }
 .cab-pantalla__accion .btn { max-width: 100%; white-space: normal; text-align: center; }
+/* espacio: «Próximamente» de la subnavegación ocupa su propia fila y sus ítems se reparten el ancho (con width:100% de planes.css dentro de un contenedor
+   que se ajusta al contenido, la etiqueta «Pro» se salía de la pantalla en el modo presentación a 720p). */
+.subnav .nav-pronto { flex: 1 1 100%; min-width: 0; }
+.nav-pronto__lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
+.nav-pronto__lista .nav-pro { min-width: 0; }

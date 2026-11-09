@@ -253,7 +253,7 @@ async function flujo() {
     for (const r of rutas) {
       await ir(r); ventana().MT.router.recargar(); await espera(350);
       const c = doc().querySelector('main .cab-pantalla'); const m = c && c.querySelector('.companero-rol svg');
-      const ok = [!!c, doc().querySelectorAll('main h1').length === 1, !!m && m.getAttribute('width') === '56', !!(c && c.querySelector('nav[aria-label="Dónde estoy"]'))];
+      const ok = [!!c, [...doc().querySelectorAll('main h1')].filter((x) => x.getClientRects().length).length === 1, !!m && m.getAttribute('width') === '56', !!(c && c.querySelector('nav[aria-label="Dónde estoy"]'))];
       if (!ok.every(Boolean)) malas.push(r + ' [' + ok.map(Number).join('') + ']');
       if (doc().documentElement.scrollWidth > ventana().innerWidth + 1) fuera.push(r);
     }
@@ -272,7 +272,8 @@ async function flujo() {
     }
     afirmar('espacio: ningún enlace ni botón visible lleva a Mi espacio fuera de la exposición guiada', malos.length === 0, malos.join(' '));
     await ir('#/guia'); ventana().MT.router.recargar(); await espera(400);
-    afirmar('espacio: la Guía es solo lectura (sin formularios, campos ni quizes) y enlaza a Kinesis y Wisfox', !doc().querySelector('main form, main input, main textarea, main select') && !!hallar('Abrir Kinesis') && !!hallar('Abrir Wisfox'));
+    afirmar('espacio: la Guía es solo lectura (sin formularios, campos ni quizes) y enlaza a Kinesis y Wisfox', ![...doc().querySelectorAll('main form, main input, main textarea, main select')].some((x) => x.getClientRects().length) &&   // los portales ocultos (el chat de Niky) también viven en main
+       !!hallar('Abrir Kinesis') && !!hallar('Abrir Wisfox'));
     afirmar('espacio: el riel conserva el ítem Guía como actual en #/guia', !!doc().querySelector('.riel a[data-ruta="guia"][aria-current="page"]'));
   }
   // ---- fin espacio ----
