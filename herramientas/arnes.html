@@ -1596,6 +1596,75 @@ async function flujoMovil() {
 /* El botón flotante de Niky, sus burbujas y su ventana. Mide en el navegador lo que el dueño pidió: «siempre un botón emergente que muestre
    mensajes como un chat que sugiere en qué puede ayudar, según el portal». Tres cosas se cuidan aparte: que no robe el foco, que no desborde
    a 390 px ni tape la barra inferior, y que con el movimiento calmado aparezca quieta. */
+// ---- tutorial ---- (js/tutorial.js: 5 roles x 5 ejemplos sobre las pantallas reales)
+async function flujoTutorial() {
+  const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
+  const tecla = (key) => D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true, cancelable: true }));
+  const sig = () => D().querySelector('.tut__btn--principal');
+  localStorage.clear(); await cargar('#/tutorial', 1280, 800); await espera(600);
+  afirmar('tutorial: #/tutorial abre «Elige un ejemplo» con 5 roles y 5 ejemplos', !!D().querySelector('.tut-sel[role="dialog"]') && D().querySelectorAll('.tut-chip').length === 5 && D().querySelectorAll('.tut-caso').length === 5);
+  await cargar('#/', 1280, 800); await espera(300);
+  afirmar('tutorial: la portada trae el botón «Ver el tutorial»', !!D().getElementById('btn-ver-tutorial'));
+  const errores0 = (W().__errores || []).length;
+  let rutasOk = true; let llegaron = 0; const fallos = [];
+  for (const rol of MTw().tutorial.ROLES) for (let n = 1; n <= 5; n++) {
+    await MTw().tutorial.iniciar({ rol, caso: n }); await espera(220);
+    const e = MTw().tutorial.estado; let guard = 0;
+    while (guard++ < 12) {
+      const p = e.pasos[e.i];
+      const ruta = (p.hash.replace(/^#\/?/, '').split('/')[0]) || 'inicio';
+      if (!MTw().router.rutas[ruta] || W().location.hash !== p.hash) { rutasOk = false; fallos.push(rol + n + ' ' + p.id + ' ' + W().location.hash); }
+      if (D().documentElement.dataset.tutorial !== 'activo') { rutasOk = false; fallos.push('sin señal ' + rol + n); }
+      if (e.i === e.pasos.length - 1) break;
+      sig().click(); await espera(230);
+    }
+    sig().click(); await espera(200);   // «Terminar»: abre el resumen final
+    const fin = D().querySelector('.tut-final');
+    if (fin && fin.querySelectorAll('.tut-logros li').length === 3 && D().documentElement.dataset.tutorial === undefined) llegaron++; else fallos.push('sin final ' + rol + n);
+  }
+  afirmar('tutorial: los 5 roles x 5 ejemplos llegan a su último paso y al resumen con 3 logros (' + llegaron + ' de 25)', llegaron === 25, fallos.slice(0, 5).join(' | '));
+  afirmar('tutorial: cada paso redirige a una ruta que existe y la señal html[data-tutorial] está puesta mientras dura', rutasOk, fallos.slice(0, 5).join(' | '));
+  afirmar('tutorial: recorrer los 25 recorridos no produjo errores de consola', (W().__errores || []).length === errores0, (W().__errores || []).slice(errores0).join(' | '));
+  // Cambio de rol y de ejemplo desde el propio tutorial, y volver al inicio
+  await MTw().tutorial.iniciar({ rol: 'docente', caso: 2 }); await espera(300);
+  afirmar('tutorial: la tarjeta es un diálogo no modal con región aria-live y progreso «Paso X de N»', D().querySelector('.tut').getAttribute('aria-modal') === 'false' && !!D().querySelector('.tut [aria-live]') && /Paso 1 de \d/.test(D().querySelector('.tut__meta').textContent));
+  D().getElementById('tut-cambiar-rol').click(); await espera(200);
+  D().querySelector('.tut-chip[data-rol="familia"]').click(); await espera(150);
+  D().querySelector('.tut-caso[data-caso="5"]').click(); await espera(700);
+  afirmar('tutorial: cambiar de rol y de ejemplo desde la tarjeta reinicia el recorrido en el nuevo rol y caso', MTw().tutorial.estado.rol === 'familia' && MTw().tutorial.estado.caso === 5 && MTw().store.obtener().rol === 'familia');
+  tecla('Escape'); await espera(250);
+  afirmar('tutorial: Escape sale (tarjeta oculta y señal html[data-tutorial] quitada) y la pantalla queda para explorar', D().querySelector('.tut').hidden && D().documentElement.dataset.tutorial === undefined && !MTw().tutorial.estado.activo);
+  await MTw().tutorial.iniciar({ rol: 'estudiante', caso: 1 }); await espera(300);
+  D().getElementById('tut-inicio').click(); await espera(300);
+  afirmar('tutorial: «Volver al inicio» cierra el recorrido y lleva a la portada', W().location.hash === '#/' && !MTw().tutorial.estado.activo && D().documentElement.dataset.tutorial === undefined);
+  // Irse por su cuenta limpia la señal
+  await MTw().tutorial.iniciar({ rol: 'docente', caso: 1 }); await espera(300);
+  W().location.hash = '#/glosario'; await espera(300);
+  afirmar('tutorial: abandonar la pantalla por otra ruta termina el recorrido y quita la señal', !MTw().tutorial.estado.activo && D().documentElement.dataset.tutorial === undefined);
+  // La Guía lista los 25 recorridos
+  await ir('#/guia/general'); await espera(400);
+  afirmar('tutorial: la Guía lista 5 roles con 5 botones «Probar este ejemplo» cada uno (25)', D().querySelectorAll('.tut-lista__rol').length === 5 && D().querySelectorAll('.tut-lista__rol li button').length === 25);
+  // Móvil: sin desbordes, tarjeta sobre la barra inferior
+  await cargar('#/', 390, 844); await espera(400);
+  await MTw().tutorial.iniciar({ rol: 'orientacion', caso: 5 }); await espera(500);
+  const de = D().documentElement; const t = D().querySelector('.tut').getBoundingClientRect(); const riel = D().getElementById('riel').getBoundingClientRect();
+  afirmar('tutorial: a 390 px no hay desborde horizontal y la tarjeta no tapa la barra inferior', de.scrollWidth <= 390 && t.bottom <= riel.top + 1 && t.left >= 0 && t.right <= 390, JSON.stringify({ sw: de.scrollWidth, tb: t.bottom, rt: riel.top }));
+  await cargar('#/tutorial', 390, 844); await espera(500);
+  const pn = D().querySelector('.tut-sel__panel').getBoundingClientRect();
+  afirmar('tutorial: a 390 px la ventana «Elige un ejemplo» cabe en la pantalla', D().documentElement.scrollWidth <= 390 && pn.left >= 0 && pn.right <= 390);
+  // Calmado: sin animaciones en la tarjeta ni en el anillo
+  localStorage.setItem('mosaicotelar.apariencia', JSON.stringify({ movimiento: 'calmado' }));
+  await cargar('#/', 1280, 800); await espera(300);
+  await MTw().tutorial.iniciar({ rol: 'docente', caso: 1 }); await espera(600);
+  const cs = (sel) => W().getComputedStyle(D().querySelector(sel)).animationName;
+  afirmar('tutorial: con el modo calmado la tarjeta y el anillo no se animan', cs('.tut') === 'none' && (!D().querySelector('.tut-foco') || cs('.tut-foco') === 'none'), cs('.tut'));
+  // El modo presentación y ?caso= siguen igual
+  localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=3'; await new Promise((r) => { f.onload = r; }); await espera(1200);
+  afirmar('tutorial: ?caso=3 sigue activando el modo presentación con su guion y no abre el tutorial', D().documentElement.dataset.presentacion === 'activa' && !!D().getElementById('guion-mesa') && !D().querySelector('.tut-sel') && MTw().casos.numero() === 3);
+  localStorage.clear();
+}
+// ---- fin tutorial ----
+
 async function flujoNiky() {
   const visible = (el) => !!el && el.getClientRects().length > 0 && ventana().getComputedStyle(el).visibility !== 'hidden';
   const dentro = (r, w, h) => r.left >= -1 && r.right <= w + 1 && r.top >= -1 && r.bottom <= h + 1;
@@ -1754,6 +1823,9 @@ async function flujoNiky() {
   try { await flujoFrontend(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'frontend: ' + String(e && e.stack || e); }
   try { await flujoEntrada(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'entrada: ' + String(e && e.stack || e); }
   try { await flujoMovil(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'móvil: ' + String(e && e.stack || e); }
+  // ---- tutorial ----
+  try { await flujoTutorial(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'tutorial: ' + String(e && e.stack || e); }
+  // ---- fin tutorial ----
   // ---- niky ----
   try { await flujoNiky(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'niky: ' + String(e && e.stack || e); }
   // ---- fin niky ----

@@ -43,6 +43,7 @@
   const PAGINAS_MAS = [
     { ruta: 'inicio', hash: '#/', etiqueta: 'Inicio', icono: 'inicio' },
     { ruta: 'guia', hash: '#/guia', etiqueta: 'Guía', icono: 'libro', soloMovil: true },   // en pantalla grande la Guía va en el riel; en el celular pasa aquí para que la barra quede en cinco
+    { ruta: 'tutorial', hash: '#/tutorial', etiqueta: 'Ver el tutorial', icono: 'recorrido' },
     { ruta: 'mapa', hash: '#/mapa', etiqueta: 'Mapa', icono: 'mapa' },
     { ruta: 'recorrido', hash: '#/recorrido', etiqueta: 'Roles y datos', icono: 'docente' },
     { ruta: 'planes', hash: '#/planes', etiqueta: 'Participa', icono: 'logros', id: 'plan-chip' },
@@ -53,7 +54,7 @@
     { ruta: 'creditos', hash: '#/creditos', etiqueta: 'Créditos', icono: 'familia' },
   ];
   // Las rutas que viven bajo «Más»: cuando se está en una, el botón «Más» se marca como actual.
-  const RUTAS_MAS = ['mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos'];
+  const RUTAS_MAS = ['tutorial', 'mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos'];
 
   let dinamico; let botonMas; let menuMas;
 
