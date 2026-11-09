@@ -1571,7 +1571,7 @@ async function flujoNiky() {
     const b = fab();
     if (!b || !visible(b)) { sinBoton.push(ruta); continue; }
     const r = b.getBoundingClientRect();
-    if (!(b.getAttribute('aria-label') || '').includes('Niky') || !b.querySelector('svg.mascota--niky') || r.width < 44 || !dentro(r, 1280, 800) || ventana().getComputedStyle(b.parentElement).position !== 'fixed') mal.push(ruta);
+    if (!(b.getAttribute('aria-label') || '').includes('Niky') || !b.querySelector('svg.mascota--niky') || r.width < 44 || !dentro(r, 1280, 800) || ventana().getComputedStyle(b.closest('.niky')).position !== 'fixed') mal.push(ruta);
   }
   afirmar('niky: el botón flotante está en todas las pantallas (' + RUTAS.filter(([r]) => !r).length + ' rutas), con nombre y el avatar de Niky', !sinBoton.length && !mal.length, 'sin botón: ' + sinBoton.join(' ') + ' | mal: ' + mal.join(' '));
 
@@ -1695,6 +1695,257 @@ async function flujoNiky() {
 }
 // ---- fin niky ----
 
+// ---- niky pestañas ----
+/* Niky con una pestaña por tarea. Por qué: el dueño pidió que Niky sea la única IA y que, si hay varias tareas, cada una tenga su propia
+   conversación. Se mide: sesiones independientes, reuso de la pestaña por tarea (niky:abrir), migración del estado viejo, cierre, tope de 5,
+   teclado, «Empezar de nuevo» y 390 px sin desbordes. */
+async function flujoNikyPestanas() {
+  const dentro = (r, w, h) => r.left >= -1 && r.right <= w + 1 && r.top >= -1 && r.bottom <= h + 1;
+  const V = () => doc().getElementById('slot-ia');
+  const tabs = () => [...V().querySelectorAll('[role="tab"]')];
+  const titulos = () => tabs().map((t) => t.textContent.replace('(respuesta nueva)', '').trim());
+  const sesiones = () => ventana().MT.ia.sesiones.de(ventana().MT.store.obtener());
+  const tecla = (el, key) => el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+  const portal = (tarea, contexto) => ventana().dispatchEvent(new (ventana().MessageEvent)('message', { origin: 'https://profenapaipa.github.io', data: { tipo: 'niky:abrir', portal: 'kinesis', tarea, contexto } }));
+  const limpio = async (ancho, alto, estado) => { localStorage.clear(); if (estado) localStorage.setItem('mosaicotelar.v2', JSON.stringify(estado)); try { sessionStorage.clear(); } catch (e) { /* sin sesión */ } await cargar('#/', ancho || 1280, alto || 800); await espera(500); };
+
+  // 1. Migración: un estado viejo (ia como lista de mensajes) pasa a la primera sesión sin perder nada.
+  await limpio(1280, 800, { rol: 'docente', ia: [{ rol: 'yo', texto: 'Pregunta vieja' }, { rol: 'ia', texto: 'Respuesta vieja', fuente: 'ejemplo' }] });
+  let ia = sesiones();
+  afirmar('niky pestañas: un estado antiguo (ia como lista) se migra a una sola sesión «Conversación» con sus dos mensajes', ia.sesiones.length === 1 && ia.sesiones[0].titulo === 'Conversación' && ia.sesiones[0].mensajes.length === 2 && ia.activa === ia.sesiones[0].id, JSON.stringify(ia).slice(0, 160));
+  ventana().MT.ia.panel.abrir(); await espera(200);
+  afirmar('niky pestañas: la conversación migrada se ve en la ventana con su pestaña', /Respuesta vieja/.test(V().innerText) && titulos().join() === 'Conversación');
+  ventana().MT.ia.panel.cerrar();
+  await limpio(1280, 800, { rol: 'docente', ia: { raro: true } });
+  afirmar('niky pestañas: un estado de ia dañado se repara con una sesión vacía (no rompe la plataforma)', sesiones().sesiones.length === 1 && sesiones().sesiones[0].mensajes.length === 0);
+  ventana().MT.ia.sesiones.nueva();
+  const antesReinicio = sesiones().sesiones.length;
+  ventana().MT.store.reiniciar();
+  afirmar('niky pestañas: reiniciar el estado deja la IA con una sola sesión vacía', antesReinicio === 2 && sesiones().sesiones.length === 1 && sesiones().sesiones[0].mensajes.length === 0);
+
+  // 2. niky:abrir: abre una pestaña por tarea, la reutiliza y no mezcla conversaciones.
+  await limpio(1280, 800);
+  portal('ordenar-nota-bitacora', { rol: 'docente', pantalla: 'bitacora', borrador: 'hoy trabajamos fracciones' }); await espera(1500);
+  afirmar('niky pestañas: niky:abrir crea la pestaña «Ordenar nota de bitácora», activa, y envía allí el primer mensaje', !V().hidden && titulos().join() === 'Ordenar nota de bitácora' && /ordenar esta nota/i.test(V().querySelector('[role="log"]').innerText), titulos().join());
+  portal('ordenar-nota-bitacora', 'y mañana repasamos'); await espera(1500);
+  afirmar('niky pestañas: niky:abrir con la MISMA tarea reutiliza la pestaña (sigue habiendo una) y suma el mensaje', tabs().length === 1 && /repasamos/.test(V().querySelector('[role="log"]').innerText) && /fracciones/.test(V().querySelector('[role="log"]').innerText), titulos().join());
+  portal('pista', 'la fracción 3/4'); await espera(1500);
+  afirmar('niky pestañas: niky:abrir con OTRA tarea crea una pestaña nueva y la activa, sin mostrar la otra conversación', tabs().length === 2 && titulos().join() === 'Ordenar nota de bitácora,Pista' && tabs()[1].getAttribute('aria-selected') === 'true' && !/ordenar esta nota/i.test(V().querySelector('[role="log"]').innerText), titulos().join());
+  portal('ajustar-actividad', ''); await espera(1500);
+  afirmar('niky pestañas: tres tareas, tres pestañas con título corto', tabs().length === 3 && titulos().join() === 'Ordenar nota de bitácora,Pista,Ajustar actividad', titulos().join());
+  const m = sesiones().sesiones.map((x) => x.mensajes.map((y) => y.texto).join(' ¦ '));
+  afirmar('niky pestañas: las conversaciones son independientes (cada sesión guarda solo sus mensajes)', /nota de bitácora/.test(m[0]) && !/pista/i.test(m[0]) && /pista/i.test(m[1]) && !/nota de bitácora/.test(m[1]) && /ajustar esta actividad/i.test(m[2]) && !/nota de bitácora|pista/i.test(m[2]), m.map((x) => x.slice(0, 40)).join(' | '));
+  const lista = V().querySelector('[role="tablist"]');
+  afirmar('niky pestañas: hay un tablist con nombre, cada pestaña controla un tabpanel y solo la activa está en el orden de Tab', !!lista && !!lista.getAttribute('aria-label') && tabs().every((t) => t.getAttribute('aria-controls') === 'cuerpo-ia') && tabs().filter((t) => t.tabIndex === 0).length === 1 && tabs()[2].tabIndex === 0 && V().querySelector('[role="tabpanel"]').getAttribute('aria-labelledby') === tabs()[2].id);
+
+  // 3. Teclado: flechas, Inicio, Fin.
+  tabs()[2].focus(); tecla(tabs()[2], 'ArrowLeft'); await espera(100);
+  afirmar('niky pestañas: la flecha izquierda pasa a la pestaña anterior y le da el foco', doc().activeElement === tabs()[1] && tabs()[1].getAttribute('aria-selected') === 'true', doc().activeElement && doc().activeElement.textContent);
+  tecla(doc().activeElement, 'Home'); await espera(100);
+  const enPrimera = doc().activeElement === tabs()[0];
+  tecla(doc().activeElement, 'End'); await espera(100);
+  afirmar('niky pestañas: Inicio va a la primera y Fin a la última', enPrimera && doc().activeElement === tabs()[2]);
+  tecla(doc().activeElement, 'ArrowRight'); await espera(100);
+  afirmar('niky pestañas: la flecha derecha en la última vuelve a la primera', doc().activeElement === tabs()[0]);
+
+  // 4. Borrador por pestaña.
+  const campo = () => V().querySelector('textarea');
+  tabs()[0].click(); await espera(100); campo().value = 'borrador uno'; campo().dispatchEvent(new Event('input', { bubbles: true }));
+  tabs()[1].click(); await espera(100);
+  const vacioEn1 = campo().value === '';
+  tabs()[0].click(); await espera(100);
+  afirmar('niky pestañas: cada pestaña recuerda su propio borrador', vacioEn1 && campo().value === 'borrador uno', campo().value);
+  campo().value = ''; campo().dispatchEvent(new Event('input', { bubbles: true }));
+
+  // 5. Respuesta en otra pestaña: contador de sin leer.
+  tabs()[0].click(); await espera(100);
+  ventana().MT.ia.consultar('Una duda', 'general', sesiones().sesiones[1].id); await espera(1200);
+  const cuenta = doc().querySelector('.niky-boton__cuenta');
+  afirmar('niky pestañas: una respuesta que llega a una pestaña no visible marca la pestaña y el botón muestra el contador (1)', !!cuenta && cuenta.textContent === '1' && /1 respuesta nueva/.test(doc().getElementById('niky-fab').getAttribute('aria-label')) && !!tabs()[1].querySelector('.pestana__punto'), cuenta && cuenta.textContent);
+  tabs()[1].click(); await espera(100);
+  afirmar('niky pestañas: al abrir esa pestaña el contador desaparece', !doc().querySelector('.niky-boton__cuenta') && /Una duda/.test(V().querySelector('[role="log"]').innerText));
+
+  // 6. «+», cierre y tope de 5.
+  V().querySelector('.pestanas__mas').click(); await espera(150);
+  V().querySelector('.pestanas__mas').click(); await espera(150);
+  afirmar('niky pestañas: «+» crea pestañas nuevas («Duda libre») hasta el máximo de 5 y se deshabilita', tabs().length === 5 && V().querySelector('.pestanas__mas').disabled && titulos()[4] === 'Duda libre', titulos().join());
+  portal('explicar', 'algo'); await espera(1500);
+  afirmar('niky pestañas: con 5 pestañas, una tarea nueva no crea una sexta (el mensaje va a la pestaña activa)', tabs().length === 5 && sesiones().sesiones.length === 5);
+  const ns = tabs().length;
+  V().querySelector('.pestana-par--activa .pestana__cerrar').click(); await espera(150);
+  afirmar('niky pestañas: «×» cierra la pestaña, activa una vecina y el foco queda dentro de la ventana', tabs().length === ns - 1 && tabs().some((t) => t.getAttribute('aria-selected') === 'true') && V().contains(doc().activeElement), tabs().length + ' ' + (doc().activeElement && doc().activeElement.tagName));
+  tabs()[0].focus(); tecla(tabs()[0], 'Delete'); await espera(150);
+  afirmar('niky pestañas: Supr cierra la pestaña enfocada', tabs().length === ns - 2);
+  while (tabs().length > 1) { tabs()[0].focus(); tecla(tabs()[0], 'Delete'); await espera(80); }
+  afirmar('niky pestañas: la última pestaña no se puede cerrar (ni tiene «×»)', tabs().length === 1 && !V().querySelector('.pestana__cerrar'));
+
+  // 7. Compatibilidad: abrir({ texto, tarea }) reutiliza la pestaña de esa tarea.
+  ventana().MT.ia.panel.cerrar(); await espera(100);
+  ventana().MT.ia.panel.abrir({ texto: 'Dame una pista, sin la respuesta.', tarea: 'pista' }); await espera(1400);
+  ventana().MT.ia.panel.abrir({ texto: 'Dame una pista, sin la respuesta.', tarea: 'pista' }); await espera(1400);
+  afirmar('niky pestañas: MT.ia.panel.abrir({ texto, tarea }) usa una pestaña por tarea y la reutiliza', titulos().filter((t) => t === 'Pista').length === 1 && /Una pista/.test(V().querySelector('[role="log"]').innerText), titulos().join());
+  ventana().MT.ia.panel.cerrar(); await espera(100);
+
+  // 8. Emoción del botón: piensa mientras responde, celebra al terminar, vuelve a reposo.
+  await limpio(1280, 800);
+  const cara = () => doc().getElementById('niky-fab').dataset.emocion;
+  ventana().MT.ia.panel.abrir(); await espera(150);
+  const tx = V().querySelector('textarea'); tx.value = 'Hola'; V().querySelector('button[type=submit]').click(); await espera(150);
+  const mientras = cara();
+  await espera(1100);
+  const despues = cara();
+  await espera(3000);
+  afirmar('niky pestañas: la cara del botón piensa mientras responde y celebra al terminar', mientras === 'pensando' && despues === 'celebra', mientras + ' → ' + despues);
+  afirmar('niky pestañas: pasados unos segundos la cara vuelve a reposo', cara() === 'contento', cara());
+  ventana().MT.ia.panel.cerrar();
+
+  // 9. «Empezar de nuevo» de la plataforma limpia todas las pestañas.
+  await limpio(1280, 800);
+  portal('pista', 'a'); await espera(1200); portal('explicar', 'b'); await espera(1200);
+  afirmar('niky pestañas: (preparación) dos pestañas con conversación', tabs().length === 2);
+  await ventana().MT.barra.empezarDeNuevo({ confirmar: false }); await espera(400);
+  afirmar('niky pestañas: «Empezar de nuevo» deja una sola pestaña vacía en la ventana', tabs().length === 1 && sesiones().sesiones[0].mensajes.length === 0 && !/pista|explícame/i.test(V().querySelector('[role="log"]').innerText), tabs().length + ' ' + titulos().join());
+  ventana().MT.ia.panel.cerrar();
+
+  // 10. Escape cierra y devuelve el foco al botón.
+  portal('pista', ''); await espera(1200);
+  tecla(tabs()[0], 'Escape'); await espera(100);
+  afirmar('niky pestañas: Escape desde una pestaña cierra la ventana y devuelve el foco al botón', V().hidden && doc().activeElement === doc().getElementById('niky-fab'));
+
+  // 11. 390 px: tres pestañas, la barra se desplaza dentro de la ventana y nada se desborda.
+  for (const rol of [null, 'docente']) {
+    await limpio(390, 844, rol ? { rol } : null);
+    portal('ordenar-nota-bitacora', 'x'); await espera(1200); portal('ajustar-actividad', 'y'); await espera(1200); portal('pista', 'z'); await espera(1500);
+    const W = ventana().innerWidth; const H = ventana().innerHeight; const rv = V().getBoundingClientRect(); const rr = doc().querySelector('.riel').getBoundingClientRect();
+    const mas = V().querySelector('.pestanas__mas').getBoundingClientRect();
+    const quien = 'niky pestañas 390 (' + (rol || 'sin rol') + '): ';
+    afirmar(quien + 'con 3 pestañas la ventana cabe, no tapa la barra inferior y el «+» sigue a la vista', dentro(rv, W, H) && rv.bottom <= rr.top + 1 && dentro(mas, W, H) && tabs().length === 3, JSON.stringify(rv));
+    afirmar(quien + 'la página y la ventana no se ensanchan (la barra se desplaza dentro)', doc().documentElement.scrollWidth <= doc().documentElement.clientWidth + 1 && V().scrollWidth <= V().clientWidth + 1);
+    afirmar(quien + 'cada pestaña, su «×» y el «+» miden al menos 44 px de alto', [...V().querySelectorAll('.pestana, .pestana__cerrar, .pestanas__mas')].every((x) => x.getBoundingClientRect().height >= 43.5));
+    ventana().MT.ia.panel.cerrar();
+  }
+
+  // 12. Movimiento calmado: nada se anima en las pestañas.
+  await limpio(1280, 800); doc().documentElement.dataset.movimiento = 'calmado';
+  ventana().MT.ia.panel.abrir(); await espera(100);
+  const cs = ventana().getComputedStyle(V().querySelector('.pestana'));
+  afirmar('niky pestañas: con el movimiento calmado las pestañas no tienen transiciones ni animaciones', cs.animationName === 'none' && cs.transitionDuration.split(',').every((x) => parseFloat(x) < 0.001));
+  delete doc().documentElement.dataset.movimiento; ventana().MT.ia.panel.cerrar();
+  localStorage.clear();
+}
+// ---- fin niky pestañas ----
+
+// ---- niky estados ----
+/* Niky siempre a mano pero nunca estorbando: tres estados (visible, reducido, oculto) que se recuerdan, y tres lugares donde no aparece
+   aunque el estado guardado sea «visible» (carrusel de bienvenida, tutorial guiado, modo presentación). Se mide en el navegador. */
+async function flujoNikyEstados() {
+  const R = () => doc().documentElement;
+  const N = () => doc().getElementById('niky');
+  const F = () => doc().getElementById('niky-fab');
+  const L = () => doc().getElementById('niky-lengueta');
+  const M = () => doc().getElementById('niky-mas');
+  const GUARDADO = () => { try { return localStorage.getItem('sinapsis.niky.estado'); } catch (e) { return 'error'; } };
+  const mide = (el) => { const r = el.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height), visible: ventana().getComputedStyle(el).display !== 'none' && r.width > 0 }; };
+  const tecla = (el, key) => el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+  const limpio = async (ancho, alto, guardado) => { localStorage.clear(); if (guardado) localStorage.setItem('sinapsis.niky.estado', guardado); try { sessionStorage.clear(); } catch (e) { /* sin sesión */ } await cargar('#/', ancho || 1280, alto || 800); await espera(500); };
+  const nivelNiky = () => ventana().getComputedStyle(N()).display !== 'none';
+
+  // 1. Por defecto: visible, con su botón de opciones.
+  await limpio(1280, 800);
+  afirmar('niky estados: por defecto está visible (botón de 56 px o más) y no hay lengüeta', N().dataset.estado === 'visible' && mide(F()).w >= 56 && !mide(L()).visible, JSON.stringify(mide(F())));
+  afirmar('niky estados: cada estado tiene nombre accesible (botón, lengüeta y opciones)', /Niky/.test(F().getAttribute('aria-label') || '') && L().getAttribute('aria-label') === 'Mostrar a Niky' && !!M().getAttribute('aria-label'));
+
+  // 2. Reducir desde el menú, con teclado.
+  M().focus(); M().click(); await espera(80);
+  const menu = doc().getElementById('niky-menu');
+  afirmar('niky estados: el botón «⋯» abre un menú con «Reducir» y «Ocultar» y el foco pasa a la primera opción', !menu.hidden && M().getAttribute('aria-expanded') === 'true' && doc().activeElement === menu.querySelector('button') && /Reducir/.test(menu.textContent) && /Ocultar/.test(menu.textContent));
+  tecla(menu, 'Escape'); await espera(50);
+  afirmar('niky estados: Escape cierra el menú y devuelve el foco al «⋯»', menu.hidden && doc().activeElement === M());
+  M().click(); await espera(50); menu.querySelectorAll('button')[0].click(); await espera(150);
+  const rf = mide(F());
+  afirmar('niky estados: «Reducir» deja el botón pequeño con área táctil de 44 px, y se guarda', N().dataset.estado === 'reducido' && rf.w >= 44 && rf.w <= 46 && GUARDADO() === 'reducido', JSON.stringify(rf) + ' ' + GUARDADO());
+  const dib = ventana().getComputedStyle(F()); const dibujo = rf.w - parseFloat(dib.borderLeftWidth) * 2;
+  afirmar('niky estados: el círculo dibujado del estado reducido mide entre 34 y 38 px', dibujo >= 34 && dibujo <= 38, String(dibujo));
+  afirmar('niky estados: reducido no muestra burbujas', !mide(doc().getElementById('niky-burbuja')).visible);
+  F().click(); await espera(150);
+  afirmar('niky estados: un toque sobre el botón reducido lo restaura sin abrir la ventana', N().dataset.estado === 'visible' && doc().getElementById('slot-ia').hidden && GUARDADO() === 'visible');
+  F().click(); await espera(250);
+  afirmar('niky estados: el segundo toque abre el chat', !doc().getElementById('slot-ia').hidden && F().getAttribute('aria-expanded') === 'true');
+  ventana().MT.ia.panel.cerrar(); await espera(150);
+
+  // 3. Ocultar: lengüeta, foco en ella, y volver a mostrar.
+  M().click(); await espera(50); menu.querySelectorAll('button')[1].click(); await espera(150);
+  const rl = mide(L());
+  const rb = L().getBoundingClientRect();
+  afirmar('niky estados: «Ocultar» quita el botón y deja la lengüeta «Mostrar a Niky» en el borde derecho, con el foco', N().dataset.estado === 'oculto' && !mide(F()).visible && rl.visible && Math.round(rb.right) >= ventana().innerWidth - 1 && doc().activeElement === L() && GUARDADO() === 'oculto', JSON.stringify(rl));
+  afirmar('niky estados: la lengüeta es poco intrusiva (menos de 40 px de ancho) y alta de tocar (44 px o más)', rl.w < 40 && rl.h >= 44, JSON.stringify(rl));
+  L().click(); await espera(150);
+  afirmar('niky estados: tocar la lengüeta muestra a Niky de nuevo y le da el foco', N().dataset.estado === 'visible' && mide(F()).visible && !mide(L()).visible && doc().activeElement === F() && GUARDADO() === 'visible');
+
+  // 4. Recuerdo entre pantallas y recargas.
+  M().click(); await espera(50); menu.querySelectorAll('button')[0].click(); await espera(100);
+  ventana().location.hash = '#/mi'; await espera(500);
+  afirmar('niky estados: el estado reducido se mantiene al cambiar de pantalla', N().dataset.estado === 'reducido');
+  await cargar('#/', 1280, 800); await espera(500);
+  afirmar('niky estados: el estado reducido se recuerda tras recargar', N().dataset.estado === 'reducido' && mide(F()).w <= 46);
+  localStorage.setItem('sinapsis.niky.estado', 'oculto'); await cargar('#/', 1280, 800); await espera(500);
+  afirmar('niky estados: el estado oculto se recuerda tras recargar (solo la lengüeta)', N().dataset.estado === 'oculto' && mide(L()).visible && !mide(F()).visible);
+  localStorage.setItem('sinapsis.niky.estado', 'cualquier-cosa'); await cargar('#/', 1280, 800); await espera(500);
+  afirmar('niky estados: un valor guardado raro cae en «visible»', N().dataset.estado === 'visible');
+
+  // 5. Con la ventana abierta el botón no se oculta ni se reduce (el estado guardado no cambia).
+  localStorage.setItem('sinapsis.niky.estado', 'oculto'); await cargar('#/', 1280, 800); await espera(400);
+  ventana().MT.ia.panel.abrir(); await espera(250);
+  afirmar('niky estados: con la ventana abierta el botón sigue visible aunque el estado sea «oculto», y no hay lengüeta', mide(F()).visible && mide(F()).w >= 56 && !mide(L()).visible && GUARDADO() === 'oculto');
+  ventana().MT.ia.panel.cerrar(); await espera(250);
+  afirmar('niky estados: al cerrar la ventana vuelve a estar oculto', N().dataset.estado === 'oculto' && !mide(F()).visible && mide(L()).visible);
+
+  // 6. Donde no aparece: carrusel, tutorial y presentación, aunque lo guardado sea «visible».
+  for (const guardado of ['visible', 'reducido', 'oculto']) {
+    await limpio(1280, 800, guardado);
+    R().classList.add('carrusel-abierto'); await espera(80);
+    const enCarrusel = !nivelNiky();
+    R().classList.remove('carrusel-abierto'); await espera(80);
+    afirmar('niky estados: con el carrusel de bienvenida abierto no hay botón, lengüeta ni burbujas (guardado: ' + guardado + ') y al salir vuelve a su estado', enCarrusel && nivelNiky() && GUARDADO() === guardado && N().dataset.estado === guardado);
+    R().setAttribute('data-tutorial', 'activo'); await espera(80);
+    const enTutorial = !nivelNiky();
+    R().removeAttribute('data-tutorial'); await espera(80);
+    afirmar('niky estados: con el tutorial guiado activo no aparece (guardado: ' + guardado + ') y al terminar vuelve a su estado', enTutorial && nivelNiky() && GUARDADO() === guardado);
+    R().dataset.presentacion = 'activa'; await espera(80);
+    const enPresentacion = !nivelNiky();
+    delete R().dataset.presentacion; await espera(80);
+    afirmar('niky estados: en el modo presentación no aparece (guardado: ' + guardado + ') y al salir vuelve a su estado', enPresentacion && nivelNiky() && GUARDADO() === guardado);
+  }
+
+  // 7. Sin almacenamiento: no rompe y vale para esta visita.
+  await limpio(1280, 800);
+  const antes = ventana().Storage.prototype.setItem;
+  ventana().Storage.prototype.setItem = function () { throw new Error('sin almacenamiento'); };
+  let error = null; try { ventana().MT.niky.fijarEstado('reducido'); } catch (e) { error = e; }
+  ventana().Storage.prototype.setItem = antes;
+  afirmar('niky estados: si el almacenamiento falla, cambiar de estado no lanza error y vale para esta visita', !error && N().dataset.estado === 'reducido', String(error));
+
+  // 8. Teclado: la lengüeta es un botón real.
+  await limpio(1280, 800, 'oculto');
+  L().focus(); L().click(); await espera(100);
+  afirmar('niky estados: la lengüeta es un botón real (se activa con Enter o espacio) y devuelve a Niky', L().tagName === 'BUTTON' && N().dataset.estado === 'visible');
+
+  // 9. 390 px: en los tres estados nada se desborda ni tapa la barra inferior.
+  for (const e of ['visible', 'reducido', 'oculto']) {
+    await limpio(390, 844, e);
+    const W = ventana().innerWidth; const rr = doc().querySelector('.riel').getBoundingClientRect();
+    const objetivo = e === 'oculto' ? L() : F(); const r = objetivo.getBoundingClientRect();
+    afirmar('niky estados 390 (' + e + '): se ve entero, por encima de la barra inferior y sin ensanchar la página', r.left >= 0 && r.right <= W + 1 && r.bottom <= rr.top + 1 && r.height >= 43.5 && doc().documentElement.scrollWidth <= doc().documentElement.clientWidth + 1, JSON.stringify({ l: r.left, r: r.right, b: r.bottom, riel: rr.top, h: r.height }));
+  }
+
+  // 10. Movimiento calmado: sin transiciones en los controles.
+  await limpio(1280, 800); R().dataset.movimiento = 'calmado'; await espera(60);
+  afirmar('niky estados: con el movimiento calmado el botón y la lengüeta no tienen transiciones', [F(), L(), M()].every((x) => ventana().getComputedStyle(x).transitionDuration.split(',').every((d) => parseFloat(d) < 0.001)));
+  delete R().dataset.movimiento;
+  localStorage.clear();
+}
+// ---- fin niky estados ----
+
 (async () => {
   try {
     for (const ancho of ANCHOS) for (const [rol, ruta] of RUTAS) {
@@ -1715,6 +1966,12 @@ async function flujoNiky() {
   // ---- niky ----
   try { await flujoNiky(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'niky: ' + String(e && e.stack || e); }
   // ---- fin niky ----
+  // ---- niky pestañas ----
+  try { await flujoNikyPestanas(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'niky pestañas: ' + String(e && e.stack || e); }
+  // ---- fin niky pestañas ----
+  // ---- niky estados ----
+  try { await flujoNikyEstados(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'niky estados: ' + String(e && e.stack || e); }
+  // ---- fin niky estados ----
   document.getElementById('resultado').textContent = JSON.stringify(salida);
   document.title = 'listo';
   // auditar.py escucha en /__resultado: así no hace falta ninguna espera fija.
