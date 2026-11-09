@@ -16,7 +16,7 @@
      «Contáctanos» lleva a #/piloto, que hoy no promete respuesta por correo mientras MT.config.contacto esté vacío. */
   const TEXTOS = {
     titulo: 'Servicios y planes',
-    bajada: 'Esto es lo que el proyecto ofrece para acompañar a una comunidad educativa. Sin cifras: primero conversamos, escuchamos lo que necesitas y lo construimos juntos.',
+    bajada: 'Esto es lo que el proyecto ofrece para acompañar a una comunidad educativa. Primero conversamos, escuchamos lo que necesitas y lo construimos juntos.',
     estados: { hoy: 'Funciona hoy', desarrollo: 'En desarrollo' },
     servicios: [
       { id: 'demo', estado: 'hoy', nombre: 'Conocer la plataforma', texto: 'Recorre los cinco roles con ejemplos y datos ficticios, y el tutorial guiado te lleva paso a paso.' },
