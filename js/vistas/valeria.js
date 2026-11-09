@@ -21,7 +21,7 @@
     c.append(h('header', { class: 'saludo' }, h('div', null, h('h1', null, 'Conversa con Niky'),
       h('p', null, 'La guía de la plataforma: ayuda al docente a diseñar y al estudiante a resolver sus dudas. Propone; decide quien enseña.'))),
       caja,
-      h('p', { class: 'suave' }, 'También puedes abrirla desde cualquier espacio con el botón “Niky” del menú, y la conversación es la misma.'));
+      h('p', { class: 'suave' }, 'También puedes abrirla desde cualquier espacio con el botón redondo de Niky, abajo a la derecha, y la conversación es la misma.'));
     const ch = MT.ia.montarChat(caja, MT.ia.panel.sugerenciasPara());
     MT.router.alSalir(() => ch.destruir());
   }

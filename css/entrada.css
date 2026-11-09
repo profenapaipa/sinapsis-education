@@ -38,7 +38,7 @@
 .ent-portada__cuerpo { display: grid; justify-items: center; text-align: center; gap: .6rem; padding-top: 1rem; padding-bottom: 1.4rem; }
 .ent-marca { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .6rem; margin-bottom: .7rem; }
 /* El logo es el primer gesto de la marca: grande, para que se vea cómo encajan las piezas. */
-.ent-marca > svg { width: clamp(76px, min(30vw, 15svh), 156px); height: auto; aspect-ratio: 1; flex: none; }
+.ent-marca > svg { width: clamp(96px, min(34vw, 17svh), 190px); height: auto; aspect-ratio: 1; flex: none; }
 .ent-marca .etiqueta { margin: 0; text-align: left; }
 .ent-portada .etiqueta { font-size: .9rem; }
 .ent-portada h1 { margin: 0; font-size: clamp(2.1rem, 8vw, 3.6rem); }
@@ -211,3 +211,7 @@ html[data-movimiento="calmado"] .ent-flota { transform: none; }
 .ent-punto--hecho { background: var(--e-vivo); border-color: var(--tinta); }
 .ent-panel__linea { margin: .8rem 0 0; padding: .55rem .9rem; font-weight: 700; font-size: 1.05rem; line-height: 1.4; background: var(--lino); border-left: 4px solid var(--e-vivo); border-radius: var(--radio-chico); }
 .ent-panel__linea:empty { display: none; }
+
+@media (min-width: 861px) { .ent-marca > svg { width: clamp(150px, 15vw, 200px); } }   /* en pantalla grande, el logo es el primer gesto de la marca */
+@media (max-height: 600px) { .ent-marca > svg { width: 72px; } .ent-masc--grande { --m: 64px; } }   /* celulares muy bajos: el botón «Empezar» manda */
+@media (max-height: 600px) { .ent-marca > svg { width: 56px; } .ent-masc--grande { --m: 44px; } .ent-portada__cuerpo { gap: .3rem; padding-top: .4rem; } }

@@ -209,6 +209,8 @@
     ocultarBurbuja(false);
     clearTimeout(temporizador);
     if (bloqueado()) return;
+    // En celular la burbuja no aparece sola: taparía el botón «Empezar», los formularios y los «Siguiente». Quien la quiere toca el botón de Niky.
+    if (window.matchMedia('(max-width: 860px)').matches) return;
     temporizador = setTimeout(mostrarBurbuja, 1100);
   }
 

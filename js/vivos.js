@@ -223,6 +223,7 @@
       const abre = !raiz.classList.contains('vivos--menu'); raiz.classList.toggle('vivos--menu', abre); menuBtn.setAttribute('aria-expanded', String(abre)); } }, '⋯');
     raiz.append(menuBtn);
   }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && raiz && raiz.classList.contains('vivos--menu')) { raiz.classList.remove('vivos--menu'); if (menuBtn) { menuBtn.setAttribute('aria-expanded', 'false'); menuBtn.focus(); } } });
   function ocultar() { alternarAmplio(false); delete document.documentElement.dataset.portal; if (raiz) raiz.hidden = true; if (MT.barra) MT.barra.actualizar(); medirCabeza(); }
 
   window.addEventListener('resize', medirCabeza);

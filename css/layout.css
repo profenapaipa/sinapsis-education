@@ -49,6 +49,7 @@
   border-bottom: 1px solid var(--linea); position: relative; z-index: 30;
 }
 .franja p { margin: 0; }
+.franja { flex-wrap: wrap; }   /* el aviso de «versión nueva» baja a su propia línea en vez de apretarse */
 .franja-aviso { flex: 1 1 auto; min-width: 0; }
 .franja-logo { display: none; flex: none; width: 34px; height: 34px; border-radius: 50%; background: #1A1714; border: 2px solid #FFFFFF; --logo-fondo: #1A1714; --hilo-kinesis: #1FA36B; --hilo-valeria: #4A6FE0; --hilo-wisfox: #F2A33A; --hilo-mosaico: #F0558A; color: #1A1714; }
 .franja-logo svg { display: block; width: 30px; height: 30px; color: #1A1714; }
