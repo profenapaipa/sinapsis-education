@@ -81,14 +81,20 @@
     // Solo los pedidos del guion (una tarea con nombre); lo que la persona escribe en la caja libre viaja como «general» y va al modelo.
     // Antes se exigía que la tarea pedida coincidiera con la del catálogo, y el paso de Niky del docente (siempre «disenar») se quedaba sin
     // respuesta preparada en los casos 1 a 4 (el catálogo espera ajustar, ayuda, orientar o familia): iba a Gemini y gastaba cuota.
-    return n && tareas && tarea && tarea !== 'general' ? t.rol + '-' + n : null;
+    // «libre» tampoco: es la caja de texto de la persona (ver consultar) y debe llegar al modelo, no a un texto preparado del guion.
+    return n && tareas && tarea && tarea !== 'general' && tarea !== 'libre' ? t.rol + '-' + n : null;
   }
   // La tarea que el servidor exige para un código preparado (la del catálogo), que es la que se envía con ese código.
   const tareaDeEjemplo = (codigo) => { const [rol, n] = String(codigo || '').split('-'); return (EJEMPLO_TAREA[rol] || [])[Number(n) - 1] || null; };
 
+  // Las tareas que el servidor atiende. Cualquier otra (las preguntas de las burbujas guía, como «que-es» o «mapa») tiene su texto propio
+  // aquí y no se manda: el servidor la rechazaría con 400 de todos modos (viajaba como «general»), así que solo era una petición perdida.
+  const TAREAS_SERVIDOR = ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar', 'libre'];
+
   async function preguntar({ tarea, texto }) {
     const limpio = recortar(tarea, texto);
-    if (info.modo === 'servidor') {
+    const ejemplo = info.modo === 'servidor' ? codigoDeEjemplo(tarea) : null;   // solo dentro del tutorial guiado
+    if (info.modo === 'servidor' && (ejemplo || TAREAS_SERVIDOR.includes(tarea))) {
       try {
         // iafuente: disenar y ajustar pueden tardar hasta 20 s en el peor caso (el servidor reintenta una vez si Gemini se cuelga; lo normal son 2 s).
         // Con el tope de 10 s se veria el texto de ejemplo aunque la IA habria respondido. Mientras tanto el chat muestra «Niky esta pensando…».
@@ -96,12 +102,12 @@
         // Perfil: el codigo del estudiante del caso en pantalla (8A-NN). El servidor arma de ahi el perfil de apoyos; el texto del perfil nunca viaja desde la pagina.
         const caso = MT.casos && MT.casos.activo ? MT.casos.activo() : null;
         const perfil = caso && /^8A-\d\d$/.test(caso.estudiante || '') && ['ajustar', 'ayuda', 'orientar', 'familia'].includes(tarea) ? caso.estudiante : null;
-        const ejemplo = codigoDeEjemplo(tarea);   // solo dentro del tutorial guiado
         const r = await fetch((cfg.base || '') + '/api/valeria', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          // El servidor conoce seis tareas; las preguntas guía de las burbujas viajan como «general».
-          body: JSON.stringify({ tarea: ejemplo ? tareaDeEjemplo(ejemplo) : ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar'].includes(tarea) ? tarea : 'general', texto: limpio, ...(perfil ? { perfil } : {}), ...(ejemplo ? { ejemplo } : {}) }),
+          // Solo llegan aquí las siete tareas de TAREAS_SERVIDOR (o un código preparado con la tarea de su catálogo).
+          // «libre» es lo que la persona escribió en la caja (ver consultar): tope de 300, espera normal y sin perfil.
+          body: JSON.stringify({ tarea: ejemplo ? tareaDeEjemplo(ejemplo) : tarea, texto: limpio, ...(perfil ? { perfil } : {}), ...(ejemplo ? { ejemplo } : {}) }),
           signal: AbortSignal.timeout(espera + 2000),
         });
         if (!r.ok) throw new Error('servidor ' + r.status);
@@ -217,8 +223,9 @@
   }
 
   /* Una pregunta en una pestaña. `sesionId` se fija al enviar: si la persona cambia de pestaña mientras Niky responde, la respuesta llega
-     a la pestaña donde se preguntó, no a la que se esté viendo. */
-  async function consultar(texto, tareaForzada, sesionId) {
+     a la pestaña donde se preguntó, no a la que se esté viendo. `origen` vale 'caja' solo cuando la persona lo escribió en el campo de texto
+     (no una burbuja guía, una sugerencia ni un pedido de Kinesis o Wisfox). */
+  async function consultar(texto, tareaForzada, sesionId, origen) {
     const st = MT.store;
     const tarea = tareaForzada || inferirTarea(texto);
     const sid = sesionId || sesionActiva(st.obtener()).id;
@@ -232,8 +239,14 @@
     if (!existe) return null;
     cara('pensando');
     let respuesta; let fallo = false;
+    /* nikylibre: lo que la persona escribe y no encaja en ninguna tarea antes recibía un texto fijo y nunca llegaba al servidor. Ahora, si
+       hay servidor, viaja como «libre» y Niky responde de verdad. «general» no cambia: las burbujas guía y los pedidos de los portales siguen
+       con sus textos propios sin gastar cuota, y sin servidor (GitHub Pages) todo sigue con los textos de ejemplo. */
+    const libre = tarea === 'general' && origen === 'caja' && info.modo === 'servidor';
     try {
-      if (tarea === 'general') {
+      if (libre) {
+        respuesta = await preguntar({ tarea: 'libre', texto });
+      } else if (tarea === 'general') {
         await demora(350);
         respuesta = { fuente: info.modo === 'servidor' ? 'respaldo' : 'ejemplo', texto: MT.datos.respuestasIA.general };
       } else {
@@ -281,8 +294,8 @@
     const chips = h('div', { class: 'chat__sugerencias' });
     const campo = h('textarea', { rows: '2', maxlength: '300', 'aria-label': 'Escribe tu mensaje para Niky', 'aria-describedby': 'chat-aviso', placeholder: 'Escribe aquí lo que necesitas…' });
     const boton = h('button', { class: 'btn', type: 'submit' }, 'Enviar');
-    const form = h('form', { class: 'chat__form', 'aria-label': 'Mensaje para Niky', onsubmit: (e) => { e.preventDefault(); mandar(campo.value); } }, campo, boton);
-    campo.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); mandar(campo.value); } });
+    const form = h('form', { class: 'chat__form', 'aria-label': 'Mensaje para Niky', onsubmit: (e) => { e.preventDefault(); mandar(campo.value, undefined, 'caja'); } }, campo, boton);
+    campo.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); mandar(campo.value, undefined, 'caja'); } });
     campo.addEventListener('input', () => { if (mostrada) recuerdo(mostrada).borrador = campo.value; });
     lista.addEventListener('scroll', () => {
       if (!mostrada) return;
@@ -290,12 +303,13 @@
       recuerdo(mostrada).scroll = lista.scrollHeight - lista.scrollTop - lista.clientHeight < 8 ? null : lista.scrollTop;
     });
 
-    async function mandar(texto, tarea) {
+    // `origen` = 'caja' cuando viene del campo de texto (Enter o Enviar): es lo único que puede viajar como tarea «libre».
+    async function mandar(texto, tarea, origen) {
       const limpio = String(texto || '').trim();
       const sid = sesionActiva(st.obtener()).id;
       if (!limpio || ocupadas.has(sid)) return;
       campo.value = ''; recuerdo(sid).borrador = '';
-      await consultar(limpio, tarea, sid);
+      await consultar(limpio, tarea, sid, origen);
     }
 
     function pintarEstado() {
