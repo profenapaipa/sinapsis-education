@@ -3,9 +3,8 @@
    Por qué una sola. Antes había dos navegaciones a la vez (la barra de portales bajo la franja y el riel lateral con seis ítems), y cada
    portal traía además su lista desplegable. Quien llegaba por el QR del pendón veía diez destinos a la vez y no sabía por cuál empezar.
    Ahora el riel (a la izquierda en pantalla grande, abajo en el celular) es lo único, y cambia con el rol:
-     - sin rol: «Inicio» y «Elegir rol» (lo mínimo para empezar);
-     - con rol: su portal (estudiante ve Wisfox; docente, orientación, familia y coordinación ven Kinesis) y «Mi espacio»;
-     - siempre: un único botón de Niky y un único «Más».
+     - siempre: Kinesis, Wisfox y «Guía» (informativa); el portal del rol (estudiante, Wisfox; el resto, Kinesis) va primero y marcado;
+     - Niky es el botón flotante (js/niky.js); un único «Más».
    Máximo cuatro ítems, que es lo que cabe en la barra del celular con objetivos de 44 px o más.
    «Más» reúne todo lo secundario (mapa, roles y datos, hoja de ruta, glosario, participar, piloto, identidad, créditos) y lo de uso
    ocasional (modo presentación, apariencia). No se borró ninguna ruta: los enlaces profundos, las pruebas y los casos de la exposición
@@ -43,7 +42,6 @@
   // Las páginas secundarias, en el orden en que se necesitan. Cada una conserva su ruta de siempre.
   const PAGINAS_MAS = [
     { ruta: 'inicio', hash: '#/', etiqueta: 'Inicio', icono: 'inicio' },
-    { ruta: 'portales', hash: '#/portales', etiqueta: 'Los tres portales', icono: 'mapa' },
     { ruta: 'mapa', hash: '#/mapa', etiqueta: 'Mapa', icono: 'mapa' },
     { ruta: 'recorrido', hash: '#/recorrido', etiqueta: 'Roles y datos', icono: 'docente' },
     { ruta: 'planes', hash: '#/planes', etiqueta: 'Participa', icono: 'logros', id: 'plan-chip' },
@@ -54,22 +52,22 @@
     { ruta: 'creditos', hash: '#/creditos', etiqueta: 'Créditos', icono: 'familia' },
   ];
   // Las rutas que viven bajo «Más»: cuando se está en una, el botón «Más» se marca como actual.
-  const RUTAS_MAS = ['portales', 'mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos', 'guia'];
+  const RUTAS_MAS = ['mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos'];
 
   let dinamico; let botonMas; let menuMas;
 
-  // Lo que depende del rol. Se vuelve a pintar solo cuando cambia el rol (no en cada cambio de datos, para no quitarle el foco a nadie).
+  /* El riel lleva SIEMPRE lo mismo: Kinesis, Wisfox y «Guía» (la página informativa). Decisión del dueño: no hay un tercer espacio («Mi espacio»)
+     que le quite la interactividad a los dos portales; lo que se necesita hacer se hace dentro de Kinesis y Wisfox, y la IA es el botón flotante.
+     Con rol elegido, el portal de su rol va primero y queda marcado como «tu portal»; el otro sigue disponible. Se vuelve a pintar solo cuando
+     cambia el rol (no en cada cambio de datos, para no quitarle el foco a nadie). */
   function itemsDelRol() {
-    const rol = rolActual(); const portal = portalDe(rol);
-    if (!portal) {
-      return [
-        h('a', { href: '#/', class: 'riel-item', 'data-ruta': 'inicio' }, icono('inicio'), 'Inicio'),
-        h('a', { href: '#/mi', class: 'riel-item', 'data-ruta': 'mi' }, icono('docente'), 'Elegir rol'),
-      ];
-    }
+    const principal = portalDe(rolActual());
+    const orden = principal === 'wisfox' ? ['wisfox', 'kinesis'] : ['kinesis', 'wisfox'];
     return [
-      h('a', { href: '#/portales/' + portal, class: 'riel-item', 'data-portal': portal, 'data-espacio': portal }, marca(portal), PORTALES[portal].nombre, h('i', { class: 'riel-vivo', 'aria-hidden': 'true' })),
-      h('a', { href: '#/mi', class: 'riel-item', 'data-ruta': 'mi' }, icono('inicio'), 'Mi espacio'),
+      ...orden.map((portal) => h('a', Object.assign({ href: '#/portales/' + portal, class: 'riel-item' + (portal === principal ? ' riel-item--principal' : ''), 'data-portal': portal, 'data-espacio': portal },
+        portal === principal ? { title: 'Tu portal' } : {}),
+        marca(portal), PORTALES[portal].nombre, portal === principal ? h('span', { class: 'solo-lectores' }, ' (tu portal)') : null, h('i', { class: 'riel-vivo', 'aria-hidden': 'true' }))),
+      h('a', { href: '#/guia', class: 'riel-item', 'data-ruta': 'guia' }, icono('libro'), 'Guía'),
     ];
   }
   let rolPintado;

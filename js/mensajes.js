@@ -48,15 +48,14 @@
       explicacion: (portal) => `${portal} es una aplicación de su propio equipo y se abre desde internet. Ahora no hay conexión, o el portal no responde.`,
       siguePuesto: 'Lo que sigue funcionando',
       sigue: (portal) => [
-        `Mi espacio, con la versión equivalente de ${portal} dentro de esta plataforma: los mismos pasos, con datos de ejemplo.`,
-        'Lo que crees se guarda en este dispositivo.',
+        `La guía, que explica cómo se usa ${portal} sin necesitar conexión.`,
         'Niky responde con ejemplos preparados.',
       ],
       verEnMiEspacio: (portal) => `Ver ${portal} en Mi espacio`,
       reintentar: 'Intentar de nuevo',
       reintentando: 'Comprobando la conexión…',
       abrirAparte: 'Abrir aparte',
-      sigueSinConexion: 'Todavía no se puede abrir. Puedes seguir en Mi espacio.',
+      sigueSinConexion: 'Todavía no se puede abrir. Puedes abrirlo aparte o intentarlo de nuevo en un momento.',
       comoRol: (rol) => `Se abre como ${rol}; puedes cambiar de rol en la franja de arriba.`,
     },
 
