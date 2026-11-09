@@ -33,7 +33,7 @@
       h('div', { class: 'rejilla rejilla--2' }, TEXTOS.servicios.map((x) => h('article', { class: 'tarjeta servicio-plan servicio-plan--' + x.estado, 'data-servicio': x.id },
         h('p', { class: 'etiqueta' }, TEXTOS.estados[x.estado]), h('h3', null, x.nombre), h('p', null, x.texto)))),
       h('p', { class: 'suave' }, TEXTOS.nota),
-      h('div', { class: 'acciones' }, h('a', { class: 'btn', id: 'btn-contactanos', href: '#/piloto' }, TEXTOS.contacto)));
+      h('div', { class: 'acciones' }, h('a', { class: 'btn', id: 'btn-contactanos', href: '#/contacto' }, TEXTOS.contacto)));
   }
   // ---- fin casos2 ----
 

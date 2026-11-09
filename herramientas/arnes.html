@@ -1629,6 +1629,56 @@ async function flujoRecorrido() {
   // ---- fin iafuente ----
 // ---- fin recorrido ----
 
+// ---- contacto ---- formulario con FormSubmit, probado SIEMPRE con fetch simulado: estas pruebas nunca envian un mensaje real.
+async function flujoContacto() {
+  const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
+  const valido = { motivo: 'pqr', nombre: 'Ana', contacto: 'ana@ejemplo.co', mensaje: 'Quisiera saber como participar en el semillero.' };
+  const falso = (cuerpo, ok = true) => async () => ({ ok, json: async () => cuerpo });
+  const C = () => MTw().contacto;
+  afirmar('contacto: la ruta #/contacto abre sin errores y muestra el formulario con motivo, nombre, contacto, mensaje y casilla', await (async () => { await cargar('#/contacto', 1280, 800); await espera(400); return !!D().querySelector('#ct-motivo') && !!D().querySelector('#ct-nombre') && !!D().querySelector('#ct-contacto') && !!D().querySelector('#ct-mensaje') && !!D().querySelector('#ct-acepto'); })());
+  afirmar('contacto: los cinco motivos y el correo alternativo estan a la vista', D().querySelectorAll('#ct-motivo option').length === 5 && !!D().querySelector('a[href="mailto:profenapaipa@gmail.com"]'));
+  afirmar('contacto: el aviso de privacidad dice que no hay cookies ni rastreadores y menciona la Ley 1581', /cookies/.test(D().body.innerText) && /1581/.test(D().body.innerText));
+  const r1 = await C().enviar(valido, falso({ success: 'true' }));
+  afirmar('contacto: un envio aceptado devuelve ok', r1.ok === true, JSON.stringify(r1));
+  const r2 = await C().enviar(valido, falso({ success: 'false', message: 'This form needs Activation. Check your email.' }, false));
+  afirmar('contacto: si FormSubmit pide activacion se dice aparte (defecto del original corregido), no como error generico', r2.ok === false && r2.motivo === 'activacion', JSON.stringify(r2));
+  const r3 = await C().enviar(valido, falso({ success: 'false', message: 'otro problema' }, false));
+  afirmar('contacto: un rechazo cualquiera se distingue de la activacion', r3.motivo === 'rechazado', JSON.stringify(r3));
+  const r4 = await C().enviar(valido, async () => { throw new TypeError('sin red'); });
+  afirmar('contacto: sin red no lanza error y devuelve motivo red', r4.motivo === 'red', JSON.stringify(r4));
+  let llamadas = 0;
+  const r5 = await C().enviar(Object.assign({}, valido, { trampa: 'soy un robot' }), async () => { llamadas++; return { ok: true, json: async () => ({ success: 'true' }) }; });
+  afirmar('contacto: el campo trampa lleno parece exito pero NO envia nada', r5.ok === true && llamadas === 0, String(llamadas));
+  let cuerpo = null;
+  await C().enviar(valido, async (url, op) => { cuerpo = { url, op }; return { ok: true, json: async () => ({ success: 'true' }) }; });
+  const j = cuerpo && JSON.parse(cuerpo.op.body);
+  afirmar('contacto: el envio va solo a formsubmit.co con el correo del semillero, asunto con prefijo de Sinapsis y _replyto', !!cuerpo && cuerpo.url === 'https://formsubmit.co/ajax/profenapaipa@gmail.com' && j._subject === 'Sinapsis Education: Petición, queja o reclamo' && j._replyto === 'ana@ejemplo.co' && j._captcha === 'false', JSON.stringify(cuerpo && cuerpo.url) + ' ' + (j && j._subject));
+  afirmar('contacto: valida nombre, contacto y mensaje corto o largo', C().validar(Object.assign({}, valido, { nombre: '' })) !== null && C().validar(Object.assign({}, valido, { contacto: 'xx' })) !== null && C().validar(Object.assign({}, valido, { mensaje: 'corto' })) !== null && C().validar(Object.assign({}, valido, { mensaje: 'x'.repeat(1300) })) !== null && C().validar(valido) === null);
+  // Formulario completo: sin casilla no envia; con casilla y fetch simulado llega el mensaje y se limita el siguiente envio por 30 s.
+  W().localStorage.removeItem(C().CLAVE);
+  const antes = W().fetch; let enviados = 0; W().fetch = async () => { enviados++; return { ok: true, json: async () => ({ success: 'true' }) }; };
+  const llenar = (n, c, m) => { D().querySelector('#ct-nombre').value = n; D().querySelector('#ct-contacto').value = c; D().querySelector('#ct-mensaje').value = m; };
+  const enviarForm = async () => { D().querySelector('.contacto__form').dispatchEvent(new (W().Event)('submit', { bubbles: true, cancelable: true })); await espera(400); };
+  llenar('Ana', 'ana@ejemplo.co', 'Quisiera saber como participar en el semillero.');
+  await enviarForm();
+  afirmar('contacto: sin marcar la casilla de aceptacion no se envia y se explica por que', enviados === 0 && /casilla/i.test(D().querySelector('#ct-error').textContent) && !D().querySelector('#ct-error').hidden, D().querySelector('#ct-error').textContent);
+  D().querySelector('#ct-acepto').checked = true; await enviarForm();
+  afirmar('contacto: con la casilla marcada se envia una vez y se avisa «Mensaje enviado»', enviados === 1 && /Mensaje enviado/.test(D().querySelector('.contacto__estado').textContent), String(enviados) + ' ' + D().querySelector('.contacto__estado').textContent);
+  llenar('Ana', 'ana@ejemplo.co', 'Un segundo mensaje enseguida, que debe esperar.'); D().querySelector('#ct-acepto').checked = true; await enviarForm();
+  afirmar('contacto: un segundo envio inmediato espera 30 segundos y no sale', enviados === 1 && /Espera/.test(D().querySelector('#ct-error').textContent), String(enviados) + ' ' + D().querySelector('#ct-error').textContent);
+  W().fetch = antes; W().localStorage.removeItem(C().CLAVE);
+  afirmar('contacto: el campo trampa y la casilla son operables: la trampa sale del orden de tabulacion y de lectura', D().querySelector('[name=sitio_web]').tabIndex === -1 && D().querySelector('.contacto__trampa').getAttribute('aria-hidden') === 'true');
+  const csp = [...(await (await fetch('../index.html')).text()).matchAll(/Content-Security-Policy" content="([^"]+)"/g)][0][1];
+  afirmar('contacto: la CSP permite formsubmit.co solo en connect-src y form-action sigue en none', /connect-src[^;]*https:\/\/formsubmit\.co/.test(csp) && /form-action 'none'/.test(csp) && (csp.match(/formsubmit/g) || []).length === 1, csp);
+  for (const ancho of [390, 1280]) {
+    await cargar('#/contacto', ancho, 844); await espera(300);
+    afirmar('contacto ' + ancho + ': sin desborde horizontal y los campos miden al menos 44 px de alto', D().documentElement.scrollWidth <= W().innerWidth + 1 && [...D().querySelectorAll('.contacto__campo :is(input, select, textarea)')].every((x) => x.getBoundingClientRect().height >= 43.5));
+  }
+  await cargar('#/', 1280, 800); await espera(300);
+  afirmar('contacto: el pie de la pagina trae el enlace «Contacto»', [...D().querySelectorAll('footer.pie a')].some((a) => a.getAttribute('href') === '#/contacto' && /Contacto/.test(a.textContent)));
+}
+// ---- fin contacto ----
+
 async function flujoTutorial() {
   const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
   const tecla = (key) => D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true, cancelable: true }));
@@ -1749,7 +1799,7 @@ async function flujoCasos2() {
   afirmar('casos2: la plataforma no muestra cifras de dinero (COP, millones, $, precio, al año, inversión)', !dinero, (textos.join('\n').match(/\bCOP\b|millones|\$\s?\d|precio|al año|inversi/i) || [''])[0]);
   await cargar('#/planes/formas', 1280, 800); await espera(300);
   const bc = D().getElementById('btn-contactanos');
-  afirmar('casos2: «Servicios y planes» trae el botón «Contáctanos» que lleva a #/piloto', !!bc && bc.getAttribute('href') === '#/piloto' && /Servicios y planes/.test(D().querySelector('#servicios-y-planes h2').textContent));
+  afirmar('casos2: «Servicios y planes» trae el botón «Contáctanos» que lleva a #/contacto (contacto: antes iba a #/piloto)', !!bc && bc.getAttribute('href') === '#/contacto' && /Servicios y planes/.test(D().querySelector('#servicios-y-planes h2').textContent));
   await cargar('#/planes/formas', 390, 844); await espera(300);
   afirmar('casos2: «Servicios y planes» no desborda a 390 px', D().documentElement.scrollWidth <= 390);
 }
@@ -2170,6 +2220,9 @@ async function flujoNikyEstados() {
   // ---- tutorial ----
   try { await flujoTutorial(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'tutorial: ' + String(e && e.stack || e); }
   // ---- fin tutorial ----
+  // ---- contacto ----
+  try { await flujoContacto(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'contacto: ' + String(e && e.stack || e); }
+  // ---- fin contacto ----
   // ---- recorrido ----
   try { await flujoRecorrido(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'recorrido: ' + String(e && e.stack || e); }
   // ---- fin recorrido ----

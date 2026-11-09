@@ -51,10 +51,11 @@
     { ruta: 'glosario', hash: '#/glosario', etiqueta: 'Glosario', icono: 'libro' },
     { ruta: 'piloto', hash: '#/piloto', etiqueta: 'Solicitar un piloto', icono: 'coordinacion' },
     { ruta: 'quienes', hash: '#/quienes', etiqueta: 'Quiénes somos', icono: 'identidad', soloMovil: true },   // quienes: Identidad vive dentro de esta página
+    { ruta: 'contacto', hash: '#/contacto', etiqueta: 'Contacto', icono: 'chat' },
     { ruta: 'creditos', hash: '#/creditos', etiqueta: 'Créditos', icono: 'familia' },
   ];
   // Las rutas que viven bajo «Más»: cuando se está en una, el botón «Más» se marca como actual.
-  const RUTAS_MAS = ['tutorial', 'mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'quienes', 'identidad', 'creditos'];
+  const RUTAS_MAS = ['tutorial', 'mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'quienes', 'identidad', 'contacto', 'creditos'];
 
   let dinamico; let botonMas; let menuMas;
 
