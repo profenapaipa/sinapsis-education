@@ -356,7 +356,7 @@
         + [40, 46, 52, 58, 64, 70, 76, 82].map((x, i) => `<circle class="m-pt-lana" cx="${x}" cy="101" r="1.3" fill="${[HILO.wisfox, HILO.mosaico][i % 2]}"/>`).join('')
         + `<path class="m-t" d="M37 113 Q60 123 83 113" fill="none" stroke-width="2"/><path class="m-rib" d="M40 113.8 v3 M46 115.6 v3 M52 116.7 v3 M60 117 v3 M68 116.7 v3 M74 115.6 v3 M80 113.8 v3"/>`;
       const cuello = `<ellipse class="m-t" cx="60" cy="86" rx="16.5" ry="6" fill="${HILO.valeria}" stroke-width="2.6"/><path class="m-rib" d="M47 83.5 v5 M51 82.5 v6 M55 82 v6.6 M59 81.8 v6.8 M63 81.8 v6.8 M67 82 v6.6 M71 82.5 v6 M75 83.5 v5"/>`;
-      const patas = `<ellipse class="m-t m-oscuro" cx="47" cy="115.5" rx="7" ry="3.8"/><ellipse class="m-t m-oscuro" cx="73" cy="115.5" rx="7" ry="3.8"/>`;
+      const patas = `<ellipse class="m-t m-oscuro" cx="47" cy="114.2" rx="7" ry="3.4"/><ellipse class="m-t m-oscuro" cx="73" cy="114.2" rx="7" ry="3.4"/>`;
       // Orejas: borde oscuro por fuera y blanco por dentro.
       const oreja = (s) => { const X = (x) => s < 0 ? x : 120 - x; return `<path class="m-t m-oscuro" d="M${X(31)} 43 L${X(27)} 7 L${X(57)} 27 Z"/><path class="m-crema" d="M${X(35.5)} 36 L${X(33)} 17.5 L${X(49)} 28.5 Z"/>`; };
       // El hocico fino y blanco con mejillas claras y mechones a los lados (el contorno de la cabeza queda quebrado, como el pelo del zorro).
