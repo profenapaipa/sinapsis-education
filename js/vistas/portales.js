@@ -66,9 +66,9 @@
   /* ---------------- Guía de inicio rápido por rol ---------------- */
   function vistaGuia(main, { sub }) {
     const rol = sub; const r = MT.roles.por(rol); const g = GUIA[rol];
-    const c = pagina(main, { etiqueta: 'Inicio rápido', titulo: 'Tu guía de inicio rápido', descripcion: 'Elige tu rol y sigue los pasos. Cada paso dice en qué portal ocurre y te lleva a él.' });
+    const c = pagina(main, { etiqueta: 'Inicio rápido', titulo: 'Tu guía de inicio rápido', descripcion: 'Elige tu rol y sigue los pasos. Cada paso dice en qué portal ocurre y te lleva a él.', rol });
     // La mascota del rol acompaña la guía (una fila pequeña sobre el título). La entrada de js/entrada.js la dibuja; aquí solo se le da sitio.
-    if (MT.entrada) c.querySelector('.pagina-cab').prepend(MT.entrada.companera(rol));
+    // La mascota del rol ya está en la cabecera única (comun.js); no hace falta una compañera aparte.
     c.append(h('nav', { class: 'pestanas-pagina', 'aria-label': 'Elige tu rol' }, MT.roles.lista.map((x) => h('a', { href: '#/guia/' + x.id, 'aria-current': x.id === rol ? 'page' : null }, x.nombre))));
     c.append(h('section', { class: 'siguiente-banner' },
       h('div', null, h('p', { class: 'etiqueta' }, 'Tu meta como ' + r.nombre.toLowerCase()), h('h2', null, g.meta), h('p', null, 'Tu portal principal es ' + PORTALES[g.principal].nombre + '.')),

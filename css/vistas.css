@@ -492,3 +492,40 @@ input[type="file"] { width: 100%; font: 400 1rem var(--fuente); color: var(--tin
 .paso-siguiente { background: var(--papel); border: 1px solid var(--linea); }
 .plegable--tarjeta { margin-top: .6rem; }
 .plegable--tarjeta > summary { min-height: 44px; font-size: 1rem; }
+
+/* ---- espacio: la cabecera única y la plantilla de pantalla ----
+   Todas las pantallas (Mi espacio de cada rol, mapa, planes, hoja, glosario, guías...) empiezan con la misma pieza y viven en el mismo
+   ancho. Por qué: el dueño veía varias aplicaciones en una; la barra lateral propia de Mi espacio y las cabeceras distintas lo causaban. */
+.pantalla { padding-bottom: 3rem; }
+.cab-pantalla { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: .4rem 1.2rem; align-items: start; padding: 1.6rem 0 .4rem; }
+.cab-pantalla__masc { width: 56px; height: 56px; }
+.cab-pantalla__masc svg { display: block; }
+.cab-pantalla__fila { display: flex; flex-wrap: wrap; align-items: center; gap: .2rem 1rem; margin-bottom: .3rem; font-size: .85rem; font-weight: 700; color: var(--tinta-suave); }
+.cab-pantalla__ruta { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem .4rem; }
+.cab-pantalla__ruta a { color: var(--tinta-suave); text-decoration: none; }
+.cab-pantalla__ruta a:hover { text-decoration: underline; }
+.cab-pantalla__aqui { color: var(--tinta); }
+.cab-pantalla__volver-enlace { color: var(--verde-texto); font: 800 .85rem var(--fuente); text-decoration: none; min-height: 24px; }
+.cab-pantalla h1 { font-size: clamp(1.7rem, 3.6vw, 2.4rem); margin: 0 0 .3rem; }
+.cab-pantalla__linea { margin: 0; max-width: 62ch; color: var(--tinta-suave); font-size: 1.05rem; }
+.cab-pantalla__extra { margin-top: .5rem; }
+.cab-pantalla__accion { align-self: center; max-width: 24rem; }
+.cab-pantalla__accion > .btn { white-space: nowrap; }
+.cab-pantalla__sig { background: var(--papel); border: 1px solid var(--linea); border-radius: var(--radio); padding: 1rem 1.2rem; }
+.cab-pantalla__sig h2 { font-family: var(--fuente); font-size: 1.05rem; letter-spacing: 0; margin: 0 0 .25rem; }
+.cab-pantalla__sig p { margin: 0 0 .6rem; color: var(--tinta-suave); font-size: .92rem; }
+.cab-pantalla__sig .etiqueta { color: var(--verde-texto); margin-bottom: .2rem; }
+.cab-pantalla [hidden] { display: none; }
+.pantalla--espacio .contenido { padding: 1rem 0 0; }
+.subnav { margin: .8rem 0 1rem; align-items: center; }
+.nav-pronto__lista { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .4rem; }
+.subnav .nav-pronto { margin: 0; border: 0; padding: 0; }
+.subnav .nav-pronto > summary { padding: .5rem .9rem; }
+.espacio-cuerpo > .tarjeta, .espacio-cuerpo > article.tarjeta { margin-top: 1rem; }
+@media (max-width: 860px) {
+  .cab-pantalla { grid-template-columns: auto minmax(0, 1fr); padding-top: 1rem; }
+  .cab-pantalla__accion { grid-column: 1 / -1; max-width: none; }
+  .cab-pantalla__accion > .btn { white-space: normal; }
+  .subnav { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: .2rem; }
+  .subnav a { white-space: nowrap; }
+}
