@@ -252,8 +252,9 @@ html[data-movimiento="calmado"] .ent-flota { transform: none; }
 .ent-proy__rol svg { flex: none; width: 22px; height: 22px; }
 .ent-proy__rol:hover { background: color-mix(in srgb, var(--hilo) 14%, var(--papel)); }
 .ent-proy__rol:focus-visible, .ent-proy__entrar:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
-.ent-proy__rol--niky { background: var(--hilo-valeria); color: #fff; border-color: var(--hilo-valeria); }
-.ent-proy__rol--niky:hover { background: color-mix(in srgb, var(--hilo-valeria) 85%, #000); }
+/* Texto en el color del papel: blanco sobre el azul oscuro del tema claro y oscuro sobre el azul claro del tema oscuro (contraste en los dos). */
+.ent-proy__rol--niky { background: var(--azul); color: var(--papel); border-color: var(--azul); }
+.ent-proy__rol--niky:hover { background: color-mix(in srgb, var(--azul) 88%, var(--tinta)); }
 .ent-proy__entrar { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--verde-texto); }
 /* «¿Quién eres?»: íconos sencillos de rol en lugar de las mascotas. */
 .ent-rol__icono { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 14px; background: var(--hundido); }

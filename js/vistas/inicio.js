@@ -97,8 +97,8 @@
         h('button', { class: 'ent-proy__rol', type: 'button', onclick: () => tutorial('docente') }, icono('recorrido'), h('span', null, P.niky.verla)))));
     return h('section', { class: 'ent-camino', id: 'ent-camino', tabindex: '-1', 'aria-labelledby': 'ent-camino-t' },
       h('div', { class: 'ent-ancho' },
-        h('div', { class: 'ent-sinapso' }, h('p', null, h('strong', null, C.sinapso[0]), ' ', C.sinapso[1])),
-        reto ? h('p', { class: 'ent-reto' }, reto.texto) : null,
+        h('div', { class: 'ent-sinapso ent-aparece' }, h('p', null, h('strong', null, C.sinapso[0]), ' ', C.sinapso[1])),
+        reto ? h('p', { class: 'ent-reto ent-aparece' }, reto.texto) : null,
         h('h2', { id: 'ent-camino-t', class: 'ent-proy-titulo' }, C.proyectosTitulo),
         h('p', { class: 'bajada ent-proy-bajada' }, C.proyectosBajada),
         h('div', { class: 'ent-proyectos' }, kinesis, niky, wisfox)));
