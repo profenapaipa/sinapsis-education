@@ -69,10 +69,10 @@
     ['tutora', 'asistente', 'misma guía'],
   ];
 
-  // Entra al espacio del rol que usa el módulo y lleva a la sección donde se trabaja.
-  function abrirEn([rol, seccion]) {
+  // Entra al portal del rol que usa el módulo (ya no hay un espacio aparte: se trabaja dentro de Kinesis o Wisfox).
+  function abrirEn([rol]) {
     MT.store.cambiar((x) => { x.rol = rol; });
-    location.hash = '#/mi/' + seccion;
+    location.hash = '#/portales/' + MT.roles.por(rol).marca;
   }
 
   function conexiones(c) {

@@ -95,20 +95,8 @@
     abrir();
   }
 
-  // A dónde lleva "Ver X en Mi espacio": si la persona ya eligió rol, a la sección donde ese rol hace lo que haría en el portal;
-  // si no eligió, a la sección principal del rol que corresponde al portal (Kinesis, docencia; Wisfox, estudiante).
-  function destinoEnMiEspacio(id) {
-    const rol = st.obtener().rol; const nombrePortal = id === 'wisfox' ? 'estudiante' : 'docente';
-    if (rol) {
-      const paso = MT.guias.pasosEn(rol, id).find((x) => x.aqui);
-      const secciones = MT.guias.seccionesEn(rol, id);
-      return { ir: () => { location.hash = '#/mi' + (paso ? '/' + paso.aqui : secciones.length ? '/' + secciones[0].id : ''); }, supuesto: null };
-    }
-    return { ir: () => MT.guias.irAqui(nombrePortal, 'resumen'), supuesto: MT.roles.por(nombrePortal).nombre };
-  }
-
   function contenidoRespaldo(id, url, reintentar) {
-    const R = MT.mensajes.respaldo; const p = PORTALES[id]; const d = destinoEnMiEspacio(id);
+    const R = MT.mensajes.respaldo; const p = PORTALES[id];
     const resultado = h('p', { class: 'suave', role: 'status' });
     return [
       h('div', { class: 'vivo-respaldo__cab' }, marca(id, 'vivo-respaldo__marca'), h('h2', null, R.titulo(p.nombre))),
@@ -116,10 +104,8 @@
       h('p', { class: 'etiqueta' }, R.siguePuesto),
       h('ul', null, R.sigue(p.nombre).map((x) => h('li', null, x))),
       h('div', { class: 'acciones' },
-        h('button', { class: 'btn', type: 'button', onclick: d.ir }, R.verEnMiEspacio(p.nombre)),
-        h('button', { class: 'btn btn--suave', type: 'button', onclick: () => reintentar(resultado) }, R.reintentar),
+        h('button', { class: 'btn', type: 'button', onclick: () => reintentar(resultado) }, R.reintentar),
         url ? h('a', { class: 'btn btn--suave', href: url, target: '_blank', rel: 'noopener' }, R.abrirAparte) : null),
-      d.supuesto ? h('p', { class: 'suave' }, R.comoRol(d.supuesto)) : null,
       resultado,
     ];
   }
@@ -129,7 +115,7 @@
     const pasos = rol ? MT.guias.pasosEn(rol, activo) : [];
     const otros = ORDEN.filter((x) => x !== activo);
     const url = (MT.config.portales || {})[activo];
-    const aviso = `${p.nombre} es una aplicación de su equipo, con sus propios datos y su propio inicio de sesión. Lo que hagas aquí todavía no aparece en Mi espacio.`;
+    const aviso = `${p.nombre} es una aplicación de su equipo, con sus propios datos y su propio inicio de sesión.`;
     // La explicación va en un desplegable: el portal necesita todo el espacio.
     const ayuda = h('details', { class: 'vivo-ayuda' },
       h('summary', { class: 'btn btn--chico btn--suave' }, r ? `Tu rol: ${r.nombre} · qué te toca aquí` : 'Qué te toca aquí'),
@@ -137,7 +123,7 @@
         h('p', null, p.que),
         r ? h('p', null, h('strong', null, `Tu rol: ${r.nombre}. `), pasos.length ? `En ${p.nombre} te toca:` : `En ${p.nombre} no tienes pasos propios; mira tu guía para ver dónde trabajas.`)
           : h('p', null, h('strong', null, 'Elige tu rol '), `para ver qué te toca hacer en ${p.nombre}.`),
-        pasos.length ? h('ol', null, pasos.map((x) => h('li', null, h('span', null, x.t), x.aqui ? h('button', { class: 'enlace-boton', type: 'button', onclick: () => MT.guias.irAqui(rol, x.aqui) }, 'Hacerlo en Mi espacio') : null))) : null,
+        pasos.length ? h('ol', null, pasos.map((x) => h('li', null, h('span', null, x.t), null))) : null,
         activo !== 'valeria' ? h('p', { class: 'suave' }, aviso) : null));
     // replaceChildren (nativo) convertiría un null en el texto "null": por eso solo se pasan nodos reales.
     // El título de la página vive fuera de la barra: en modo inmersivo la barra se oculta y la página no puede quedarse sin su h1.
@@ -201,9 +187,7 @@
     rescate.hidden = activo === 'valeria' || !url;
     if (rescate.hidden) return;
     rescate.replaceChildren(...[R.pregunta, ' ',
-      h('a', { href: url, target: '_blank', rel: 'noopener' }, R.aparte), R.o,
-      h('button', { class: 'enlace-boton', type: 'button', onclick: () => destinoEnMiEspacio(activo).ir() }, R.miEspacio),
-      R.aprobado ? null : h('span', { class: 'vivo-rescate__borrador' }, ' ' + R.borrador)].filter(Boolean));
+      h('a', { href: url, target: '_blank', rel: 'noopener' }, R.aparte)].filter(Boolean));
   }
 
   function mostrar(id) {

@@ -64,9 +64,9 @@
           h('h1', { id: 'ent-h1' }, E.MARCA.nombre),
           h('p', { class: 'ent-lema' }, E.MARCA.lema),
           h('div', { class: 'ent-portada__acciones' },
-            h('button', { class: 'btn ent-empezar', type: 'button', onclick: () => ir(presentando ? 'ent-quien' : 'ent-camino') }, T.portada.empezar),
+            h('button', { class: 'btn ent-empezar', type: 'button', onclick: () => ir('ent-quien') }, T.portada.empezar),
             h('button', { class: 'ent-enlace', type: 'button', onclick: () => ir('ent-quien') }, T.portada.yaSe),
-            rol ? h('a', { class: 'ent-enlace', href: '#/guia/' + rol.id }, T.portada.seguir(rol.nombre)) : null))));
+            rol ? h('a', { class: 'ent-enlace', href: '#/portales/' + rol.marca }, T.portada.seguir(rol.nombre)) : null))));
   }
 
   // El camino: un hilo con los colores de los cuatro hilos de la plataforma y las tres mascotas que van apareciendo.

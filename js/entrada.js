@@ -320,7 +320,7 @@
   /* ---------------------------------------------------------------- ¿Quién eres? */
   function quienEres() {
     const R = TEXTOS.rol; const st = MT.store;
-    const elegir = (r) => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/guia/' + r.id; };
+    const elegir = (r) => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/portales/' + MT.roles.por(r.id).marca; };
     const opcion = (r, clase) => {
       const id = mascotaDeRol(r.id);
       return h('button', { class: 'ent-rol ' + (clase || ''), type: 'button', 'data-espacio': ESPACIO[id], onclick: () => elegir(r) },

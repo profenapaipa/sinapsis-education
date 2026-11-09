@@ -77,3 +77,6 @@
 .diferencial h2 { font-size: 1.25rem; margin: 0 0 .3rem; }
 
 .creditos__lema { font: 700 clamp(1.2rem, 2.6vw, 1.6rem)/1.35 var(--fuente-titulo); margin: 0; max-width: 40ch; }
+
+/* ---- espacio: «tu portal» en el riel. Un punto de la marca bajo el nombre: el otro portal sigue disponible y sin marca. ---- */
+.riel .riel-item--principal::after { content: ""; width: 18px; height: 3px; border-radius: 3px; background: var(--l-vivo, #FFFFFF); margin-top: -.05rem; }

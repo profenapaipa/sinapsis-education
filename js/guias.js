@@ -79,13 +79,17 @@
   /* La franja que acompaña dentro de Mi espacio: en qué paso de tu guía estás, cómo volver a ella y qué sigue. */
   function franjaDe(rol, seccion) {
     const g = GUIA[rol]; if (!g) return null;
-    const i = g.pasos.findIndex((p) => p.aqui === seccion);
+    // Un paso que depende de que otro rol haya actuado (el docente ve cómo la recibe el estudiante solo cuando orientación aprobó) no se
+    // marca como «el paso en el que estás» antes de tiempo: a un docente nuevo le decía «Paso 5 de 5» en su primera pantalla.
+    const hecho = (p) => !(rol === 'docente' && p.portal === 'wisfox') || MT.store.obtener().ajustes.some((a) => a.estado === 'aprobado');
+    const i = g.pasos.findIndex((p) => p.aqui === seccion && hecho(p));
     const sig = g.pasos[i + 1] || null;
     const ir = (p) => (p.aqui ? irAqui(rol, p.aqui) : (location.hash = '#/portales/' + p.portal));
     return h('div', { class: 'franja-guia', role: 'region', 'aria-label': 'Tu guía de inicio rápido' },
       h('span', { class: 'franja-guia__texto' }, i >= 0 ? h('span', null, h('strong', null, `Paso ${i + 1} de ${g.pasos.length} de tu guía: `), g.pasos[i].t) : h('span', null, h('strong', null, 'Tu guía: '), g.meta)),
       h('span', { class: 'acciones' }, h('a', { class: 'btn btn--chico btn--suave', href: '#/guia/' + rol }, 'Volver a mi guía'),
-        sig ? h('button', { class: 'btn btn--chico', type: 'button', onclick: () => ir(sig) }, 'Siguiente: ' + sig.t) : null));
+        // «Siguiente» de la guía es secundario: la acción principal de la pantalla es la de la cabecera (una sola acción principal por pantalla).
+        sig ? h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => ir(sig) }, 'Siguiente: ' + sig.t) : null));
   }
 
   MT.guias = { PORTALES, ORDEN, GUIA, AJUSTE, pasosEn, seccionesEn, franjaDe, notaAjuste, irAqui, rolActual };

@@ -296,7 +296,7 @@
       { rol: '', hash: '#/recorrido/roles', grupo: 'Niky', seg: 45, titulo: 'Lo que Niky nunca recibe',
         texto: 'La tabla «Quién ve qué» muestra que Niky no recibe información clínica ni perfiles de estudiantes. Hoy responde con ejemplos preparados.' },
 
-      { rol: '', hash: '#/portales', grupo: 'Todos', seg: 35, titulo: 'Tres portales, una sola plataforma',
+      { rol: '', hash: '#/guia', grupo: 'Todos', seg: 35, titulo: 'Tres portales, una sola plataforma',
         texto: 'Cierra con los tres portales juntos e invita a probar la plataforma con el código QR del pendón. Quedan abiertas las preguntas.' });
     return p;
   }

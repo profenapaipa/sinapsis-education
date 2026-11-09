@@ -48,15 +48,14 @@
       explicacion: (portal) => `${portal} es una aplicación de su propio equipo y se abre desde internet. Ahora no hay conexión, o el portal no responde.`,
       siguePuesto: 'Lo que sigue funcionando',
       sigue: (portal) => [
-        `Mi espacio, con la versión equivalente de ${portal} dentro de esta plataforma: los mismos pasos, con datos de ejemplo.`,
-        'Lo que crees se guarda en este dispositivo.',
+        `La guía, que explica cómo se usa ${portal} sin necesitar conexión.`,
         'Niky responde con ejemplos preparados.',
       ],
       verEnMiEspacio: (portal) => `Ver ${portal} en Mi espacio`,
       reintentar: 'Intentar de nuevo',
       reintentando: 'Comprobando la conexión…',
       abrirAparte: 'Abrir aparte',
-      sigueSinConexion: 'Todavía no se puede abrir. Puedes seguir en Mi espacio.',
+      sigueSinConexion: 'Todavía no se puede abrir. Puedes abrirlo aparte o intentarlo de nuevo en un momento.',
       comoRol: (rol) => `Se abre como ${rol}; puedes cambiar de rol en la franja de arriba.`,
     },
 
@@ -103,7 +102,7 @@
         { rol: 'familia', hash: '#/mi/resumen', titulo: 'La familia ve la novedad', texto: 'Solo aparece lo ya aprobado, con su razón y en lenguaje sencillo.' },
         { rol: 'estudiante', hash: '#/mi/resumen', titulo: 'El estudiante recibe la actividad a su medida', texto: 'La practica, responde el quiz y gana logros a su ritmo.' },
         { rol: 'docente', hash: '#/mi/resumen', titulo: 'La docencia ve el progreso', texto: 'Con lo que pasó, decide el siguiente paso. El ciclo vuelve a empezar.' },
-        { rol: '', hash: '#/portales', titulo: 'Los tres portales', texto: 'Kinesis, Niky y Wisfox son los proyectos de los que nace esta plataforma. Aquí se ven juntos.' },
+        { rol: '', hash: '#/guia', titulo: 'Los tres portales', texto: 'Kinesis, Niky y Wisfox son los proyectos de los que nace esta plataforma. Aquí se ven juntos.' },
       ],
     },
   };

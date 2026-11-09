@@ -18,9 +18,8 @@
 
   function chat(c) {
     const caja = h('div', { class: 'tarjeta tarjeta--chat' });
-    c.append(h('header', { class: 'saludo' }, h('div', null, h('h1', null, 'Conversa con Niky'),
-      h('p', null, 'La guía de la plataforma: ayuda al docente a diseñar y al estudiante a resolver sus dudas. Propone; decide quien enseña.'))),
-      caja,
+    MT.comun.hero({ titulo: 'Conversa con Niky', texto: 'La guía de la plataforma: ayuda al docente a diseñar y al estudiante a resolver sus dudas. Propone; decide quien enseña.' });   // el h1 vive en la cabecera única
+    c.append(caja,
       h('p', { class: 'suave' }, 'También puedes abrirla desde cualquier espacio con el botón redondo de Niky, abajo a la derecha, y la conversación es la misma.'));
     const ch = MT.ia.montarChat(caja, MT.ia.panel.sugerenciasPara());
     MT.router.alSalir(() => ch.destruir());
@@ -34,8 +33,8 @@
         : 'Hoy responde con textos de ejemplo. Todavía no tiene conexión con un modelo de lenguaje.'));
     pintar();
     window.addEventListener('mt-ia-modo', pintar, { once: true });
-    c.append(h('header', { class: 'saludo' }, h('div', null, h('h1', null, 'Conexión de Niky'), h('p', null, 'Qué responde hoy y qué cambia cuando se conecte un modelo.'))),
-      h('div', { class: 'rejilla rejilla--2' }, estado,
+    MT.comun.hero({ titulo: 'Conexión de Niky', texto: 'Qué responde hoy y qué cambia cuando se conecte un modelo.' });
+    c.append(h('div', { class: 'rejilla rejilla--2' }, estado,
         h('div', { class: 'tarjeta' }, h('p', { class: 'etiqueta' }, 'Dónde se muestra'),
           h('p', null, 'En su propio espacio y en un panel que se abre desde cualquier pantalla, para el docente y para el estudiante. Comparten la misma conversación.'))),
       h('details', { class: 'plegable', style: 'margin-top:1rem' }, h('summary', null, 'Cómo se protege'),   // plegado: en el chat basta el sello de ejemplo
@@ -48,8 +47,7 @@
   MT.router.registrar({
     id: 'valeria', titulo: 'IA Niky', espacio: 'valeria', subs: TABS,
     render(main, { sub }) {
-      const c = espacio(main, { marca: 'valeria', nombre: 'Niky', descripcion: 'La guía de la plataforma', ruta: 'valeria', tabs: TABS, sub,
-        usuario: { iniciales: 'NI', nombre: 'Niky', rol: MT.ia.info.modo === 'servidor' ? 'En vivo' : 'Modo de ejemplo' } });
+      const c = espacio(main, { nombre: 'Niky', descripcion: 'La guía de la plataforma', ruta: 'valeria', tabs: TABS, sub });
       ({ chat, conexion })[sub](c);
     },
   });
