@@ -945,14 +945,15 @@ async function flujoDemostracion() {
   afirmar('sin conexión: el aviso del respaldo es amable (sin culpar ni mostrar errores técnicos)', !/error|falló|fallo|culpa|ERR_/i.test(tr));
   [...resp('kinesis').querySelectorAll('button')].find((b) => /Intentar de nuevo/.test(b.textContent)).click(); await espera(400);
   afirmar('sin conexión: "Intentar de nuevo" sin red lo dice y deja el respaldo a la vista', /Todavía no se puede abrir/.test(resp('kinesis').innerText) && visible(resp('kinesis')));
-  [...resp('kinesis').querySelectorAll('button')].find((b) => /Ver Kinesis en Mi espacio/.test(b.textContent)).click(); await espera(400);
-  afirmar('sin conexión: "Ver Kinesis en Mi espacio" lleva a la versión equivalente (sin rol, como docente)', /^#\/mi\//.test(ventana().location.hash) && MTw().store.obtener().rol === 'docente', ventana().location.hash + ' ' + MTw().store.obtener().rol);
+  // ---- espacio ---- Por qué: el respaldo ya no ofrece «Ver X en Mi espacio» (no hay un tercer espacio); sus salidas son «Intentar de nuevo» y «Abrir aparte», probadas arriba.
+  // ---- fin espacio ----
   // El mismo respaldo para Wisfox, y con el rol de estudiante ya elegido
   MTw().store.cambiar((s) => { s.rol = 'estudiante'; });
   await ir('#/portales/wisfox'); await espera(500);
   afirmar('sin conexión: Wisfox también tiene su respaldo', visible(resp('wisfox')) && /Wisfox no se puede abrir ahora/.test(resp('wisfox').innerText));
-  [...resp('wisfox').querySelectorAll('button')].find((b) => /Ver Wisfox en Mi espacio/.test(b.textContent)).click(); await espera(400);
-  afirmar('sin conexión: con el rol elegido, el respaldo no cambia de rol y lleva a su sección', MTw().store.obtener().rol === 'estudiante' && /^#\/mi/.test(ventana().location.hash), ventana().location.hash);
+  // ---- espacio ---- Por qué: sin «Ver X en Mi espacio», solo se comprueba que el respaldo de Wisfox no cambia el rol elegido.
+  afirmar('sin conexión: con el rol elegido, el respaldo no cambia de rol', MTw().store.obtener().rol === 'estudiante');
+  // ---- fin espacio ----
   // Vuelve la conexión: el aviso lo dice y los portales se intentan abrir solos
   MTw().conexion.sondear = async () => true;
   ventana().dispatchEvent(new (ventana().Event)('online')); await espera(400);
@@ -1098,15 +1099,16 @@ async function flujoDemostracion() {
   { const mb = D().querySelector('.vivo-menu-btn'); if (mb && !D().querySelector('.vivos--menu')) { mb.click(); await espera(150); } }   // la línea de rescate vive en el menú «⋯»
   const resc = () => D().querySelector('.vivos .vivo-rescate');
   const textoResc = resc() ? resc().innerText.replace(/\s+/g, ' ').trim() : '';
-  afirmar('QA-02: bajo la barra del portal hay una línea fija "¿No ves el portal? Ábrelo aparte o usa Mi espacio"', visible(resc()) && textoResc.startsWith('¿No ves el portal? Ábrelo aparte o usa Mi espacio'), textoResc);
-  afirmar('QA-02: la línea de rescate está marcada [por aprobar] mientras no se apruebe', MTw().mensajes.rescate.aprobado === true || /\[por aprobar\]/.test(textoResc));
+  // ---- espacio ---- Por qué: la línea de rescate ya no dice «o usa Mi espacio» ni lleva la marca «[por aprobar]» (no se muestra nada de borrador al público).
+  afirmar('QA-02: bajo la barra del portal hay una línea fija "¿No ves el portal? Ábrelo aparte"', visible(resc()) && textoResc.startsWith('¿No ves el portal? Ábrelo aparte') && !/Mi espacio|por aprobar/.test(textoResc), textoResc);
+  // ---- fin espacio ----
   const enl = resc() && resc().querySelector('a');
   afirmar('QA-02: "Ábrelo aparte" abre la dirección del portal en otra pestaña, de forma segura', !!enl && enl.getAttribute('href') === MTw().config.portales.kinesis && enl.target === '_blank' && /noopener/.test(enl.rel));
   afirmar('QA-02: la línea sigue ahí después de que el marco cargue (no depende del evento load)', (await espera(1500), visible(resc())));
   const barraAlto = D().querySelector('.vivo-barra').getBoundingClientRect().height;
   afirmar('QA-02: la línea no hace crecer el menú del portal (en modo inmersivo es flotante y no resta alto)', barraAlto < 420, String(barraAlto));
-  [...resc().querySelectorAll('button')].find((b) => /usa Mi espacio/.test(b.textContent)).click(); await espera(400);
-  afirmar('QA-02: "usa Mi espacio" lleva a la versión equivalente', /^#\/mi/.test(ventana().location.hash), ventana().location.hash);
+  // ---- espacio ---- (se quitó la salida «usa Mi espacio» de la línea de rescate)
+  // ---- fin espacio ----
   await ir('#/portales/valeria'); await espera(300);
   afirmar('QA-02: en Niky (que vive dentro de la plataforma) la línea no aparece', !visible(resc()));
   // Un portal que responde con error HTTP: la plataforma lo ve y muestra el respaldo (el sondeo lee el estado en el mismo origen)
