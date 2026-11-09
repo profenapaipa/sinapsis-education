@@ -49,7 +49,7 @@
        último paso cierra con el logro. La emoción sale del lugar del paso: curioso al empezar, celebra al terminar, pensando con Niky. */
     paso: {
       docente: [
-        'Mira qué le sirve a cada estudiante; nunca verás un diagnóstico.',
+        'Mira qué le sirve a cada estudiante: sus apoyos, en lenguaje sencillo.',   // honestidad: en Kinesis el docente asignado al curso sí puede ver lo clínico
         'Piensa la clase para todos y agrega su quiz.',
         'Pídele ideas a Niky y quédate con la que te sirva.',
         'Elige un apoyo y mira el cambio que propone.',

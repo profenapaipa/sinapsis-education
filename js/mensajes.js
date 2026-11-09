@@ -16,7 +16,7 @@
       activar: 'Modo presentación',
       salir: 'Salir de la presentación',
       ayudaBoton: 'Letra más grande y un guion para recorrer la plataforma con un caso. Atajo: Alt+P.',
-      guion: 'Guion de la mesa',
+      guion: 'Recorrido guiado',
       borrador: '[por aprobar]',
       paso: (n, total) => `Paso ${n} de ${total}`,
       turno: (rol) => `Turno: ${rol}`,

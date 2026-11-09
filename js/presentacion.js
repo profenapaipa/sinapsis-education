@@ -71,7 +71,7 @@
     const selector = refs.caso ? h('label', { class: 'guion__caso', for: 'guion-caso' }, M.caso, ' ', refs.caso) : null;
     const cuerpo = h('div', { class: 'guion__cuerpo', id: 'guion-cuerpo' },
       h('div', { class: 'guion__texto-caja' },
-        h('p', { class: 'guion__etiqueta' }, M.guion, ' ', G.aprobado ? null : h('span', { class: 'guion__borrador' }, M.borrador), ' · ', refs.meta),
+        h('p', { class: 'guion__etiqueta' }, refs.meta),   // honestidad: sin «Guion de la mesa [por aprobar]» a la vista; el nombre queda para lectores de pantalla
         refs.titulo, refs.texto),
       // Los botones de uso ocasional que no caben junto a los puntos se sientan debajo de Anterior y Siguiente: la barra queda baja.
       h('div', { class: 'guion__nav' }, h('div', { class: 'guion__nav-par' }, refs.anterior, refs.siguiente),

@@ -79,7 +79,7 @@
         h('div', { class: 'flujo-nodo' }, marca(n.marca, 'flujo-marca'), h('div', null, h('strong', null, n.quien), h('p', null, n.accion))),
         h('div', { class: 'flujo-flecha' }, icono('flecha'), h('span', { class: 'sello sello--e' }, n.entrega)))))));
     c.append(h('div', { class: 'rejilla rejilla--3', style: 'margin-top:1rem' },
-      [['Nunca sale de su lugar', 'La información clínica solo existe como archivos que marca orientación: nadie más los ve, y la IA no los recibe jamás.'],
+      [['Nunca sale de su lugar', 'La información clínica solo la ven orientación y el docente asignado al curso; nunca la familia, el estudiante ni la administración, y la IA no la recibe jamás.'],
        ['A la IA solo llega un perfil anónimo', 'Lo que se envía tiene tope de longitud y nunca incluye el perfil de un estudiante.'],
        ['Las claves no viajan', 'Viven solo en el servidor. La página que abres no contiene ninguna.']]
         .map(([t, p]) => h('div', { class: 'tarjeta tarjeta--borde' }, h('h3', null, t), h('p', null, p)))));

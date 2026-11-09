@@ -942,7 +942,8 @@ async function flujoDemostracion() {
   // ---- ligera ---- Por qué: el riel de abajo ya no lleva enlaces de planes ni hoja de ruta (viven en «Más» y el chip «Participa» se oculta en la mesa); lo que se mide es lo mismo: sin pie y sin «Participa».
   afirmar('presentación: hay menos navegación (sin pie ni enlace de Participa)', !visible(D().querySelector('.pie')) && !visible(D().getElementById('plan-chip')));
   // ---- fin ligera ----
-  afirmar('presentación: el guion dice que es un borrador por aprobar mientras no esté aprobado', MTw().mensajes.guion.aprobado === true || /\[por aprobar\]/.test(guion().innerText), guion().innerText.slice(0, 80));
+  // honestidad (pedido del dueño): ya no se muestra «Guion de la mesa [por aprobar]» al público.
+  afirmar('presentación: el recorrido no muestra la etiqueta de guion ni la marca de borrador', !/\[por aprobar\]|Guion de la mesa/.test(guion().innerText), guion().innerText.slice(0, 80));
   const pasos = MTw().casos.guion(MTw().casos.actual());
   afirmar('presentación: el guion recorre los cinco roles', CINCO.every((r) => pasos.some((p) => p.rol === r)), pasos.map((p) => p.rol).join());
   const malosPasos = pasos.filter((p) => { const [r = 'inicio', sub] = rutaDe(p.hash); const def = MTw().router.rutas[r]; if (!def) return true; if (r === 'mi' && p.rol) return !(MTw().secciones[p.rol] || []).some((s) => s.id === sub); return false; });
