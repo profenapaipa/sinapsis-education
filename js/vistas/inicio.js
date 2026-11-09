@@ -64,7 +64,8 @@
           h('h1', { id: 'ent-h1' }, E.MARCA.nombre),
           h('p', { class: 'ent-lema' }, E.MARCA.lema),
           h('div', { class: 'ent-portada__acciones' },
-            h('button', { class: 'btn ent-empezar', type: 'button', onclick: () => ir('ent-quien') }, T.portada.empezar),
+            h('button', { class: 'btn ent-empezar', type: 'button', 'aria-describedby': 'ent-empezar-linea', onclick: () => ir('ent-quien') }, T.portada.empezar),
+            h('p', { class: 'ent-empezar-linea', id: 'ent-empezar-linea' }, T.portada.empezarLinea),
             h('button', { class: 'ent-enlace', type: 'button', onclick: () => ir('ent-quien') }, T.portada.yaSe),
             // Entrada discreta al tutorial guiado (js/tutorial.js): elegir rol y ejemplo y recorrer las pantallas reales.
             h('button', { class: 'ent-enlace', type: 'button', id: 'btn-ver-tutorial', onclick: () => MT.tutorial && MT.tutorial.abrir() }, 'Ver el tutorial'),
@@ -129,14 +130,15 @@
       // del lunes empieza en su guion y no debe verse alterada. Queda la portada, la pregunta de rol y «Saber más».
       const presentando = (MT.presentacion && MT.presentacion.activo()) || /[?&]caso=\d+/.test(location.search) || /^#\/caso\//.test(location.hash);
       const raiz = h('div', { class: 'entrada' });
-      raiz.append(
-        portada(E, T, presentando),
-        presentando ? null : camino(E, T),
-        presentando ? null : h('section', { class: 'ent-seccion ent-seccion--pestanas', id: 'ent-pestanas', 'aria-labelledby': 'ent-pest-t' },
-          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-pest-t' }, T.pestanas.titulo), E.pestanas(() => ir('ent-quien')))),
-        h('section', { class: 'ent-seccion ent-seccion--rol', id: 'ent-quien', tabindex: '-1', 'aria-labelledby': 'ent-rol-t' },
-          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-rol-t' }, T.rol.titulo), h('p', { class: 'bajada' }, T.rol.bajada), E.quienEres())),
-        saberMas(E, T));
+      // quien2: se filtran los null (Element.append(null) escribe el texto «null»: era el «nullnull» que se veía en modo presentación).
+      raiz.append(...[
+        portada(E, T, presentando),
+        presentando ? null : camino(E, T),
+        presentando ? null : h('section', { class: 'ent-seccion ent-seccion--pestanas', id: 'ent-pestanas', 'aria-labelledby': 'ent-pest-t' },
+          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-pest-t' }, T.pestanas.titulo), E.pestanas(() => ir('ent-quien')))),
+        h('section', { class: 'ent-seccion ent-seccion--rol', id: 'ent-quien', tabindex: '-1', 'aria-labelledby': 'ent-rol-t' },
+          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-rol-t' }, T.rol.titulo), h('p', { class: 'bajada' }, T.rol.bajada), E.quienEres())),
+        saberMas(E, T)].filter(Boolean));
       main.append(raiz);
       conAparicion(raiz);
     },

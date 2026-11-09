@@ -137,7 +137,8 @@ async function flujo() {
   await cargar('#/', 1280); await espera(400);
   afirmar('el inicio pregunta quién eres', textoPagina().includes('¿Quién eres?'));
   // ---- entrada ---- (cambió: las tarjetas de rol ahora son cuatro opciones grandes (.ent-rol) más un enlace discreto para coordinación; siguen siendo los 5 roles)
-  afirmar('hay una opción por rol: cuatro grandes y coordinación aparte (5 roles)', doc().querySelectorAll('.ent-rol').length === 4 && [...doc().querySelectorAll('#ent-quien button')].filter((b) => /Soy/.test(b.textContent)).length === 5);
+  // quien2: los cinco roles son ahora opciones iguales (antes coordinación iba aparte como enlace).
+  afirmar('hay una opción por rol: cinco opciones iguales (5 roles)', doc().querySelectorAll('.ent-rol').length === 5 && [...doc().querySelectorAll('#ent-quien button')].filter((b) => /Soy/.test(b.textContent)).length === 5);
   // ---- fin entrada ----
   // ---- ligera ---- Por qué: la plataforma tenía DOS navegaciones (barra de portales y riel de seis ítems). Ahora es una sola (el riel), que cambia con el rol,
   // y todo lo secundario vive en un único menú «Más». Estas pruebas reemplazan a las del riel de seis ítems y a las de la barra de pestañas.
@@ -179,8 +180,9 @@ async function flujo() {
   // ---- fin rol ----
   // ---- fin ligera ----
   await pulsar('Soy docente');
-  // ---- espacio ---- Por qué: «¿Quién eres?» lleva directo al portal del rol, no a una guía ni a Mi espacio (decisión del dueño). La guía se abre aparte.
-  afirmar('elegir docente lleva directo al portal de su rol (Kinesis)', ventana().location.hash === '#/portales/kinesis' && ventana().MT.store.obtener().rol === 'docente', ventana().location.hash);
+  // ---- espacio ---- quien2: «¿Quién eres?» abre ahora el tutorial guiado del rol (decisión del dueño, 9 nov); antes llevaba directo al portal.
+  afirmar('elegir docente abre su tutorial guiado y guarda el rol', ventana().MT.tutorial.estado.activo && ventana().MT.tutorial.estado.rol === 'docente' && ventana().MT.store.obtener().rol === 'docente', ventana().location.hash);
+  ventana().document.dispatchEvent(new (ventana().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
   await ir('#/guia/docente'); ventana().MT.router.recargar();
   // ---- fin espacio ----
   afirmar('la franja dice con qué rol se mira', doc().getElementById('rol-actual').textContent.includes('Docente'));
@@ -1403,7 +1405,9 @@ async function flujoEntrada() {
     await cargar('#/', 390, 844); await espera(350);
     const b = [...D().querySelectorAll('#ent-quien button')].find((x) => x.textContent.includes(texto)); b.click(); await espera(350);
     // espacio: «¿Quién eres?» lleva directo al portal del rol (ya no a la guía); la guía y su compañera se abren aparte.
-    afirmar(`entrada: elegir «${texto}» avanza solo a su portal, guarda el rol y queda marcado como «tu portal»`, W().location.hash === '#/portales/' + (id === 'estudiante' ? 'wisfox' : 'kinesis') && MTw().store.obtener().rol === id && !!D().querySelector('.riel .riel-item--principal'), W().location.hash);
+    // quien2: elegir el rol abre el tutorial guiado en ese rol y guarda el rol (antes llevaba directo al portal).
+    afirmar(`entrada: elegir «${texto}» abre el tutorial guiado en ese rol y guarda el rol`, MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === id && MTw().store.obtener().rol === id, JSON.stringify({ a: MTw().tutorial.estado.activo, r: MTw().tutorial.estado.rol, h: W().location.hash }));
+    W().document.dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
     await ir('#/guia/' + id); await espera(250);
     afirmar(`entrada: la guía de «${texto}» la acompaña ${mascota}`, new RegExp('Te acompaña ' + mascota).test((D().querySelector('.ent-companera') || {}).textContent || ''));
   }
@@ -1412,8 +1416,14 @@ async function flujoEntrada() {
   afirmar('entrada: la compañera de la guía es discreta en el celular (menos de 96 px de alto: con la frase de su mascota ocupa dos líneas) y no tapa el título', compa.height < 96 && compa.top >= D().querySelector('main h1').getBoundingClientRect().bottom - 2, Math.round(compa.height) + ' px');
   // ---- fin espacio ----
   localStorage.clear(); await cargar('#/', 390, 844); await espera(350);
-  [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(300);
-  afirmar('entrada: coordinación sigue disponible como enlace discreto (lleva a Kinesis)', W().location.hash === '#/portales/kinesis');
+  [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(600);
+  afirmar('entrada: coordinación es una opción más y abre su tutorial guiado', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'coordinacion');
+  W().document.dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
+  await cargar('#/', 390, 844); await espera(350);   // quien2: el tutorial dejó otra pantalla; las siguientes miden la portada
+  afirmar('entrada: «¿Quién eres?» deja entrar directo a los portales sin tutorial', !!D().querySelector('#ent-quien a[href="#/portales/kinesis"]') && !!D().querySelector('#ent-quien a[href="#/portales/wisfox"]'));
+  afirmar('quien2: la franja trae «Tutorial guiado» siempre visible y lleva al selector del tutorial', !!D().querySelector('.franja .franja-tutorial[href="#/tutorial"]') && D().querySelector('.franja-tutorial').getBoundingClientRect().height >= 39.5);
+  afirmar('quien2: el botón principal de la portada dice qué ganas y lo explica en una línea', /Recorre la plataforma con un ejemplo/.test(D().querySelector('.ent-empezar').textContent) && D().querySelector('.ent-empezar').getAttribute('aria-describedby') === 'ent-empezar-linea' && !!D().getElementById('ent-empezar-linea'));
+  afirmar('entrada: la portada nunca escribe el texto «null» (modo normal)', !/null/.test(D().querySelector('.entrada').innerText));
 
   // ---- historia ---- Por qué: la entrada y las guías cuentan una sola historia (bienvenida, reto, guía, acción, logro) con la voz de MT.narrativa; se mide que
   // responda en todos los contextos y roles, que sea corta y sin nombres viejos, y que cada ejemplo recorra el arco en pequeño.
