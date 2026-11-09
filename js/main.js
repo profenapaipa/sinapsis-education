@@ -89,5 +89,6 @@
   MT.barra.construir();
   MT.ia.detectar();
   MT.router.iniciar();
+  if (MT.carrusel) MT.carrusel.iniciar();   // la bienvenida de la primera vez (js/carrusel.js)
   if (MT.presentacion && MT.presentacion.desdeUrl) MT.presentacion.desdeUrl();
 })(window.MT = window.MT || {});

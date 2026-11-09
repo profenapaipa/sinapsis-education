@@ -1,0 +1,31 @@
+/* carrusel.css: la bienvenida de la primera vez (cuatro pantallas con scroll horizontal). Usa los tokens de tokens.css. */
+.carrusel-abierto { overflow: hidden; }
+.carr { position: fixed; inset: 0; z-index: 300; display: flex; flex-direction: column; background: var(--papel); color: var(--tinta); }
+.carr-barra { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 1rem; flex: none; }
+.carr-etiqueta { margin: 0; font: 800 .8rem/1 var(--fuente); letter-spacing: .06em; text-transform: uppercase; color: var(--tinta-suave); }
+.carr-pista { flex: 1; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+.carr-pista::-webkit-scrollbar { display: none; }
+.carr-pista:focus-visible { outline: 3px solid var(--tinta); outline-offset: -3px; }
+.carr-pantalla { flex: 0 0 100%; scroll-snap-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .7rem; padding: .5rem 1.4rem 1rem; text-align: center; overflow-y: auto; }
+.carr-masc { display: grid; place-items: center; }
+.carr-masc svg { width: clamp(120px, 26svh, 200px); height: auto; }
+.carr-titulo { margin: 0; font: 800 clamp(1.7rem, 6vw, 2.6rem)/1.1 var(--fuente-titulo); }
+.carr-linea { margin: 0; max-width: 30rem; font-size: clamp(1.05rem, 3.6vw, 1.3rem); font-weight: 700; line-height: 1.35; }
+.carr-pasos { list-style: none; margin: .3rem 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; max-width: 40rem; }
+.carr-pasos li { display: grid; gap: .1rem; min-width: 7.2rem; padding: .55rem .8rem; background: var(--lino); border: 1px solid var(--linea); border-radius: var(--radio); }
+.carr-pasos strong { font-weight: 800; }
+.carr-pasos span { font-size: .86rem; color: var(--tinta-suave); }
+.carr-pantalla[data-quien="kinesis"] .carr-pasos li { border-top: 4px solid var(--hilo-kinesis); }
+.carr-pantalla[data-quien="wisfox"] .carr-pasos li { border-top: 4px solid var(--hilo-wisfox); }
+.carr-pantalla[data-quien="niky"] .carr-pasos li { border-top: 4px solid var(--hilo-valeria); }
+.carr-pantalla[data-quien="sinapso"] .carr-pasos li { border-top: 4px solid var(--hilo-mosaico); }
+.carr-detalle { margin: 0; max-width: 30rem; color: var(--tinta-suave); line-height: 1.45; }
+.carr-acciones { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; margin-top: .4rem; }
+.carr-pie { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 1.2rem calc(.9rem + env(safe-area-inset-bottom)); flex: none; }
+.carr-puntos { display: flex; gap: .5rem; }
+.carr-punto { width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 2px solid var(--tinta); background: transparent; cursor: pointer; }
+.carr-punto[aria-current="true"] { background: var(--tinta); }
+.carr-sig[hidden] { display: none; }
+html[data-movimiento="calmado"] .carr-pista { scroll-behavior: auto; }
+@media (prefers-reduced-motion: reduce) { .carr-pista { scroll-behavior: auto; } }
+@media (max-height: 640px) { .carr-masc svg { width: 96px; } .carr-detalle { display: none; } }

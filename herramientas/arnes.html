@@ -26,7 +26,7 @@ function cargar(ruta, ancho, alto) {
   return new Promise((res) => {
     f.style.width = ancho + 'px'; f.style.height = (alto || 900) + 'px';
     f.onload = () => res();
-    f.src = '../index.html?t=' + (++n) + ruta;
+    f.src = '../index.html?t=' + (++n) + '&sin-intro=1' + ruta;   // la bienvenida de la primera vez (js/carrusel.js) se prueba aparte: aquí taparía todas las pantallas
   });
 }
 const doc = () => f.contentDocument;
@@ -652,6 +652,34 @@ async function flujo() {
       afirmar('la propuesta suelta se anima al montarse', vivas > 0, 'activas=' + vivas);
       lp.irA(3300); caja.remove();
     }
+  // ---- carrusel ---- Por qué: la bienvenida de la primera vez (js/carrusel.js) cuenta en cuatro pantallas qué es el proyecto y a qué plataforma entra cada perfil.
+  // El resto de las pruebas carga la página con ?sin-intro (ver cargar); aquí se carga SIN ese parámetro y con el almacenamiento vacío, como en un dispositivo nuevo.
+  {
+    const abrirNuevo = async (extra) => { localStorage.clear(); await new Promise((res) => { f.onload = () => res(); f.src = '../index.html?t=' + (++n) + (extra || '') + '#/'; }); await espera(900); };
+    await abrirNuevo('');
+    const c = () => doc().querySelector('.carr');
+    afirmar('carrusel: en un dispositivo nuevo aparece la bienvenida, con cuatro pantallas y su diálogo accesible', !!c() && c().getAttribute('role') === 'dialog' && doc().querySelectorAll('.carr-pantalla').length === 4);
+    const quien = [...doc().querySelectorAll('.carr-pantalla')].map((x) => x.dataset.quien).join(',');
+    afirmar('carrusel: cada personaje cuenta su parte (Sinapso, Kinesis, Wisfox y Niky) con su dibujo', quien === 'sinapso,kinesis,wisfox,niky' && [...doc().querySelectorAll('.carr-masc svg')].length === 4);
+    afirmar('carrusel: ningún texto dice «Mosaico Telar» ni «ValerIA»', !/Mosaico Telar|ValerIA/.test(c().innerText));
+    afirmar('carrusel: no desborda el ancho de la pantalla', doc().documentElement.scrollWidth <= ventana().innerWidth + 1, String(doc().documentElement.scrollWidth));
+    const sig = () => doc().querySelector('.carr-sig');
+    sig().click(); await espera(900); sig().click(); await espera(900); sig().click(); await espera(900);
+    afirmar('carrusel: «Siguiente» recorre las pantallas y en la última aparecen «Entrar a Wisfox» y «Entrar a Kinesis»', sig().hidden && /Entrar a Wisfox/.test(c().innerText) && /Entrar a Kinesis/.test(c().innerText));
+    [...doc().querySelectorAll('.carr button')].find((b) => /Entrar a Wisfox/.test(b.textContent)).click(); await espera(500);
+    afirmar('carrusel: «Entrar a Wisfox» cierra la bienvenida, la recuerda y lleva al portal', !c() && ventana().location.hash === '#/portales/wisfox' && ventana().localStorage.getItem('sinapsis.intro') === '1', ventana().location.hash);
+    await new Promise((res) => { f.onload = () => res(); f.src = '../index.html?t=' + (++n) + '#/'; }); await espera(700);
+    afirmar('carrusel: la segunda vez no aparece', !c());
+    await abrirNuevo('');
+    doc().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(200);
+    afirmar('carrusel: Escape lo cierra (y se recuerda)', !c() && ventana().localStorage.getItem('sinapsis.intro') === '1');
+    await abrirNuevo('&sin-intro=1');
+    afirmar('carrusel: con ?sin-intro no aparece (lo usan las pruebas)', !c());
+    await abrirNuevo('&caso=2');
+    afirmar('carrusel: con ?caso= (exposición guiada) no aparece', !c());
+    localStorage.clear(); await cargar('#/', 1280, 800); await espera(300);
+  }
+  // ---- fin carrusel ----
   // ---- fin logo (agente de marca) ----
   // ---- mascotas ----
   {
