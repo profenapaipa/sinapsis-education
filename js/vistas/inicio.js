@@ -71,26 +71,39 @@
             rol ? h('a', { class: 'ent-enlace', href: '#/portales/' + rol.marca }, T.portada.seguir(rol.nombre)) : null))));
   }
 
-  // El camino: un hilo con los colores de los cuatro hilos de la plataforma y las tres mascotas que van apareciendo.
+  /* ---- portada3 ---- El camino: tres tarjetas grandes, una por proyecto, en lugar de las mascotas repetidas (pedido del dueño, 9 nov 2026).
+     Los personajes se reservan para el tutorial; aquí cada proyecto se reconoce por su logo y su color. Niky va en el centro, unida por un hilo
+     a las otras dos, porque apoya en los dos espacios. Dentro de cada tarjeta están los botones del tutorial guiado según el rol. */
   function camino(E, T) {
-    const C = T.camino;
+    const C = T.camino; const P = C.proyectos;
+    const { marca, icono } = MT.ui;
     const reto = MT.narrativa.linea('reto');
-    const estacion = (id, texto) => h('li', { class: 'ent-estacion ent-aparece', 'data-espacio': E.ESPACIO[id] },
-      h('div', { class: 'ent-flota' }, E.mascota(id, 'saluda', 'ent-masc--estacion')),
-      h('p', null, h('strong', null, E.nombreDe(id)), h('span', null, texto)));
+    const tutorial = (rol) => { if (MT.tutorial) MT.tutorial.iniciar({ rol }); };
+    const botonRol = (id) => { const r = MT.roles.por(id);
+      return h('button', { class: 'ent-proy__rol', type: 'button', 'data-rol': id, onclick: () => tutorial(id) }, icono(r.icono), h('span', null, r.nombre)); };
+    const tarjeta = (id, espacio, cuerpo, pie) => h('article', { class: 'ent-proy ent-aparece', 'data-proyecto': id, 'data-espacio': espacio, 'aria-labelledby': 'ent-proy-' + id },
+      h('div', { class: 'ent-proy__cab' }, h('span', { class: 'ent-proy__logo' }, marca(espacio)),
+        h('div', null, h('h3', { id: 'ent-proy-' + id }, E.nombreDe(id)), h('p', { class: 'ent-proy__titulo' }, P[id].titulo))),
+      h('p', { class: 'ent-proy__texto' }, P[id].texto), cuerpo, pie);
+    const conRoles = (id) => h('div', { class: 'ent-proy__acciones' },
+      h('p', { class: 'ent-proy__etiqueta', id: 'ent-proy-' + id + '-rec' }, C.recorrer),
+      h('div', { class: 'ent-proy__roles', role: 'group', 'aria-labelledby': 'ent-proy-' + id + '-rec' }, P[id].roles.map(botonRol)));
+    const kinesis = tarjeta('kinesis', 'kinesis', conRoles('kinesis'), h('a', { class: 'ent-proy__entrar', href: '#/portales/kinesis' }, P.kinesis.entrar));
+    const wisfox = tarjeta('wisfox', 'wisfox', conRoles('wisfox'), h('a', { class: 'ent-proy__entrar', href: '#/portales/wisfox' }, P.wisfox.entrar));
+    const niky = tarjeta('niky', 'valeria',
+      h('ul', { class: 'ent-proy__puentes' }, h('li', { 'data-espacio': 'kinesis' }, P.niky.enKinesis), h('li', { 'data-espacio': 'wisfox' }, P.niky.enWisfox)),
+      h('div', { class: 'ent-proy__acciones' }, h('div', { class: 'ent-proy__roles' },
+        h('button', { class: 'ent-proy__rol ent-proy__rol--niky', type: 'button', id: 'ent-preguntar-niky', onclick: () => MT.ia && MT.ia.panel.abrir() }, icono('chat'), h('span', null, P.niky.preguntar)),
+        h('button', { class: 'ent-proy__rol', type: 'button', onclick: () => tutorial('docente') }, icono('recorrido'), h('span', null, P.niky.verla)))));
     return h('section', { class: 'ent-camino', id: 'ent-camino', tabindex: '-1', 'aria-labelledby': 'ent-camino-t' },
       h('div', { class: 'ent-ancho' },
-        h('h2', { id: 'ent-camino-t', class: 'solo-lectores' }, C.etiqueta),
-        h('div', { class: 'ent-sinapso ent-aparece', 'data-espacio': E.ESPACIO.sinapso },
-          h('div', { class: 'ent-flota' }, E.mascota('sinapso', 'senala', 'ent-masc--estacion')),
-          h('p', null, h('strong', null, C.sinapso[0]), ' ', C.sinapso[1])),
-        // Momento 2, Reto: lo que le pasa a cualquiera en el aula, dicho por Sinapso, antes de ver quién ayuda.
-        reto ? h('p', { class: 'ent-reto ent-aparece' }, reto.texto) : null,
-        h('ol', { class: 'ent-estaciones' }, ['kinesis', 'wisfox', 'niky'].map((id) => estacion(id, C.rotulos[id]))),
-        // Tres pasos para empezar: lo que sigue, en orden. El tercero es lo que ocurre al elegir tu rol, por eso no es un botón.
-        h('div', { class: 'ent-pasos3' }, h('h3', null, C.pasosTitulo),
-          h('ol', null, C.pasos.map(([t, destino]) => h('li', null, destino ? h('button', { class: 'ent-enlace', type: 'button', onclick: () => ir(destino) }, t) : h('span', null, t)))))));
+        h('div', { class: 'ent-sinapso' }, h('p', null, h('strong', null, C.sinapso[0]), ' ', C.sinapso[1])),
+        reto ? h('p', { class: 'ent-reto' }, reto.texto) : null,
+        h('h2', { id: 'ent-camino-t', class: 'ent-proy-titulo' }, C.proyectosTitulo),
+        h('p', { class: 'bajada ent-proy-bajada' }, C.proyectosBajada),
+        h('div', { class: 'ent-proyectos' }, kinesis, niky, wisfox)));
   }
+  // ---- fin portada3 ----
 
   function saberMas(E, T) {
     const S = T.saberMas;

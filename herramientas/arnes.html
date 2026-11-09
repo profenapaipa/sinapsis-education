@@ -1456,7 +1456,8 @@ async function flujoEntrada() {
     // Bienvenida: Sinapso te recibe con su frase; el reto y los tres pasos están en el camino.
     await ir('#/'); await espera(400);   // la prueba anterior terminó en una guía: la portada se mide en el inicio
     afirmar('historia: Sinapso da la bienvenida en la portada con la frase de la narrativa', (D().querySelector('.ent-habla') || {}).textContent === N.linea('bienvenida').texto);
-    afirmar('historia: el camino trae la frase del reto y tres pasos para empezar', D().querySelector('.ent-reto') && D().querySelectorAll('.ent-pasos3 li').length === 3 && !/Mosaico Telar|ValerIA/.test(D().querySelector('.ent-camino').innerText));
+    // portada3: los «tres pasos» se reemplazaron por tres tarjetas de proyecto con el tutorial adentro (pedido del dueño).
+    afirmar('historia: el camino trae la frase del reto y las tres tarjetas de proyecto', D().querySelector('.ent-reto') && D().querySelectorAll('.ent-proy').length === 3 && !/Mosaico Telar|ValerIA/.test(D().querySelector('.ent-camino').innerText));
     // Cada ejemplo recorre el arco: abre en «Paso 2 de 5: Reto» y termina en «Paso 5 de 5: Logro».
     const momento = (id) => (D().querySelector(`#ent-panel-${id} .ent-momento strong`) || {}).textContent || '';
     const abre = ['sinapso', 'kinesis', 'wisfox', 'niky'].map((id) => momento(id));
@@ -1679,6 +1680,26 @@ async function flujoContacto() {
   afirmar('contacto: el pie de la pagina trae el enlace «Contacto»', [...D().querySelectorAll('footer.pie a')].some((a) => a.getAttribute('href') === '#/contacto' && /Contacto/.test(a.textContent)));
 }
 // ---- fin contacto ----
+
+// ---- portada3 ---- tres tarjetas de proyecto en la portada con el tutorial por rol adentro, sin mascotas repetidas.
+async function flujoPortada3() {
+  const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
+  await cargar('#/', 1280, 800); await espera(500);
+  const ids = [...D().querySelectorAll('.ent-proy')].map((x) => x.dataset.proyecto).join(',');
+  afirmar('portada3: tres tarjetas, una por proyecto, con Niky en el centro', ids === 'kinesis,niky,wisfox', ids);
+  afirmar('portada3: Kinesis trae los cuatro roles del colegio y Wisfox el de estudiante', [...D().querySelectorAll('[data-proyecto="kinesis"] .ent-proy__rol')].map((b) => b.dataset.rol).join() === 'docente,orientacion,familia,coordinacion' && [...D().querySelectorAll('[data-proyecto="wisfox"] .ent-proy__rol')].map((b) => b.dataset.rol).join() === 'estudiante');
+  afirmar('portada3: el camino y «¿Quién eres?» ya no muestran mascotas (se reservan para el tutorial)', !D().querySelector('#ent-camino .mascota, #ent-quien .mascota'), String(D().querySelectorAll('#ent-camino .mascota, #ent-quien .mascota').length));
+  afirmar('portada3: los botones de rol miden al menos 44 px de alto', [...D().querySelectorAll('.ent-proy__rol')].every((b) => b.getBoundingClientRect().height >= 43.5));
+  D().querySelector('[data-proyecto="kinesis"] [data-rol="orientacion"]').click(); await espera(900);
+  afirmar('portada3: el botón de rol abre el tutorial guiado en ese rol', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'orientacion', JSON.stringify({ a: MTw().tutorial.estado.activo, r: MTw().tutorial.estado.rol }));
+  D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(300);
+  await cargar('#/', 1280, 800); await espera(400);
+  D().getElementById('ent-preguntar-niky').click(); await espera(500);
+  afirmar('portada3: «Pregúntale a Niky» abre el panel de Niky', !!MTw().ia.panel.abierto);
+  await cargar('#/', 390, 844); await espera(400);
+  afirmar('portada3 390: las tarjetas caben sin desborde horizontal', D().documentElement.scrollWidth <= W().innerWidth + 1 && [...D().querySelectorAll('.ent-proy')].every((x) => x.getBoundingClientRect().right <= W().innerWidth + 1));
+}
+// ---- fin portada3 ----
 
 async function flujoTutorial() {
   const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
@@ -2221,6 +2242,9 @@ async function flujoNikyEstados() {
   // ---- tutorial ----
   try { await flujoTutorial(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'tutorial: ' + String(e && e.stack || e); }
   // ---- fin tutorial ----
+  // ---- portada3 ----
+  try { await flujoPortada3(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'portada3: ' + String(e && e.stack || e); }
+  // ---- fin portada3 ----
   // ---- contacto ----
   try { await flujoContacto(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'contacto: ' + String(e && e.stack || e); }
   // ---- fin contacto ----

@@ -215,3 +215,50 @@ html[data-movimiento="calmado"] .ent-flota { transform: none; }
 @media (min-width: 861px) { .ent-marca > svg { width: clamp(150px, 15vw, 200px); } }   /* en pantalla grande, el logo es el primer gesto de la marca */
 @media (max-height: 600px) { .ent-marca > svg { width: 72px; } .ent-masc--grande { --m: 64px; } }   /* celulares muy bajos: el botón «Empezar» manda */
 @media (max-height: 600px) { .ent-marca > svg { width: 56px; } .ent-masc--grande { --m: 44px; } .ent-portada__cuerpo { gap: .3rem; padding-top: .4rem; } }
+
+/* ---- portada3 ---- Tres proyectos en tarjetas grandes. Color y logo de cada espacio (tokens de hilos), botones de rol de 44 px o más.
+   En pantalla ancha van en tres columnas con Niky al centro y un hilo de color que la une a Kinesis y a Wisfox. */
+.ent-camino .ent-ancho::before { content: none; }
+.ent-sinapso { justify-content: center; text-align: center; }
+.ent-proy-titulo { margin: 1.6rem 0 .2rem; text-align: center; }
+.ent-proy-bajada { margin: 0 auto 1.2rem; text-align: center; max-width: 52ch; }
+.ent-proyectos { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+@media (min-width: 900px) {
+  .ent-proyectos { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+  /* El hilo que une los tres espacios, por detrás de las tarjetas. */
+  .ent-proyectos::before { content: ""; position: absolute; left: 8%; right: 8%; top: 3.4rem; height: 6px; border-radius: 3px; z-index: 0;
+    background: linear-gradient(90deg, var(--hilo-kinesis), var(--hilo-valeria) 50%, var(--hilo-wisfox)); }
+}
+.ent-proy { position: relative; z-index: 1; display: flex; flex-direction: column; gap: .8rem; padding: 1.1rem 1.1rem 1rem; background: var(--papel);
+  border: 2px solid var(--tinta); border-top: 8px solid var(--hilo, var(--tinta)); border-radius: 18px; box-shadow: 0 6px 0 -2px color-mix(in srgb, var(--hilo, var(--tinta)) 35%, transparent); }
+.ent-proy[data-espacio="kinesis"] { --hilo: var(--hilo-kinesis); }
+.ent-proy[data-espacio="wisfox"] { --hilo: var(--hilo-wisfox); }
+.ent-proy[data-espacio="valeria"] { --hilo: var(--hilo-valeria); background: color-mix(in srgb, var(--hilo-valeria) 8%, var(--papel)); }
+.ent-proy__cab { display: flex; align-items: center; gap: .8rem; }
+.ent-proy__logo { flex: none; display: grid; place-items: center; width: 64px; height: 64px; border-radius: 16px; background: var(--hilo); }
+.ent-proy__logo svg { width: 48px; height: 48px; }
+.ent-proy h3 { margin: 0; font-family: var(--fuente-titulo); font-size: 1.5rem; line-height: 1.1; }
+.ent-proy__titulo { margin: .15rem 0 0; font-weight: 800; color: var(--tinta); }
+.ent-proy__texto { margin: 0; line-height: 1.5; color: var(--tinta-suave); }
+.ent-proy__puentes { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+.ent-proy__puentes li { display: flex; align-items: center; gap: .55rem; font-weight: 700; font-size: .95rem; line-height: 1.35; }
+.ent-proy__puentes li::before { content: ""; flex: none; width: 1.6rem; height: 6px; border-radius: 3px; background: var(--hilo-kinesis); }
+.ent-proy__puentes li[data-espacio="wisfox"]::before { background: var(--hilo-wisfox); }
+.ent-proy__acciones { margin-top: auto; display: grid; gap: .45rem; }
+.ent-proy__etiqueta { margin: 0; font-size: .8rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--tinta-suave); }
+.ent-proy__roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .45rem; }
+.ent-proy__rol { display: flex; align-items: center; gap: .5rem; min-height: 48px; padding: .5rem .7rem; font: inherit; font-weight: 700; text-align: left; cursor: pointer;
+  color: var(--tinta); background: var(--papel); border: 2px solid var(--tinta); border-radius: 12px; }
+.ent-proy__rol svg { flex: none; width: 22px; height: 22px; }
+.ent-proy__rol:hover { background: color-mix(in srgb, var(--hilo) 14%, var(--papel)); }
+.ent-proy__rol:focus-visible, .ent-proy__entrar:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.ent-proy__rol--niky { background: var(--hilo-valeria); color: #fff; border-color: var(--hilo-valeria); }
+.ent-proy__rol--niky:hover { background: color-mix(in srgb, var(--hilo-valeria) 85%, #000); }
+.ent-proy__entrar { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; color: var(--verde-texto); }
+/* «¿Quién eres?»: íconos sencillos de rol en lugar de las mascotas. */
+.ent-rol__icono { flex: none; display: grid; place-items: center; width: 56px; height: 56px; border-radius: 14px; background: var(--hundido); }
+.ent-rol__icono svg { width: 30px; height: 30px; }
+.ent-rol-niky .ent-rol__icono { width: 40px; height: 40px; background: var(--hilo-valeria); }
+.ent-rol-niky .ent-rol__icono svg { width: 30px; height: 30px; }
+@media (prefers-reduced-motion: reduce) { .ent-proy { box-shadow: none; } }
+/* ---- fin portada3 ---- */

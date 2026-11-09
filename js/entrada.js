@@ -39,6 +39,19 @@
       sinapso: ['Sinapsis es donde dos neuronas se conectan para aprender.', 'Nosotros conectamos el colegio, la familia y el estudiante.'],
       // «el aula / el estudiante / la guía» son los rótulos aprobados.
       rotulos: { kinesis: 'el aula', wisfox: 'el estudiante', niky: 'la guía' },
+      // ---- portada3 ---- Tres proyectos, una tarjeta cada uno, con el tutorial guiado por rol adentro (pedido del dueño, 9 nov 2026).
+      // Kinesis = el colegio y sus actores; Wisfox = centrado en el estudiante; Niky = el apoyo de la IA en los dos espacios. BORRADOR POR APROBAR.
+      proyectosTitulo: 'Tres espacios, un mismo camino',
+      proyectosBajada: 'Elige un proyecto y recórrelo con el tutorial guiado, según quién eres.',
+      recorrer: 'Recorre el tutorial como',
+      proyectos: {
+        kinesis: { titulo: 'El colegio y sus actores', texto: 'Docencia, orientación, familia y coordinación planean y acompañan juntas a cada estudiante.', entrar: 'Entrar a Kinesis', roles: ['docente', 'orientacion', 'familia', 'coordinacion'] },
+        niky: { titulo: 'La IA que apoya en los dos espacios', texto: 'Sugiere, alerta, resume y propone. Las decisiones siguen siendo de las personas.',
+          enKinesis: 'En Kinesis: ideas y ajustes para la clase', enWisfox: 'En Wisfox: pistas y explicaciones a tu ritmo',
+          preguntar: 'Pregúntale a Niky', verla: 'Verla en el tutorial' },
+        wisfox: { titulo: 'Centrado en el estudiante', texto: 'Cada estudiante recibe la actividad a su medida, avanza a su ritmo y ve sus logros.', entrar: 'Entrar a Wisfox', roles: ['estudiante'] },
+      },
+      // ---- fin portada3 ----
       pasosTitulo: 'Tres pasos para empezar',                                 // nuevo
       pasos: [['Pruébalo en un minuto', 'ent-pestanas'], ['Elige tu rol', 'ent-quien'], ['Haz una cosa en tu guía', null]], // nuevo (el tercero es lo que pasa después de elegir: no lleva a ningún lado)
     },
@@ -324,14 +337,15 @@
     const opcion = (r, clase) => {
       const id = mascotaDeRol(r.id);
       return h('button', { class: 'ent-rol ' + (clase || ''), type: 'button', 'data-espacio': ESPACIO[id], onclick: () => elegir(r) },
-        mascota(id, 'saluda', 'ent-masc--rol'),
+        // portada3: un ícono sencillo por rol; las mascotas se reservan para el tutorial (antes salían tres pulpos iguales).
+        h('span', { class: 'ent-rol__icono', 'aria-hidden': 'true' }, MT.ui.icono(r.icono)),
         h('span', { class: 'ent-rol__texto' }, h('strong', null, r.boton), h('small', null, R.acompana(nombreDe(id)))));
     };
     const principales = MT.roles.lista.filter((r) => r.id !== 'coordinacion');
     const coord = MT.roles.por('coordinacion');
     return h('div', { class: 'ent-rol-caja' },
       h('div', { class: 'ent-roles' }, principales.map((r) => opcion(r))),
-      h('div', { class: 'ent-rol-niky', 'data-espacio': ESPACIO.niky }, mascota('niky', 'base', 'ent-masc--chica'), h('p', { class: 'suave' }, R.niky)),
+      h('div', { class: 'ent-rol-niky', 'data-espacio': ESPACIO.niky }, h('span', { class: 'ent-rol__icono ent-rol__icono--niky', 'aria-hidden': 'true' }, MT.ui.marca('valeria')), h('p', { class: 'suave' }, R.niky)),
       h('p', { class: 'ent-rol-coord' }, h('button', { class: 'ent-enlace', type: 'button', onclick: () => elegir(coord) }, R.coordinacion)));
   }
 
