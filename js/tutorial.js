@@ -90,6 +90,32 @@
       textoFamilia: 'Tú cargas la autorización de datos, la política y el PIAR firmado en la sección Documentos de Kinesis (/documentos).',
     },
     // ---- fin casos2 ----
+    // ---- nikylibre ---- Paso «Niky te ayuda» de orientación, familia y coordinación (BORRADOR POR APROBAR del dueño).
+    // pedido: lo que se le pide a Niky (aparece como mensaje de la persona). respuesta: el texto de ejemplo cuando no hay servidor (GitHub
+    // Pages) o cuando el ejemplo no está en el catálogo del servidor (Ciencias sociales). Con servidor, el tutorial manda el código preparado
+    // del catálogo ('<rol>-<n>') y responde el texto del catálogo, sin gastar cuota.
+    niky: {
+      titulo: 'Niky te ayuda',
+      orientacion: {
+        texto: 'Niky te propone una nota para el docente. Tú la revisas y decides qué enviar.',
+        pestana: 'Nota al docente',
+        pedido: (c) => `Ayúdame a escribir una nota al docente sobre el ajuste de ${c.estudiante} en ${c.asignatura}.`,
+        respuesta: (c) => `**Nota para el docente (borrador)**\n\nEl ajuste de ${c.estudiante} en ${c.asignatura} responde a los apoyos de su perfil. ${c.devuelve ? 'La versión corregida ya incluye el apoyo que faltaba.' : 'Cada cambio trae su razón.'} El objetivo de la clase no cambia.\n\n- Mira cómo le va en la próxima sesión.\n- Si algo no funciona, cuéntalo y lo revisamos.\n\nEs una propuesta: decides tú.`,
+      },
+      familia: {
+        texto: 'Niky te sugiere cómo acompañar en casa, con palabras sencillas.',
+        pestana: 'Acompañar en casa',
+        pedido: (c) => `¿Cómo acompaño en casa la actividad de ${c.asignatura}?`,
+        respuesta: (c) => `Hola. En ${c.asignatura} trabajamos «${c.titulo}». El colegio aprobó un ajuste para que tu hija o hijo participe con los apoyos que ya usa en clase.\n\n**Cómo acompañar en casa:**\n1. Pídele que te cuente con sus palabras qué hizo.\n2. Celebra el esfuerzo, no solo el resultado.\n\nSi tienes dudas, escríbele al colegio.`,
+      },
+      coordinacion: {
+        texto: 'Niky lee las cifras contigo: cuántos hay, nunca de quién son.',
+        pestana: 'Leer las cifras',
+        pedido: (c) => `Léeme las cifras del colegio en el ejemplo de ${c.asignatura}.`,
+        respuesta: (c) => `**Lectura de las cifras (datos de ejemplo)**\n\n- ${c.devuelve ? 'Hay un ajuste devuelto a la docencia con una nota.' : 'Hay un ajuste esperando revisión.'}\n- Cada estudiante se registra con un código, como ${c.estudiante}.\n\nLas cifras dicen cuántos ajustes hay, no de quién son.`,
+      },
+    },
+    // ---- fin nikylibre ----
     final: {
       titulo: (rol) => `Lo que lograste como ${rol.toLowerCase()}`,
       bajada: (c) => `Recorriste el ejemplo de ${c.asignatura}. Todo sigue ahí para explorarlo con calma.`,
@@ -132,6 +158,9 @@
     const opc = TEXTOS.opciones[rolId];
     if (opc) intro.opciones = opc.map(([texto, ir, quien]) => ({ texto, ir, quien }));
     let p = [intro];
+    // nikylibre: el paso corto de Niky de orientación, familia y coordinación (antes solo docente y estudiante abrían a Niky). Queda en la
+    // misma pantalla y con la misma acción del paso anterior, para que lo que se ve no cambie mientras Niky responde.
+    const pasoNiky = (hash, accion) => ({ rolId, id: 'niky', hash, accion, niky: true, quien: 'niky', pose: 'piensa', emocion: 'pensando', foco: 'niky', titulo: TEXTOS.niky.titulo, texto: TEXTOS.niky[rolId].texto });
 
     if (rolId === 'estudiante') {
       p.push(
@@ -155,6 +184,7 @@
       if (c.devuelve) p.push(de(del('orientacion', '#/mi/ajustes', 'devolver'), { id: 'devuelve', hash: '#/mi/ajustes', accion: 'devolver', quien: 'kinesis', emocion: 'duda', foco: 'ajuste' }));
       p.push(
         de(del('orientacion', '#/mi/ajustes', 'aprobar'), { id: 'decidir', hash: '#/mi/ajustes', accion: 'aprobar', quien: 'kinesis', emocion: 'celebra', foco: 'ajuste' }),
+        pasoNiky('#/mi/ajustes', 'aprobar'),   // nikylibre: Niky redacta la nota al docente sobre el ajuste recién decidido
         { rolId, id: 'archivos', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'animo', foco: 'tarjetas', titulo: T.archivosOrientacion, texto: T.archivosOrientacionTexto },
         // ---- casos2 ---- Antes de trabajar con un perfil, orientación comprueba que la autorización de datos esté (aviso de ejemplo).
         { rolId, id: 'autorizacion', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'curioso', foco: 'tarjetas', autorizacion: true, titulo: TEXTOS.autorizacion.titulo, texto: TEXTOS.autorizacion.texto });
@@ -163,6 +193,7 @@
       p.push(
         { rolId, id: 'espera', hash: '#/mi/resumen', accion: c.devuelve ? 'devolver' : 'proponer', quien: 'kinesis', emocion: 'curioso', foco: 'tarjetas', titulo: T.sinNovedades, texto: T.sinNovedadesTexto },
         de(del('familia', '#/mi/resumen'), { id: 'aprobado', hash: '#/mi/resumen', accion: 'aprobar', quien: 'kinesis', emocion: 'celebra', foco: 'tarjetas' }),
+        pasoNiky('#/mi/resumen', 'aprobar'),   // nikylibre: con el ajuste ya aprobado, Niky sugiere cómo acompañar en casa
         { rolId, id: 'archivos', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'animo', foco: 'tarjetas', titulo: T.archivosFamilia, texto: T.archivosFamiliaTexto },
         // ---- casos2 ---- Versión breve para la familia, que es quien carga los documentos.
         { rolId, id: 'autorizacion', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'curioso', foco: 'tarjetas', autorizacion: true, titulo: TEXTOS.autorizacion.titulo, texto: TEXTOS.autorizacion.textoFamilia });
@@ -175,7 +206,8 @@
         { rolId, id: 'autorizacion', hash: '#/mi/estudiantes', quien: 'kinesis', emocion: 'curioso', foco: 'tabla', autorizacion: true, titulo: TEXTOS.autorizacion.titulo, texto: TEXTOS.autorizacion.texto },
         // ---- fin casos2 ----
         deGuia(2, { id: 'categorias', hash: '#/mi/categorias', quien: 'kinesis', emocion: 'pensando', foco: 'tabla' }),
-        deGuia(3, { id: 'cifras', hash: '#/mi/resumen', accion: c.devuelve ? 'devolver' : 'proponer', quien: 'kinesis', emocion: 'celebra', foco: 'tarjetas', texto: T.cifras(c) }));
+        deGuia(3, { id: 'cifras', hash: '#/mi/resumen', accion: c.devuelve ? 'devolver' : 'proponer', quien: 'kinesis', emocion: 'celebra', foco: 'tarjetas', texto: T.cifras(c) }),
+        pasoNiky('#/mi/resumen', c.devuelve ? 'devolver' : 'proponer'));   // nikylibre: Niky lee esas mismas cifras
     }
     p = p.filter((x) => x && x.titulo);
     p.forEach((x) => { x.pose = x.pose || 'senala'; });
@@ -227,6 +259,7 @@
       MT.casos.cerrarPanel();
       // Las acciones de los pasos anteriores ya deberían estar hechas; se repiten por si se saltó con una opción (son idempotentes).
       if (p.accion) cadena(MT.casos.actual(), p.accion).forEach((a) => MT.casos.accion(a));
+      if (p.niky) abrirNiky(p.rolId);
       pintar(true);
       if (location.hash === p.hash) MT.router.recargar(); else location.hash = p.hash;
       // Después de que el router pinta la pantalla: anillo y foco al botón que se estaba usando (el router lleva el foco al título).
@@ -237,6 +270,18 @@
   function enfocar(el) {
     const b = el && el.isConnected && !el.disabled ? el : (refs.siguiente && !refs.siguiente.disabled ? refs.siguiente : refs.atras);
     if (b) b.focus({ preventScroll: true });
+  }
+  /* nikylibre: abre a Niky con el pedido del caso, como el paso de ideas del docente (conversación limpia, una pestaña propia).
+     La tarea 'tut-<rol>' no es una tarea del servidor: con servidor y un ejemplo del catálogo, js/ia.js manda el código preparado
+     ('<rol>-<n>') con la tarea que exige el catálogo; sin servidor, o con Ciencias sociales (que no está en el catálogo), no sale ninguna
+     petición y responde el texto de TEXTOS.niky, que se deja en respuestasIA justo antes. */
+  function abrirNiky(rolId) {
+    const N = TEXTOS.niky[rolId]; const c = MT.casos.actual();
+    if (!N || !MT.ia || !MT.ia.panel) return;
+    const tarea = 'tut-' + rolId;
+    MT.datos.respuestasIA[tarea] = N.respuesta(c);
+    MT.store.cambiar((s) => { s.ia = []; });
+    MT.ia.panel.abrir({ texto: N.pedido(c), tarea, sesion: { id: tarea, titulo: N.pestana } });
   }
   const siguiente = (e) => { if (est.i >= est.pasos.length - 1) final(); else ir(est.i + 1, e && e.currentTarget); };
   const saltarA = (id, e) => { const k = est.pasos.findIndex((x) => x.id === id); if (k >= 0) ir(k, e && e.currentTarget); };
