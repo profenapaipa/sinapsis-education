@@ -477,7 +477,8 @@ async function flujo() {
     await ir('#/'); await espera(200);
     const rl = ventana().document.querySelector('#riel-logo');
     const cs = ventana().getComputedStyle(rl);
-    { const v = cs.borderRadius + '|' + cs.backgroundColor + '|' + cs.borderTopColor + '|' + cs.borderTopWidth; afirmar('el botón de inicio es un círculo con contorno blanco y fondo oscuro', /^(50%|26px)\|rgb\(26, 23, 20\)\|rgb\(255, 255, 255\)\|3px$/.test(v), v); }
+    // Cambió por decisión del dueño (8 nov): el botón de inicio ya no es un círculo negro con aro blanco («montado»), sino la versión «sobre negro» del logo: piezas blancas e hilos vivos, sin disco ni borde.
+    { const v = cs.borderTopWidth + '|' + cs.backgroundColor + '|' + ventana().getComputedStyle(rl.querySelector('svg')).color; afirmar('el botón de inicio es el logo sobre negro (piezas blancas, sin borde ni disco)', /^0px\|rgba\((0, 0, 0, 0|255, 255, 255, 0\.14)\)\|rgb\(250, 247, 242\)$/.test(v), v); }
     { const r = rl.getBoundingClientRect(); const s = rl.querySelector('svg').getBoundingClientRect(); const d = Math.hypot((s.left + s.width / 2) - (r.left + r.width / 2), (s.top + s.height / 2) - (r.top + r.height / 2)); afirmar('el logo del botón de inicio está centrado en su círculo', d < 0.6, 'desvío=' + d.toFixed(2) + ' px'); }
     afirmar('el botón de inicio muestra los hilos de colores', rl.querySelectorAll('.hilos rect').length > 0);
     afirmar('«Más» nombra la sección Identidad, no Marca', [...ventana().document.querySelectorAll('#menu-mas a')].some((x) => x.textContent.trim() === 'Identidad') && ![...ventana().document.querySelectorAll('#menu-mas a')].some((x) => x.textContent.trim() === 'Marca'));   // ---- ligera: Identidad vive en «Más» ----
