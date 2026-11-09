@@ -31,7 +31,7 @@
   const ESTILOS = ['hilo', 'piezas', 'taller'];
   function aplicarApariencia(a) {
     const r = document.documentElement;
-    if (a.tema === 'claro' || a.tema === 'oscuro') r.dataset.tema = a.tema; else delete r.dataset.tema;
+    r.dataset.tema = 'claro';   // solo modo claro por ahora (ver js/tema.js)
     if (a.texto === 'grande') r.dataset.texto = 'grande'; else delete r.dataset.texto;
     // El nombre del atributo lo define animacion.css (marca); las reglas de reducción están allí y en css/calmado.css.
     if (a.movimiento === 'calmado') r.dataset.movimiento = 'calmado'; else delete r.dataset.movimiento;
@@ -46,7 +46,6 @@
       h('input', { type: 'radio', name: 'tema', value: valor, checked: (a.tema || 'sistema') === valor,
         onchange: () => { a.tema = valor; aplicarApariencia(a); } }), texto);
     menu.append(
-      h('fieldset', null, h('legend', null, 'Modo'), radio('sistema', 'Del sistema'), radio('claro', 'Claro'), radio('oscuro', 'Oscuro')),
       h('label', { class: 'casilla' }, h('input', { type: 'checkbox', checked: a.texto === 'grande',
         onchange: (e) => { a.texto = e.target.checked ? 'grande' : 'normal'; aplicarApariencia(a); } }), 'Texto más grande'),
       h('label', { class: 'casilla' }, h('input', { type: 'checkbox', id: 'opcion-calmado', 'aria-describedby': 'ayuda-calmado', checked: a.movimiento === 'calmado',

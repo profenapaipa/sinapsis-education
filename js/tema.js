@@ -3,7 +3,8 @@
 (function () {
   try {
     var a = JSON.parse(localStorage.getItem('mosaicotelar.apariencia') || '{}'), r = document.documentElement;
-    if (a.tema === 'claro' || a.tema === 'oscuro') r.dataset.tema = a.tema;
+    // Por ahora la plataforma solo tiene modo claro: el oscuro no está optimizado (queda como tarea futura, el CSS se conserva). Se fuerza siempre, también si el navegador pide oscuro o si había uno guardado.
+    r.dataset.tema = 'claro';
     if (a.texto === 'grande') r.dataset.texto = 'grande';
     if (a.movimiento === 'calmado') r.dataset.movimiento = 'calmado';
     // Estilo de la página: solo valores conocidos. js/main.js lo quita si MT.config.mostrarEstilos está apagado (este script corre antes de config.js).
