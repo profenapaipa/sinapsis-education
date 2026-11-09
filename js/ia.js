@@ -63,6 +63,24 @@
     pantalla: 'Esta pantalla forma parte de la plataforma. Mira el título, lee la descripción de arriba y usa el menú para moverte. Si te pierdes, el **inicio** siempre está a un toque. Si quieres, dime qué buscas y te sugiero adónde ir.',
   };
 
+  /* iafuente: respuestas PREPARADAS del servidor. Durante el tutorial guiado los pasos no deben gastar cuota ni depender de Gemini: con un codigo
+     valido ('<rol>-<n>') y la tarea que le corresponde, POST /api/valeria responde al instante {fuente:'ejemplo'} sin llamar a ningun modelo.
+     La tarea esperada de cada codigo sale de 02_Piloto/app/ejemplos-preparados.json (aqui copiada: si cambia alla, cambia aqui). */
+  const EJEMPLO_TAREA = {
+    docente: ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia'], orientacion: ['orientar', 'coordinar', 'familia', 'orientar', 'coordinar'],
+    familia: ['familia', 'familia', 'ayuda', 'familia', 'familia'], coordinacion: ['coordinar', 'coordinar', 'coordinar', 'coordinar', 'coordinar'],
+    estudiante: ['ayuda', 'ayuda', 'ayuda', 'ayuda', 'ayuda'],
+  };
+  // Los casos del guion del servidor (1 Tecnologia, 2 Ingles, 3 Matematicas, 4 Ciencias naturales, 5 Lengua) frente a los de la plataforma (n -> n del servidor).
+  // Ciencias sociales (5 de la plataforma) no esta en el guion del servidor: ahi se usan los textos propios de casos.js.
+  const CASO_DEL_SERVIDOR = { 1: 2, 2: 3, 3: 4, 4: 5, 6: 1 };
+  function codigoDeEjemplo(tarea) {
+    const t = MT.tutorial && MT.tutorial.estado;
+    if (!t || !t.activo) return null;
+    const n = CASO_DEL_SERVIDOR[t.caso]; const tareas = EJEMPLO_TAREA[t.rol];
+    return n && tareas && tareas[n - 1] === tarea ? t.rol + '-' + n : null;
+  }
+
   async function preguntar({ tarea, texto }) {
     const limpio = recortar(tarea, texto);
     if (info.modo === 'servidor') {
@@ -73,17 +91,18 @@
         // Perfil: el codigo del estudiante del caso en pantalla (8A-NN). El servidor arma de ahi el perfil de apoyos; el texto del perfil nunca viaja desde la pagina.
         const caso = MT.casos && MT.casos.activo ? MT.casos.activo() : null;
         const perfil = caso && /^8A-\d\d$/.test(caso.estudiante || '') && ['ajustar', 'ayuda', 'orientar', 'familia'].includes(tarea) ? caso.estudiante : null;
+        const ejemplo = codigoDeEjemplo(tarea);   // solo dentro del tutorial guiado
         const r = await fetch((cfg.base || '') + '/api/valeria', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           // El servidor conoce seis tareas; las preguntas guía de las burbujas viajan como «general».
-          body: JSON.stringify({ tarea: ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar'].includes(tarea) ? tarea : 'general', texto: limpio, ...(perfil ? { perfil } : {}) }),
+          body: JSON.stringify({ tarea: ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar'].includes(tarea) ? tarea : 'general', texto: limpio, ...(perfil ? { perfil } : {}), ...(ejemplo ? { ejemplo } : {}) }),
           signal: AbortSignal.timeout(espera + 2000),
         });
         if (!r.ok) throw new Error('servidor ' + r.status);
         const d = await r.json();
         // iafuente: antes solo «gemini» contaba como en vivo (openclaw salía como «respaldo») y «filtro» pasaba por respuesta.
-        return { fuente: ['openclaw', 'gemini'].includes(d.fuente) ? 'en vivo' : d.fuente === 'filtro' ? 'filtro' : 'respaldo', texto: d.texto };
+        return { fuente: ['openclaw', 'gemini'].includes(d.fuente) ? 'en vivo' : d.fuente === 'filtro' ? 'filtro' : d.fuente === 'ejemplo' ? 'ejemplo' : 'respaldo', texto: d.texto };
       } catch (e) { /* cae al ejemplo */ }
     }
     await demora(450);
@@ -467,5 +486,5 @@
   };
 
   const sesiones = { MAX: MAX_SESIONES, de: sesionesDe, activa: sesionActiva, hayMensajes, sinLeer, asegurar: asegurarSesion, nueva: nuevaSesion, activar: activarSesion, cerrar: cerrarSesion, titulo: tituloDe };
-  MT.ia = { info, detectar, puedeHaberServidor, preguntar, consultar, montarChat, panel, chipModo, sesiones };
+  MT.ia = { info, detectar, puedeHaberServidor, preguntar, consultar, montarChat, panel, chipModo, sesiones, codigoDeEjemplo };
 })(window.MT = window.MT || {});

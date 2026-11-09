@@ -1615,6 +1615,18 @@ async function flujoRecorrido() {
   afirmar('recorrido: un rol inválido cae al rol del portal (docente en Kinesis)', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'docente', JSON.stringify({ rol: MTw().tutorial.estado.rol }));
   tecla('Escape'); await espera(250);
 }
+  // ---- iafuente ---- dentro del tutorial, Niky pide al servidor la respuesta PREPARADA (no gasta cuota ni depende de Gemini).
+  fuera: { const ia = () => MTw().ia;
+    afirmar('iafuente: fuera del tutorial no se pide ninguna respuesta preparada', ia().codigoDeEjemplo('disenar') === null);
+    await MTw().tutorial.iniciar({ rol: 'docente', caso: 6 }); await espera(500);
+    afirmar('iafuente: en el tutorial, docente con Tecnologia (caso 6 de la plataforma = 1 del servidor) pide docente-1 solo para la tarea disenar', ia().codigoDeEjemplo('disenar') === 'docente-1' && ia().codigoDeEjemplo('ajustar') === null, String(ia().codigoDeEjemplo('disenar')));
+    await MTw().tutorial.iniciar({ rol: 'estudiante', caso: 2 }); await espera(500);
+    afirmar('iafuente: estudiante con Matematicas (caso 2 = 3 del servidor) pide estudiante-3 con la tarea ayuda', ia().codigoDeEjemplo('ayuda') === 'estudiante-3', String(ia().codigoDeEjemplo('ayuda')));
+    await MTw().tutorial.iniciar({ rol: 'docente', caso: 5 }); await espera(500);
+    afirmar('iafuente: Ciencias sociales no esta en el guion del servidor: no pide ejemplo y usa los textos propios', ia().codigoDeEjemplo('disenar') === null && ia().codigoDeEjemplo('ayuda') === null);
+    tecla('Escape'); await espera(250);
+  }
+  // ---- fin iafuente ----
 // ---- fin recorrido ----
 
 async function flujoTutorial() {
