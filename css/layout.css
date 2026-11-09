@@ -137,7 +137,7 @@ main:focus { outline: none; }
 .riel .riel-ctl { position: relative; display: flex; flex-direction: column; align-items: center; gap: .25rem; width: 70px; min-height: 44px; padding: .45rem .2rem; border-radius: 12px; border: 0; background: none; color: var(--riel-texto); text-decoration: none; font: 800 .74rem/1.1 var(--fuente); cursor: pointer; }
 .riel .riel-rol { margin-bottom: .4rem; border-top: 1px solid rgba(255, 255, 255, .18); border-radius: 0 0 12px 12px; padding-top: .55rem; }
 .riel .riel-rol svg { width: 40px; height: 40px; }
-.riel .riel-ctl__texto { max-width: 66px; overflow-wrap: anywhere; text-align: center; }
+.riel .riel-ctl__texto { font-size: .64rem; letter-spacing: -.01em; text-align: center; white-space: nowrap; }   /* «Coordinación» cabe en una línea en los 70 px del riel */
 
 /* ---------- Celular ---------- */
 @media (max-width: 860px) {
