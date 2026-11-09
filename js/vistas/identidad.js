@@ -36,11 +36,17 @@
 
   const seccion = (id, titulo, ...hijos) => h('section', { class: 'manual-seccion', id, 'aria-labelledby': 'm-' + id }, h('h2', { id: 'm-' + id }, titulo), ...hijos);
 
+  // ---- quienes ---- El manual de marca ahora vive DENTRO de «Quiénes somos» como subsección desplegable (decisión del dueño). Su cuerpo se
+  // extrae a cuerpo(c) para poder montarlo allí sin duplicar nada; la ruta #/identidad sigue existiendo y abre «Quiénes somos» con la subsección abierta.
   MT.router.registrar({
     id: 'identidad', titulo: 'Identidad', espacio: '',
-    render(main) {
-      const c = pagina(main, { etiqueta: 'Identidad', titulo: MT.nombre + ': identidad',
-        descripcion: 'Cómo se ve y cómo habla la plataforma. Todo lo que ves aquí está hecho con los mismos componentes que usa el resto del sitio.' });
+    render(main) { MT.router.rutas.quienes.render(main, { identidad: true }); },
+  });
+  MT.identidadCuerpo = cuerpo;
+  MT.identidadCabecera = { etiqueta: 'Identidad', titulo: MT.nombre + ': identidad',
+        descripcion: 'Cómo se ve y cómo habla la plataforma. Todo lo que ves aquí está hecho con los mismos componentes que usa el resto del sitio.' };
+
+  function cuerpo(c) {
 
       c.append(h('nav', { class: 'toc', 'aria-label': 'Contenido de la identidad' }, h('ul', null,
         [['proposito', 'Propósito'], ['logo', 'Logo'], ['estilos', 'Propuestas de estilo'], ['color', 'Color'], ['tipografia', 'Tipografía'], ['formas', 'Formas e íconos'], ['recursos', 'Recursos'], ['componentes', 'Componentes'], ['voz', 'Voz']]
@@ -177,6 +183,5 @@
             h('li', null, '“Tu ajuste espera a orientación.”'), h('li', null, '“Hoy responde con textos de ejemplo.”'), h('li', null, '“Cuando la actividad esté lista te contaremos qué cambió y por qué.”'))),
           h('div', { class: 'tarjeta' }, h('h3', null, 'Así no'), h('ul', null,
             h('li', null, 'Prometer lo que no existe.'), h('li', null, 'Mencionar diagnósticos o etiquetas.'), h('li', null, 'Hablar de “casos” o “problemas” de un estudiante.'))))));
-    },
-  });
+  }
 })(window.MT = window.MT || {});
