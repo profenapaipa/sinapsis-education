@@ -1621,7 +1621,9 @@ async function flujoRecorrido() {
   fuera: { const ia = () => MTw().ia;
     afirmar('iafuente: fuera del tutorial no se pide ninguna respuesta preparada', ia().codigoDeEjemplo('disenar') === null);
     await MTw().tutorial.iniciar({ rol: 'docente', caso: 6 }); await espera(500);
-    afirmar('iafuente: en el tutorial, docente con Tecnologia (caso 6 de la plataforma = 1 del servidor) pide docente-1 solo para la tarea disenar', ia().codigoDeEjemplo('disenar') === 'docente-1' && ia().codigoDeEjemplo('ajustar') === null, String(ia().codigoDeEjemplo('disenar')));
+    afirmar('iafuente: en el tutorial, docente con Tecnologia (caso 6 de la plataforma = 1 del servidor) pide docente-1 con la tarea del catalogo (disenar); la caja libre (general) no usa ejemplo', ia().codigoDeEjemplo('disenar') === 'docente-1' && ia().tareaDeEjemplo('docente-1') === 'disenar' && ia().codigoDeEjemplo('general') === null, String(ia().codigoDeEjemplo('disenar')));
+    await MTw().tutorial.iniciar({ rol: 'docente', caso: 1 }); await espera(500);
+    afirmar('iafuente: el paso de Niky del docente en Ingles (caso 1 = 2 del servidor) pide docente-2 y envia la tarea que exige el catalogo (ajustar)', ia().codigoDeEjemplo('disenar') === 'docente-2' && ia().tareaDeEjemplo('docente-2') === 'ajustar', String(ia().codigoDeEjemplo('disenar')));
     await MTw().tutorial.iniciar({ rol: 'estudiante', caso: 2 }); await espera(500);
     afirmar('iafuente: estudiante con Matematicas (caso 2 = 3 del servidor) pide estudiante-3 con la tarea ayuda', ia().codigoDeEjemplo('ayuda') === 'estudiante-3', String(ia().codigoDeEjemplo('ayuda')));
     await MTw().tutorial.iniciar({ rol: 'docente', caso: 5 }); await espera(500);

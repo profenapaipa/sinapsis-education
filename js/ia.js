@@ -78,8 +78,13 @@
     const t = MT.tutorial && MT.tutorial.estado;
     if (!t || !t.activo) return null;
     const n = CASO_DEL_SERVIDOR[t.caso]; const tareas = EJEMPLO_TAREA[t.rol];
-    return n && tareas && tareas[n - 1] === tarea ? t.rol + '-' + n : null;
+    // Solo los pedidos del guion (una tarea con nombre); lo que la persona escribe en la caja libre viaja como «general» y va al modelo.
+    // Antes se exigía que la tarea pedida coincidiera con la del catálogo, y el paso de Niky del docente (siempre «disenar») se quedaba sin
+    // respuesta preparada en los casos 1 a 4 (el catálogo espera ajustar, ayuda, orientar o familia): iba a Gemini y gastaba cuota.
+    return n && tareas && tarea && tarea !== 'general' ? t.rol + '-' + n : null;
   }
+  // La tarea que el servidor exige para un código preparado (la del catálogo), que es la que se envía con ese código.
+  const tareaDeEjemplo = (codigo) => { const [rol, n] = String(codigo || '').split('-'); return (EJEMPLO_TAREA[rol] || [])[Number(n) - 1] || null; };
 
   async function preguntar({ tarea, texto }) {
     const limpio = recortar(tarea, texto);
@@ -96,7 +101,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           // El servidor conoce seis tareas; las preguntas guía de las burbujas viajan como «general».
-          body: JSON.stringify({ tarea: ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar'].includes(tarea) ? tarea : 'general', texto: limpio, ...(perfil ? { perfil } : {}), ...(ejemplo ? { ejemplo } : {}) }),
+          body: JSON.stringify({ tarea: ejemplo ? tareaDeEjemplo(ejemplo) : ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar'].includes(tarea) ? tarea : 'general', texto: limpio, ...(perfil ? { perfil } : {}), ...(ejemplo ? { ejemplo } : {}) }),
           signal: AbortSignal.timeout(espera + 2000),
         });
         if (!r.ok) throw new Error('servidor ' + r.status);
@@ -486,5 +491,5 @@
   };
 
   const sesiones = { MAX: MAX_SESIONES, de: sesionesDe, activa: sesionActiva, hayMensajes, sinLeer, asegurar: asegurarSesion, nueva: nuevaSesion, activar: activarSesion, cerrar: cerrarSesion, titulo: tituloDe };
-  MT.ia = { info, detectar, puedeHaberServidor, preguntar, consultar, montarChat, panel, chipModo, sesiones, codigoDeEjemplo };
+  MT.ia = { info, detectar, puedeHaberServidor, preguntar, consultar, montarChat, panel, chipModo, sesiones, codigoDeEjemplo, tareaDeEjemplo };
 })(window.MT = window.MT || {});
