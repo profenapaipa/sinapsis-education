@@ -1614,7 +1614,6 @@ async function flujoRecorrido() {
   W().postMessage({ tipo: 'recorrido:abrir', portal: 'kinesis', rol: 'no-existe' }, '*'); await espera(900);
   afirmar('recorrido: un rol inválido cae al rol del portal (docente en Kinesis)', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'docente', JSON.stringify({ rol: MTw().tutorial.estado.rol }));
   tecla('Escape'); await espera(250);
-}
   // ---- iafuente ---- dentro del tutorial, Niky pide al servidor la respuesta PREPARADA (no gasta cuota ni depende de Gemini).
   fuera: { const ia = () => MTw().ia;
     afirmar('iafuente: fuera del tutorial no se pide ninguna respuesta preparada', ia().codigoDeEjemplo('disenar') === null);
@@ -1627,6 +1626,7 @@ async function flujoRecorrido() {
     tecla('Escape'); await espera(250);
   }
   // ---- fin iafuente ----
+}
 // ---- fin recorrido ----
 
 // ---- contacto ---- formulario con FormSubmit, probado SIEMPRE con fetch simulado: estas pruebas nunca envian un mensaje real.
