@@ -1711,7 +1711,7 @@ async function flujoCasos2() {
     await cargar('#/', ancho, alto); await MTw().tutorial.iniciar({ rol, caso: 6 }); await espera(300);
     const e = MTw().tutorial.estado; let guard = 0;
     while (guard++ < 12) {
-      if (/P-\d/.test(D().body.innerText)) pcodigo.push(rol + '@' + ancho + ' ' + e.pasos[e.i].id);
+      if (/\bP-\d/.test(D().body.innerText)) pcodigo.push(rol + '@' + ancho + ' ' + e.pasos[e.i].id);
       if (ancho === 390 && D().documentElement.scrollWidth > 390) desborde.push(rol + ' ' + e.pasos[e.i].id);
       if (e.i === e.pasos.length - 1) break;
       sig().click(); await espera(230);
@@ -1726,15 +1726,13 @@ async function flujoCasos2() {
   if (viejo) {
     localStorage.setItem('mosaicotelar.v2', JSON.stringify(viejo).replace(/8A-/g, 'P-'));
     await cargar('#/mi/estudiantes', 1280, 800); await espera(300);
-    afirmar('casos2: un almacén antiguo con «P-03» se migra a «8A-03» y no muestra «P-0x»', MTw().store.obtener().estudiantes.some((x) => x.id === '8A-03') && !/P-\d/.test(JSON.stringify(MTw().store.obtener())));
+    afirmar('casos2: un almacén antiguo con «P-03» se migra a «8A-03» y no muestra «P-0x»', MTw().store.obtener().estudiantes.some((x) => x.id === '8A-03') && !/\bP-\d/.test(JSON.stringify(MTw().store.obtener())));
   } else afirmar('casos2: hay almacén guardado para probar la migración', false);
   // Servicios y planes: sin cifras de dinero y con «Contáctanos» hacia #/piloto.
   const textos = [];
   for (const r of ['#/planes/formas', '#/planes/acompanamiento', '#/piloto', '#/estado', '#/']) { await cargar(r, 1280, 800); await espera(300); textos.push(D().body.innerText); }
-  const dinero = /COP|millones|\$\s?\d|precio|al año|inversi/i.test(textos.join('
-'));
-  afirmar('casos2: la plataforma no muestra cifras de dinero (COP, millones, $, precio, al año, inversión)', !dinero, (textos.join('
-').match(/COP|millones|\$\s?\d|precio|al año|inversi/i) || [''])[0]);
+  const dinero = /\bCOP\b|millones|\$\s?\d|precio|al año|inversi/i.test(textos.join('\n'));
+  afirmar('casos2: la plataforma no muestra cifras de dinero (COP, millones, $, precio, al año, inversión)', !dinero, (textos.join('\n').match(/\bCOP\b|millones|\$\s?\d|precio|al año|inversi/i) || [''])[0]);
   await cargar('#/planes/formas', 1280, 800); await espera(300);
   const bc = D().getElementById('btn-contactanos');
   afirmar('casos2: «Servicios y planes» trae el botón «Contáctanos» que lleva a #/piloto', !!bc && bc.getAttribute('href') === '#/piloto' && /Servicios y planes/.test(D().querySelector('#servicios-y-planes h2').textContent));
