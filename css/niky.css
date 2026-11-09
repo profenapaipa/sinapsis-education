@@ -179,3 +179,4 @@ html[data-movimiento="calmado"] .niky-lengueta, html[data-movimiento="calmado"] 
 
 /* Carrusel de bienvenida y tutorial guiado: Niky no aparece, sea cual sea su estado guardado. */
 html.carrusel-abierto .niky, html[data-tutorial] .niky, html:has([data-tutorial="activo"]) .niky { display: none; }
+#slot-ia .chat__aviso { margin: 0; padding: 0 .8rem .35rem; font-size: .8125rem; line-height: 1.4; }

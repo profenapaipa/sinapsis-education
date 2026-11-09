@@ -38,7 +38,10 @@
   }
 
   // El servidor limita el texto; se recorta aquí también para no mandar de más.
-  const recortar = (tarea, texto) => String(texto || '').replace(/\s+/g, ' ').trim().slice(0, tarea === 'ajustar' ? 2500 : 300);
+  // iafuente: los topes son los del servidor (ESPECIFICACION_FRENTE): 300 por defecto, 2500 para ajustar, orientar y familia, y 1200 para coordinar.
+  // Con un solo tope de 300 las tareas largas llegaban truncadas.
+  const TOPE = { ajustar: 2500, orientar: 2500, familia: 2500, coordinar: 1200 };
+  const recortar = (tarea, texto) => String(texto || '').replace(/\s+/g, ' ').trim().slice(0, TOPE[tarea] || 300);
 
   /* Respuestas de ejemplo para las preguntas que Niky propone en cada pantalla (js/niky.js). Son textos preparados, no un modelo: el chat
      lo dice con su sello «Respuesta de ejemplo». Van aquí y no en datos.js porque los casos de la exposición reescriben respuestasIA al
@@ -54,7 +57,7 @@
     progreso: 'En tu ruta puedes ver lo que ya hiciste y lo que sigue. Avanzas a tu ritmo: lo importante es lo que vas aprendiendo, no la velocidad. Si algo se te quedó difícil, puedes repetirlo y pedirme ayuda.',
     portales: 'Cada portal tiene su lugar:\n\n- **Kinesis:** el aula. Docentes planean y ajustan, orientación revisa y la familia se entera.\n- **Wisfox:** el estudiante recibe su actividad a la medida y practica.\n- **Niky:** soy yo, y acompaño a los dos con ideas y ayuda.\n\nSe pasan el trabajo entre sí, por eso se ven juntos.',
     mapa: 'El mapa tiene tres columnas, una por cada parte (Kinesis, Niky y Wisfox), con sus módulos. Las flechas muestran **qué viaja de una parte a otra**. Toca un módulo para ver qué hace y quién lo usa, y mira la etiqueta: dice si **funciona hoy**, si es un ejemplo o si todavía viene.',
-    estado: 'El mapa lo dice módulo por módulo: unos **funcionan hoy**, otros están **en integración**, otros responden con **ejemplos** (como yo) y otros **vienen**. La etiqueta de cada uno es la fuente más fiable. Yo hoy no estoy conectada a un modelo de lenguaje.',
+    estado: 'El mapa lo dice módulo por módulo: unos **funcionan hoy**, otros están **en integración**, otros responden con **ejemplos** (como yo) y otros **vienen**. La etiqueta de cada uno es la fuente más fiable. Debajo de cada respuesta de la conversación libre dice de dónde viene: ejemplo, respaldo o en vivo.',
     planes: 'Cada forma de participar describe qué incluye y qué todavía se está validando. Léelas con calma y compara con lo que tu colegio necesita. Yo no cierro acuerdos ni hago ofertas: eso lo conversan personas, en la sección de piloto.',
     piloto: 'Un piloto es un **primer recorrido acompañado** en un colegio, paso a paso y sin datos reales hasta que todo esté en regla. Sirve para probar, escuchar y ajustar antes de decidir nada. Los detalles se conversan con el equipo, en la sección de piloto.',
     pantalla: 'Esta pantalla forma parte de la plataforma. Mira el título, lee la descripción de arriba y usa el menú para moverte. Si te pierdes, el **inicio** siempre está a un toque. Si quieres, dime qué buscas y te sugiero adónde ir.',
@@ -67,13 +70,14 @@
         const r = await fetch((cfg.base || '') + '/api/valeria', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          // El servidor solo conoce tres tareas; las preguntas guía de las burbujas viajan como «general».
-          body: JSON.stringify({ tarea: ['ajustar', 'disenar', 'ayuda'].includes(tarea) ? tarea : 'general', texto: limpio }),
+          // El servidor conoce seis tareas; las preguntas guía de las burbujas viajan como «general».
+          body: JSON.stringify({ tarea: ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar'].includes(tarea) ? tarea : 'general', texto: limpio }),
           signal: AbortSignal.timeout((cfg.espera || 8000) + 2000),
         });
         if (!r.ok) throw new Error('servidor ' + r.status);
         const d = await r.json();
-        return { fuente: d.fuente === 'gemini' ? 'en vivo' : 'respaldo', texto: d.texto };
+        // iafuente: antes solo «gemini» contaba como en vivo (openclaw salía como «respaldo») y «filtro» pasaba por respuesta.
+        return { fuente: ['openclaw', 'gemini'].includes(d.fuente) ? 'en vivo' : d.fuente === 'filtro' ? 'filtro' : 'respaldo', texto: d.texto };
       } catch (e) { /* cae al ejemplo */ }
     }
     await demora(450);
@@ -224,7 +228,7 @@
       if (tarea === 'disenar') s.actividad = respuesta.texto;
     });
     // La cara del botón: duda si hubo error o respaldo; si no, celebra un momento y vuelve a reposo.
-    if (fallo || respuesta.fuente === 'respaldo') { cara('contento'); cara('duda', 3500); }
+    if (fallo || respuesta.fuente === 'respaldo' || respuesta.fuente === 'filtro') { cara('contento'); cara('duda', 3500); }
     else { cara('contento'); cara('celebra', 2500); }
     return respuesta;
   }
@@ -245,7 +249,7 @@
     const estadoEl = h('div', { class: 'chat__estado' });
     const lista = h('div', { class: 'chat__mensajes', role: 'log', 'aria-live': 'polite', 'aria-label': 'Conversación con Niky' });
     const chips = h('div', { class: 'chat__sugerencias' });
-    const campo = h('textarea', { rows: '2', maxlength: '300', 'aria-label': 'Escribe tu mensaje para Niky', placeholder: 'Escribe aquí lo que necesitas…' });
+    const campo = h('textarea', { rows: '2', maxlength: '300', 'aria-label': 'Escribe tu mensaje para Niky', 'aria-describedby': 'chat-aviso', placeholder: 'Escribe aquí lo que necesitas…' });
     const boton = h('button', { class: 'btn', type: 'submit' }, 'Enviar');
     const form = h('form', { class: 'chat__form', 'aria-label': 'Mensaje para Niky', onsubmit: (e) => { e.preventDefault(); mandar(campo.value); } }, campo, boton);
     campo.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); mandar(campo.value); } });
@@ -280,7 +284,7 @@
       }
       for (const m of x.mensajes) {
         nodos.push(h('div', { class: 'msg msg--' + m.rol }, ricoTexto(m.texto),
-          m.rol === 'ia' && m.fuente ? h('small', null, m.fuente === 'ejemplo' ? 'Respuesta de ejemplo' : m.fuente === 'respaldo' ? 'Respuesta de respaldo' : 'Generada en vivo') : null));
+          m.rol === 'ia' && m.fuente ? h('small', null, m.fuente === 'ejemplo' ? 'Respuesta de ejemplo' : m.fuente === 'respaldo' ? 'Respuesta de respaldo' : m.fuente === 'filtro' ? 'Aviso de privacidad, no es una respuesta' : 'Generada en vivo') : null));
       }
       const ocupado = ocupadas.has(x.id);
       if (ocupado) nodos.push(h('div', { class: 'msg msg--ia' }, 'Niky está pensando…'));
@@ -299,7 +303,8 @@
     window.addEventListener('mt-ia-modo', alModo);
     if (!enVentana) chatsSueltos++;
 
-    contenedor.replaceChildren(h('div', { class: 'chat' }, estadoEl, lista, chips, form));
+    contenedor.replaceChildren(h('div', { class: 'chat' }, estadoEl, lista, chips,
+      h('p', { class: 'chat__aviso suave', id: 'chat-aviso' }, 'Todo es ficticio: no escribas datos personales reales.'), form));
     pintarEstado(); pintarChips(); pintar(st.obtener());
 
     return {
