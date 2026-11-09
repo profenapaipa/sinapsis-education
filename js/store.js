@@ -13,7 +13,7 @@
     return Object.assign({
       rol: '',
       cuenta: null,           // el registro de esta persona (correo, rol, plan); sobrevive a "empezar de nuevo"
-      vinculo: 'P-03',        // el estudiante con quien se identifica la familia y el propio estudiante
+      vinculo: '8A-03',        // el estudiante con quien se identifica la familia y el propio estudiante
       contador: {},
       actividad: '',          // el último texto que propuso Niky al docente
       ia: [],
@@ -22,7 +22,11 @@
 
   function cargar() {
     try {
-      const crudo = window.localStorage.getItem(CLAVE);
+      let crudo = window.localStorage.getItem(CLAVE);
+      // ---- casos2 ---- Los códigos «P-03» pasaron a «8A-03» (decisión del dueño: la persona nunca ve «P-xx»). Quien ya tenía datos guardados en este
+      // navegador los conserva: se renombra el código en TODO el texto guardado (estudiantes, ajustes, progreso, eventos, vínculo) antes de leerlo.
+      if (crudo && /\bP-(0[1-9]|[1-9]\d)\b/.test(crudo)) crudo = crudo.replace(/\bP-(0[1-9]|[1-9]\d)\b/g, '8A-$1');
+      // ---- fin casos2 ----
       if (crudo) return Object.assign(inicial(), JSON.parse(crudo));
     } catch (e) { /* almacenamiento no disponible: se sigue en memoria */ }
     return inicial();
@@ -65,8 +69,10 @@
         let id = obj.id;
         if (!id) {
           if (col === 'estudiantes') {
-            const mayor = Math.max(0, ...s.estudiantes.map((e) => Number((e.id.match(/\d+/) || [0])[0])));
-            id = 'P-' + String(mayor + 1).padStart(2, '0');
+            // ---- casos2 ---- el código ahora es «8A-03»: se toma el número FINAL (la regla anterior habría leído el «8» del curso y repetido códigos).
+            const mayor = Math.max(0, ...s.estudiantes.map((e) => Number((e.id.match(/(\d+)$/) || [0, 0])[1])));
+            // ---- fin casos2 ----
+            id = '8A-' + String(mayor + 1).padStart(2, '0');
           } else {
             s.contador[col] = (s.contador[col] || 100) + 1;
             id = prefijos[col] + s.contador[col];

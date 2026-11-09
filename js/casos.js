@@ -1,11 +1,11 @@
-/* casos.js: los cinco casos de la exposición guiada.
+/* casos.js: los seis casos de la exposición guiada.
 
    Para qué sirve. El lunes 9 de noviembre el equipo expone la plataforma en la mesa de la Cámara de Comercio. Después del pitch (unos 3 minutos)
    quedan de 7 a 12 minutos para mostrar cómo trabajan juntos Kinesis, Wisfox y Niky con UN mismo ejemplo, mientras los estudiantes de cada
-   grupo cuentan lo que construyeron. Hay cinco casos preparados y funcionales, pero en cada exposición se usa uno solo: se elige en el
-   selector del guion (modo presentación) o con la dirección del sitio, por ejemplo ?caso=3.
+   grupo cuentan lo que construyeron. Hay seis casos preparados y funcionales, pero en cada exposición se usa uno solo: se elige en el
+   selector del guion (modo presentación) o con la dirección del sitio, por ejemplo ?caso=3 (del 1 al 6).
 
-   Qué trae cada caso (todo con códigos P-01 a P-10, sin nombres ni diagnósticos):
+   Qué trae cada caso (todo con códigos «8A-01» a «8A-10», sin nombres ni diagnósticos):
    - una asignatura, una actividad y el estudiante con quien se cuenta la historia;
    - el perfil de apoyos de ese estudiante, ya guardado;
    - lo que Niky propone al docente y lo que le explica al estudiante (respuestas de ejemplo, no un modelo conectado);
@@ -30,7 +30,7 @@
   const CASOS = [
     /* ---------------------------------------------------------------- 1. Inglés: es el ejemplo de partida de la plataforma */
     {
-      n: 1, etiqueta: 'Inglés: «Mi rutina del día»', asignatura: 'Inglés', estudiante: 'P-03', titulo: 'Mi rutina del día',
+      n: 1, etiqueta: 'Inglés: «Mi rutina del día»', asignatura: 'Inglés', estudiante: '8A-03', titulo: 'Mi rutina del día',
       perfil: null, actividad: null, // usa el perfil y la actividad que ya trae la plataforma
       ideas: 'Necesito una actividad de 20 minutos para enseñar el present simple a grado 8.º.',
       ayuda: { etiqueta: 'No entiendo la s del verbo', pregunta: 'No entiendo cuándo se le pone la s al verbo.' },
@@ -39,8 +39,8 @@
 
     /* ---------------------------------------------------------------- 2. Matemáticas: tiempo adicional y vocabulario de apoyo */
     {
-      n: 2, etiqueta: 'Matemáticas: proporcionalidad', asignatura: 'Matemáticas', estudiante: 'P-07', titulo: 'Recetas y escalas: razón y proporción',
-      perfil: null, // P-07 ya trae tiempo adicional y vocabulario de apoyo
+      n: 2, etiqueta: 'Matemáticas: proporcionalidad', asignatura: 'Matemáticas', estudiante: '8A-07', titulo: 'Recetas y escalas: razón y proporción',
+      perfil: null, // 8A-07 ya trae tiempo adicional y vocabulario de apoyo
       actividad: {
         id: 'a2', titulo: 'Recetas y escalas: razón y proporción', asignatura: 'Matemáticas', tema: 'Razón y proporción',
         descripcion: 'Los estudiantes cambian una receta de limonada de 2 a 6 vasos y descubren qué se mantiene igual. Cada uno elige cómo mostrar su resultado: con una tabla, un dibujo o explicándolo en voz alta.',
@@ -64,8 +64,8 @@
 
     /* ---------------------------------------------------------------- 3. Ciencias naturales: descansos y recibir la instrucción por dos canales */
     {
-      n: 3, etiqueta: 'Ciencias naturales: cadenas alimentarias', asignatura: 'Ciencias naturales', estudiante: 'P-02', titulo: 'Quién come a quién: cadenas alimentarias',
-      perfil: null, // P-02 ya trae descansos activos e instrucciones orales y escritas
+      n: 3, etiqueta: 'Ciencias naturales: cadenas alimentarias', asignatura: 'Ciencias naturales', estudiante: '8A-02', titulo: 'Quién come a quién: cadenas alimentarias',
+      perfil: null, // 8A-02 ya trae descansos activos e instrucciones orales y escritas
       actividad: {
         id: 'a3', titulo: 'Quién come a quién: cadenas alimentarias', asignatura: 'Ciencias naturales', tema: 'Ecosistemas y cadenas alimentarias',
         descripcion: 'Los estudiantes arman en parejas una cadena alimentaria con tarjetas y flechas. Cada uno elige cómo presentarla: dibujándola, escribiéndola o contándola.',
@@ -89,8 +89,8 @@
 
     /* ---------------------------------------------------------------- 4. Lengua castellana: evitar leer en voz alta frente al curso */
     {
-      n: 4, etiqueta: 'Lengua castellana: escribir un cuento', asignatura: 'Lengua castellana', estudiante: 'P-05', titulo: 'Escribo un cuento corto',
-      perfil: { id: 'P-05', piar: true, apoyos: ['Evitar leer en voz alta frente al curso', 'Instrucciones en pasos cortos y numerados'], fortalezas: ['Escribe con mucha imaginación'] },
+      n: 4, etiqueta: 'Lengua castellana: escribir un cuento', asignatura: 'Lengua castellana', estudiante: '8A-05', titulo: 'Escribo un cuento corto',
+      perfil: { id: '8A-05', piar: true, apoyos: ['Evitar leer en voz alta frente al curso', 'Instrucciones en pasos cortos y numerados'], fortalezas: ['Escribe con mucha imaginación'] },
       actividad: {
         id: 'a4', titulo: 'Escribo un cuento corto', asignatura: 'Lengua castellana', tema: 'El cuento: inicio, nudo y desenlace',
         descripcion: 'Los estudiantes arman un cuento con tarjetas de personaje, lugar y problema. Cada uno elige cómo contarlo: escribiéndolo, dibujándolo en viñetas o grabándolo.',
@@ -114,9 +114,9 @@
 
     /* ---------------------------------------------------------------- 5. Ciencias sociales: orientación devuelve el ajuste con una nota */
     {
-      n: 5, etiqueta: 'Ciencias sociales: línea de tiempo (con devolución)', asignatura: 'Ciencias sociales', estudiante: 'P-08', titulo: 'Línea de tiempo de la Independencia',
+      n: 5, etiqueta: 'Ciencias sociales: línea de tiempo (con devolución)', asignatura: 'Ciencias sociales', estudiante: '8A-08', titulo: 'Línea de tiempo de la Independencia',
       // Empieza con dos apoyos: por eso la primera versión del ajuste queda incompleta y orientación la devuelve.
-      perfil: { id: 'P-08', piar: true, apoyos: ['Apoyo visual junto al texto', 'Una sola tarea a la vez'], fortalezas: ['Recuerda las fechas con facilidad'] },
+      perfil: { id: '8A-08', piar: true, apoyos: ['Apoyo visual junto al texto', 'Una sola tarea a la vez'], fortalezas: ['Recuerda las fechas con facilidad'] },
       devuelve: {
         nota: 'A este perfil también le sirven los descansos activos. Ya lo agregué: vuelve a generar el ajuste.',
         apoyoNuevo: 'Descansos activos cada 15 minutos',
@@ -141,6 +141,34 @@
         ayuda: 'Buena pregunta. La idea es esta:\n\n- En **1819** ocurrió la **Batalla de Boyacá** (7 de agosto), un triunfo clave del ejército libertador.\n- Ese mismo año se creó la **Gran Colombia**, una república que unió varios territorios.\n\nPista para tu línea de tiempo: el grito de independencia fue el 20 de julio de **1810**.\n\nPara practicar: ¿cuál va primero en tu línea, 1810 o 1819?',
       },
     },
+
+    /* ---------------------------------------------------------------- 6. Tecnología: el caso principal de Kinesis (programación con Turtle)
+       ---- casos2 ---- Se agregó por decisión del dueño. Es el caso con más apoyos de trabajo (ejemplo que ya funciona, apoyo visual, pareja, retos
+       por niveles y editor con letra grande). Los apoyos nuevos tienen su regla en js/datos.js para que el ajuste los convierta en cambios concretos. */
+    {
+      n: 6, etiqueta: 'Tecnología: mi primer programa con Turtle (Python)', asignatura: 'Tecnología', estudiante: '8A-04', titulo: 'Mi primer programa con Turtle (Python)',
+      perfil: { id: '8A-04', piar: true, apoyos: ['Ejemplo que ya funciona', 'Apoyo visual junto al texto', 'Programación en pareja', 'Retos por niveles', 'Editor con letra grande'], fortalezas: ['Disfruta resolver retos paso a paso'] },
+      actividad: {
+        id: 'a6', titulo: 'Mi primer programa con Turtle (Python)', asignatura: 'Tecnología', tema: 'Programación: secuencias y repeticiones',
+        descripcion: 'Los estudiantes dan órdenes a una tortuga para que dibuje en la pantalla: primero un cuadrado y luego su propia figura. Parten de un ejemplo que ya funciona, lo cambian y eligen cómo mostrar lo que lograron.',
+        dua: { repr: [REPR[0], REPR[2]], accion: [ACCION[1], ACCION[2]], compromiso: [COMPROMISO[1]] },
+        pasos: ['Ejecuta el ejemplo que ya funciona y mira qué dibuja la tortuga.', 'Cambia un número del programa y vuelve a ejecutarlo, en pareja.', 'Elige un reto de tu nivel y dibuja tu propia figura.'],
+        quiz: [
+          { q: 'En Turtle, ¿qué hace la orden forward(100)?', o: ['La tortuga avanza 100 pasos', 'La tortuga gira 100 grados', 'La tortuga borra el dibujo', 'La tortuga se detiene'], a: 0, why: 'forward significa «avanzar»: la tortuga se mueve 100 pasos en la dirección en que mira.' },
+          { q: 'Para dibujar un cuadrado se repiten 4 veces un avance y un giro de…', o: ['45 grados', '60 grados', '90 grados', '180 grados'], a: 2, why: 'Un cuadrado tiene 4 esquinas rectas, y cada giro de 90 grados completa la vuelta: 4 × 90 = 360.' },
+          { q: '¿Para qué sirve un ciclo for en un programa?', o: ['Para repetir órdenes sin escribirlas muchas veces', 'Para cambiar el color de la pantalla', 'Para guardar el programa', 'Para borrar errores'], a: 0, why: 'El ciclo for repite un grupo de órdenes cuantas veces le indiques.' },
+          { q: 'Tu programa no dibuja lo que esperabas. ¿Qué es lo mejor que puedes hacer?', o: ['Borrar todo y empezar de cero', 'Cambiar una sola cosa y volver a ejecutar', 'Esperar a que se arregle solo', 'Cerrar el editor'], a: 1, why: 'Programar es probar: cambias una cosa a la vez y miras el resultado. Equivocarse ayuda a encontrar la causa.' },
+        ],
+        archivos: [],
+      },
+      ideas: 'Necesito una actividad de 20 minutos para que grado 8.º haga su primer programa con Turtle en Python.',
+      ayuda: { etiqueta: '¿Qué hace el ciclo for?', pregunta: 'No entiendo qué hace el ciclo for en Turtle.' },
+      ia: {
+        disenar: '**Actividad de 20 minutos: mi primer programa con Turtle**\n\n**Inicio (4 min).** Ejecuta en la pantalla un programa que ya funciona y dibuja un cuadrado. Pregunta: “¿Qué crees que hizo la tortuga?”. Responden en voz alta, en parejas o señalando.\n\n**Desarrollo (12 min).** En parejas, cambian un número del ejemplo y miran qué pasa. Luego eligen un reto por niveles (un cuadrado más grande, un triángulo o una figura propia) y lo muestran como prefieran: ejecutándolo, dibujándolo o explicándolo.\n\n**Cierre (4 min).** Cada pareja cuenta qué cambió y qué descubrió. Sirve un editor con letra grande y un dibujo del resultado junto a cada orden.\n\nTú decides qué usar y qué cambiar.',
+        ayuda: 'Buena pregunta. La idea es esta:\n\n- Un **ciclo for** repite órdenes sin que las escribas una y otra vez.\n- Para el cuadrado: *for i in range(4):* repite 4 veces *forward(100)* y *left(90)*.\n\nPiensa en una receta que dice «bate 4 veces»: no escribes «bate» cuatro veces.\n\n**Pruébalo tú:** ¿qué cambiarías para dibujar un triángulo? Pista: piensa en cuántas veces repites y en cuántos grados giras.',
+      },
+    },
+    // ---- fin casos2 ----
   ];
 
   /* ---------------------------------------------------------------- el caso elegido */

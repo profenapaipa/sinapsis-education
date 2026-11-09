@@ -332,7 +332,7 @@ async function flujo() {
   // 4. Docente propone un ajuste
   await ir('#/mi/ajustes'); await espera(200);
   await pulsar('Nuevo ajuste');
-  poner(doc().querySelector('dialog[open] [name="estudiante"]'), 'P-03'); await espera(100);
+  poner(doc().querySelector('dialog[open] [name="estudiante"]'), '8A-03'); await espera(100);
   afirmar('el ajuste previsualiza cambios concretos con su razón', doc().querySelectorAll('dialog[open] .vista-previa li').length >= 3);
   enDialogo('Enviar a orientación').click(); await espera(300);
   afirmar('el ajuste queda en revisión', /En revisión/.test(textoPagina()));
@@ -342,7 +342,7 @@ async function flujo() {
   // 5. Docente deja una nota visible para la familia
   await ir('#/mi/notas'); await espera(200);
   await pulsar('Nueva nota');
-  poner(doc().querySelector('dialog[open] [name="estudiante"]'), 'P-03');
+  poner(doc().querySelector('dialog[open] [name="estudiante"]'), '8A-03');
   poner(doc().querySelector('dialog[open] [name="texto"]'), 'Hoy participó mucho en pareja.');
   poner(doc().querySelector('dialog[open] [name="familia"]'), 'si');
   enDialogo('Guardar').click(); await espera(300);
@@ -367,7 +367,7 @@ async function flujo() {
   afirmar('orientación guarda un archivo clínico y lo ve', /informe-clinico\.pdf/.test(textoPagina()));
   await ir('#/mi/estudiantes'); await espera(200);
   afirmar('orientación ve los apoyos de los perfiles', /Instrucciones en pasos cortos/.test(textoPagina()));
-  [...doc().querySelectorAll('button')].find((b) => b.getAttribute('aria-label') === 'Editar a P-01').click(); await espera(250);
+  [...doc().querySelectorAll('button')].find((b) => b.getAttribute('aria-label') === 'Editar a 8A-01').click(); await espera(250);
   afirmar('orientación puede editar apoyos', !!doc().querySelector('dialog[open] .checks'));
   enDialogo('Cancelar').click(); await espera(150);
 
@@ -422,7 +422,7 @@ async function flujo() {
   afirmar('coordinación no ve los apoyos de los estudiantes', !/Tiempo adicional|pasos cortos/.test(textoPagina()));
   await pulsar('Nuevo estudiante');
   enDialogo('Crear estudiante').click(); await espera(300);
-  afirmar('coordinación crea un estudiante con código nuevo', /P-11/.test(textoPagina()));
+  afirmar('coordinación crea un estudiante con código nuevo', /8A-11/.test(textoPagina()));
   await ir('#/mi/cursos'); await espera(200);
   await pulsar('Nuevo curso');
   poner(doc().querySelector('dialog[open] [name="nombre"]'), '9.°-A'); enDialogo('Guardar').click(); await espera(300);
@@ -1418,7 +1418,7 @@ async function flujoEntrada() {
   const niky = D().querySelector('#ent-panel-niky').innerText;
   afirmar('entrada: Niky: tocar una pregunta muestra la respuesta de ejemplo, lo dice, y la persona decide (Usar o Cambiar)', /Respuesta de ejemplo/.test(niky) && /ejemplos preparados/.test(niky) && /Usar/.test(niky) && /Cambiar/.test(niky));
   afirmar('entrada: los ejemplos no escriben en los datos (actividades y ajustes quedan igual)', antes === JSON.stringify(MTw().store.obtener().actividades) + JSON.stringify(MTw().store.obtener().ajustes));
-  afirmar('entrada: en los ejemplos solo hay códigos de estudiante (P-01...), sin nombres', /P-\d\d/.test(D().querySelector('#ent-panel-kinesis').innerText) && !/[Ss]ofía|[Jj]uan |[Mm]aría/.test(D().querySelector('.entrada').innerText));
+  afirmar('entrada: en los ejemplos solo hay códigos de estudiante (8A-01...), sin nombres', /P-\d\d/.test(D().querySelector('#ent-panel-kinesis').innerText) && !/[Ss]ofía|[Jj]uan |[Mm]aría/.test(D().querySelector('.entrada').innerText));
 
   // Rol: una pregunta, cada opción avanza sola a la guía y la mascota del rol acompaña
   for (const [texto, id, mascota] of [['Soy estudiante', 'estudiante', 'Wisfox'], ['Soy docente', 'docente', 'Kinesis'], ['Soy familia', 'familia', 'Kinesis'], ['Soy de orientación', 'orientacion', 'Kinesis']]) {
@@ -1596,18 +1596,18 @@ async function flujoMovil() {
 /* El botón flotante de Niky, sus burbujas y su ventana. Mide en el navegador lo que el dueño pidió: «siempre un botón emergente que muestre
    mensajes como un chat que sugiere en qué puede ayudar, según el portal». Tres cosas se cuidan aparte: que no robe el foco, que no desborde
    a 390 px ni tape la barra inferior, y que con el movimiento calmado aparezca quieta. */
-// ---- tutorial ---- (js/tutorial.js: 5 roles x 5 ejemplos sobre las pantallas reales)
+// ---- tutorial ---- (js/tutorial.js: 5 roles x 6 ejemplos sobre las pantallas reales)
 async function flujoTutorial() {
   const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
   const tecla = (key) => D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true, cancelable: true }));
   const sig = () => D().querySelector('.tut__btn--principal');
   localStorage.clear(); await cargar('#/tutorial', 1280, 800); await espera(600);
-  afirmar('tutorial: #/tutorial abre «Elige un ejemplo» con 5 roles y 5 ejemplos', !!D().querySelector('.tut-sel[role="dialog"]') && D().querySelectorAll('.tut-chip').length === 5 && D().querySelectorAll('.tut-caso').length === 5);
+  afirmar('tutorial: #/tutorial abre «Elige un ejemplo» con 5 roles y 6 ejemplos (casos2: eran 5, se sumó Tecnología)', !!D().querySelector('.tut-sel[role="dialog"]') && D().querySelectorAll('.tut-chip').length === 5 && D().querySelectorAll('.tut-caso').length === 6);
   await cargar('#/', 1280, 800); await espera(300);
   afirmar('tutorial: la portada trae el botón «Ver el tutorial»', !!D().getElementById('btn-ver-tutorial'));
   const errores0 = (W().__errores || []).length;
   let rutasOk = true; let llegaron = 0; const fallos = [];
-  for (const rol of MTw().tutorial.ROLES) for (let n = 1; n <= 5; n++) {
+  for (const rol of MTw().tutorial.ROLES) for (let n = 1; n <= 6; n++) {   // casos2: 6 ejemplos
     await MTw().tutorial.iniciar({ rol, caso: n }); await espera(220);
     const e = MTw().tutorial.estado; let guard = 0;
     while (guard++ < 12) {
@@ -1622,9 +1622,9 @@ async function flujoTutorial() {
     const fin = D().querySelector('.tut-final');
     if (fin && fin.querySelectorAll('.tut-logros li').length === 3 && D().documentElement.dataset.tutorial === undefined) llegaron++; else fallos.push('sin final ' + rol + n);
   }
-  afirmar('tutorial: los 5 roles x 5 ejemplos llegan a su último paso y al resumen con 3 logros (' + llegaron + ' de 25)', llegaron === 25, fallos.slice(0, 5).join(' | '));
+  afirmar('tutorial: los 5 roles x 6 ejemplos llegan a su último paso y al resumen con 3 logros (' + llegaron + ' de 30)', llegaron === 30, fallos.slice(0, 5).join(' | '));
   afirmar('tutorial: cada paso redirige a una ruta que existe y la señal html[data-tutorial] está puesta mientras dura', rutasOk, fallos.slice(0, 5).join(' | '));
-  afirmar('tutorial: recorrer los 25 recorridos no produjo errores de consola', (W().__errores || []).length === errores0, (W().__errores || []).slice(errores0).join(' | '));
+  afirmar('tutorial: recorrer los 30 recorridos no produjo errores de consola', (W().__errores || []).length === errores0, (W().__errores || []).slice(errores0).join(' | '));
   // Cambio de rol y de ejemplo desde el propio tutorial, y volver al inicio
   await MTw().tutorial.iniciar({ rol: 'docente', caso: 2 }); await espera(300);
   afirmar('tutorial: la tarjeta es un diálogo no modal con región aria-live y progreso «Paso X de N»', D().querySelector('.tut').getAttribute('aria-modal') === 'false' && !!D().querySelector('.tut [aria-live]') && /Paso 1 de \d/.test(D().querySelector('.tut__meta').textContent));
@@ -1641,9 +1641,9 @@ async function flujoTutorial() {
   await MTw().tutorial.iniciar({ rol: 'docente', caso: 1 }); await espera(300);
   W().location.hash = '#/glosario'; await espera(300);
   afirmar('tutorial: abandonar la pantalla por otra ruta termina el recorrido y quita la señal', !MTw().tutorial.estado.activo && D().documentElement.dataset.tutorial === undefined);
-  // La Guía lista los 25 recorridos
+  // La Guía lista los 30 recorridos (casos2: 5 roles x 6 ejemplos)
   await ir('#/guia/general'); await espera(400);
-  afirmar('tutorial: la Guía lista 5 roles con 5 botones «Probar este ejemplo» cada uno (25)', D().querySelectorAll('.tut-lista__rol').length === 5 && D().querySelectorAll('.tut-lista__rol li button').length === 25);
+  afirmar('tutorial: la Guía lista 5 roles con 6 botones «Probar este ejemplo» cada uno (30)', D().querySelectorAll('.tut-lista__rol').length === 5 && D().querySelectorAll('.tut-lista__rol li button').length === 30);
   // Móvil: sin desbordes, tarjeta sobre la barra inferior
   await cargar('#/', 390, 844); await espera(400);
   await MTw().tutorial.iniciar({ rol: 'orientacion', caso: 5 }); await espera(500);
@@ -1664,6 +1664,66 @@ async function flujoTutorial() {
   localStorage.clear();
 }
 // ---- fin tutorial ----
+
+// ---- casos2 ---- Códigos 8A-NN, caso de Tecnología, paso de autorizaciones y plataforma sin cifras de dinero.
+async function flujoCasos2() {
+  const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
+  const sig = () => D().querySelector('.tut__btn--principal');
+  localStorage.clear(); await cargar('#/', 1280, 800); await espera(400);
+  afirmar('casos2: hay 6 casos y el último es Tecnología con el estudiante 8A-04', MTw().casos.lista.length === 6 && MTw().casos.lista[5].asignatura === 'Tecnología' && MTw().casos.lista[5].estudiante === '8A-04');
+  afirmar('casos2: cada caso usa su estudiante 8A-NN (3, 7, 2, 5, 8, 4)', MTw().casos.lista.map((c) => c.estudiante).join() === '8A-03,8A-07,8A-02,8A-05,8A-08,8A-04');
+  // Paso de autorizaciones: coordinación, orientación y familia; en los demás roles no aparece.
+  const conAuth = []; const sinAuth = [];
+  for (const rol of MTw().tutorial.ROLES) {
+    await MTw().tutorial.iniciar({ rol, caso: 6 }); await espera(220);
+    const e = MTw().tutorial.estado; let visto = false; let guard = 0;
+    while (guard++ < 12) {
+      const a = D().querySelector('.tut__auth');
+      if (a && !a.hidden) { visto = visto || (/Autorización de datos presente/.test(a.textContent) && /Documentos de Kinesis \(\/documentos\)/.test(D().querySelector('.tut__texto').textContent) && D().getElementById('tut-autorizacion').checked); }
+      if (e.i === e.pasos.length - 1) break;
+      sig().click(); await espera(230);
+    }
+    (visto ? conAuth : sinAuth).push(rol);
+    MTw().tutorial.salir();
+  }
+  afirmar('casos2: el paso «Autorización de datos presente» aparece en coordinación, orientación y familia, y en ningún otro rol', conAuth.sort().join() === 'coordinacion,familia,orientacion', 'con: ' + conAuth + ' sin: ' + sinAuth);
+  // Ninguna pantalla muestra «P-0x»; el caso 6 abre en los cinco roles sin desbordes a 390.
+  let pcodigo = []; let desborde = [];
+  for (const [ancho, alto] of [[1280, 800], [390, 844]]) for (const rol of MTw().tutorial.ROLES) {
+    await cargar('#/', ancho, alto); await MTw().tutorial.iniciar({ rol, caso: 6 }); await espera(300);
+    const e = MTw().tutorial.estado; let guard = 0;
+    while (guard++ < 12) {
+      if (/P-\d/.test(D().body.innerText)) pcodigo.push(rol + '@' + ancho + ' ' + e.pasos[e.i].id);
+      if (ancho === 390 && D().documentElement.scrollWidth > 390) desborde.push(rol + ' ' + e.pasos[e.i].id);
+      if (e.i === e.pasos.length - 1) break;
+      sig().click(); await espera(230);
+    }
+    MTw().tutorial.salir();
+  }
+  afirmar('casos2: ninguna pantalla del recorrido muestra «P-0x»', pcodigo.length === 0, pcodigo.slice(0, 5).join(' | '));
+  afirmar('casos2: el caso de Tecnología no desborda a 390 px en ningún rol', desborde.length === 0, desborde.slice(0, 5).join(' | '));
+  // Datos antiguos: un almacén con «P-03» se migra a «8A-03» sin perder nada.
+  localStorage.clear(); await cargar('#/', 1280, 800); await espera(300);
+  const viejo = JSON.parse(localStorage.getItem('mosaicotelar.v2') || 'null');   // la clave real del almacén (js/store.js)
+  if (viejo) {
+    localStorage.setItem('mosaicotelar.v2', JSON.stringify(viejo).replace(/8A-/g, 'P-'));
+    await cargar('#/mi/estudiantes', 1280, 800); await espera(300);
+    afirmar('casos2: un almacén antiguo con «P-03» se migra a «8A-03» y no muestra «P-0x»', MTw().store.obtener().estudiantes.some((x) => x.id === '8A-03') && !/P-\d/.test(JSON.stringify(MTw().store.obtener())));
+  } else afirmar('casos2: hay almacén guardado para probar la migración', false);
+  // Servicios y planes: sin cifras de dinero y con «Contáctanos» hacia #/piloto.
+  const textos = [];
+  for (const r of ['#/planes/formas', '#/planes/acompanamiento', '#/piloto', '#/estado', '#/']) { await cargar(r, 1280, 800); await espera(300); textos.push(D().body.innerText); }
+  const dinero = /COP|millones|\$\s?\d|precio|al año|inversi/i.test(textos.join('
+'));
+  afirmar('casos2: la plataforma no muestra cifras de dinero (COP, millones, $, precio, al año, inversión)', !dinero, (textos.join('
+').match(/COP|millones|\$\s?\d|precio|al año|inversi/i) || [''])[0]);
+  await cargar('#/planes/formas', 1280, 800); await espera(300);
+  const bc = D().getElementById('btn-contactanos');
+  afirmar('casos2: «Servicios y planes» trae el botón «Contáctanos» que lleva a #/piloto', !!bc && bc.getAttribute('href') === '#/piloto' && /Servicios y planes/.test(D().querySelector('#servicios-y-planes h2').textContent));
+  await cargar('#/planes/formas', 390, 844); await espera(300);
+  afirmar('casos2: «Servicios y planes» no desborda a 390 px', D().documentElement.scrollWidth <= 390);
+}
+// ---- fin casos2 ----
 
 async function flujoNiky() {
   const visible = (el) => !!el && el.getClientRects().length > 0 && ventana().getComputedStyle(el).visibility !== 'hidden';
@@ -1823,6 +1883,9 @@ async function flujoNiky() {
   try { await flujoFrontend(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'frontend: ' + String(e && e.stack || e); }
   try { await flujoEntrada(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'entrada: ' + String(e && e.stack || e); }
   try { await flujoMovil(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'móvil: ' + String(e && e.stack || e); }
+  // ---- casos2 ----
+  try { await flujoCasos2(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'casos2: ' + String(e && e.stack || e); }
+  // ---- fin casos2 ----
   // ---- tutorial ----
   try { await flujoTutorial(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'tutorial: ' + String(e && e.stack || e); }
   // ---- fin tutorial ----

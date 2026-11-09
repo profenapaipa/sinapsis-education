@@ -5,13 +5,13 @@
    la plataforma funcionando, con una tarjeta flotante que dice qué mirar y un anillo suave sobre el elemento clave. Al salir, todo queda
    donde estaba para explorarlo con calma.
 
-   De dónde sale cada recorrido. Hay 5 roles x 5 ejemplos = 25 recorridos. NO se escribieron 25 guiones: cada uno se deriva del guion de
+   De dónde sale cada recorrido. Hay 5 roles x 6 ejemplos = 30 recorridos (casos2: se sumó el de Tecnología). NO se escribieron 30 guiones: cada uno se deriva del guion de
    js/casos.js (MT.casos.guion), filtrando los pasos que le tocan a ese rol y tomando de ahí el título y la primera frase; los pasos que el
    guion no trae (por ejemplo, las categorías de apoyo de coordinación) salen de la guía por rol de js/guias.js. Aquí solo viven los textos
    propios del tutorial (TEXTOS): selector, bienvenidas, resúmenes finales y rótulos. Son borrador por aprobar del dueño.
 
    Reglas que se respetan:
-   - Códigos P-01 a P-10 y datos ficticios; nada de nombres, diagnósticos ni cifras.
+   - Códigos 8A-01 a 8A-10 y datos ficticios; nada de nombres, diagnósticos ni cifras.
    - Niky hoy responde con ejemplos preparados; propone, la persona decide. Los textos no prometen nada que no exista.
    - Atrás vuelve a cargar el ejemplo y repite las acciones hasta ese paso, para que la pantalla nunca contradiga el texto (por ejemplo,
      que la familia vea «aprobado» en un paso que dice «todavía no hay novedades»).
@@ -29,7 +29,7 @@
       titulo: 'Elige un ejemplo',
       bajada: 'Tú decides quién eres y qué caso quieres ver. Te llevamos por las pantallas reales, paso a paso.',
       rol: '¿Con qué rol lo quieres ver?',
-      ejemplos: 'Cinco ejemplos',
+      ejemplos: 'Seis ejemplos',   // casos2: eran cinco; ahora son seis con el de Tecnología
       nota: 'Los ejemplos usan datos ficticios y reemplazan lo que hayas creado en este navegador.',
       empezar: 'Empezar',
       cerrar: 'Cerrar',
@@ -41,6 +41,9 @@
       3: { linea: 'Cadenas alimentarias, con pausas activas para trabajar mejor.', quien: 'sinapso', emocion: 'animo' },
       4: { linea: 'Escribir un cuento sin leerlo frente al curso.', quien: 'niky', emocion: 'pensando' },
       5: { linea: 'Una línea de tiempo donde orientación devuelve el ajuste y todo se corrige.', quien: 'kinesis', emocion: 'duda' },
+      // ---- casos2 ---- Tecnología: lo acompaña Kinesis (el caso principal de ese equipo) con ánimo, que además le da su propio color en la tarjeta.
+      6: { linea: 'Un primer programa con Turtle (Python): ejemplo que funciona, trabajo en pareja y retos por niveles.', quien: 'kinesis', emocion: 'animo' },
+      // ---- fin casos2 ----
     },
     ui: {
       paso: (n, t) => `Paso ${n} de ${t}`,
@@ -78,6 +81,15 @@
         : 'Hay un ajuste esperando revisión. Coordinación lo cuenta, pero no ve de quién es.'),
       estudiantesCoord: (c) => `Cada estudiante se registra con un código, como ${c.estudiante}.`,
     },
+    // ---- casos2 ---- Aviso de autorizaciones (borrador por aprobar). Solo un aviso con una casilla de ejemplo: no muestra ni simula documentos.
+    autorizacion: {
+      titulo: 'Autorización de datos',
+      casilla: 'Autorización de datos presente',
+      nota: 'Es un aviso de ejemplo: aquí no se muestra ningún documento ni dato real.',
+      texto: 'La autorización de datos de menores, la política y el PIAR firmado se guardan en la sección Documentos de Kinesis (/documentos), y es la familia quien los carga.',
+      textoFamilia: 'Tú cargas la autorización de datos, la política y el PIAR firmado en la sección Documentos de Kinesis (/documentos).',
+    },
+    // ---- fin casos2 ----
     final: {
       titulo: (rol) => `Lo que lograste como ${rol.toLowerCase()}`,
       bajada: (c) => `Recorriste el ejemplo de ${c.asignatura}. Todo sigue ahí para explorarlo con calma.`,
@@ -143,16 +155,25 @@
       if (c.devuelve) p.push(de(del('orientacion', '#/mi/ajustes', 'devolver'), { id: 'devuelve', hash: '#/mi/ajustes', accion: 'devolver', quien: 'kinesis', emocion: 'duda', foco: 'ajuste' }));
       p.push(
         de(del('orientacion', '#/mi/ajustes', 'aprobar'), { id: 'decidir', hash: '#/mi/ajustes', accion: 'aprobar', quien: 'kinesis', emocion: 'celebra', foco: 'ajuste' }),
-        { rolId, id: 'archivos', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'animo', foco: 'tarjetas', titulo: T.archivosOrientacion, texto: T.archivosOrientacionTexto });
+        { rolId, id: 'archivos', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'animo', foco: 'tarjetas', titulo: T.archivosOrientacion, texto: T.archivosOrientacionTexto },
+        // ---- casos2 ---- Antes de trabajar con un perfil, orientación comprueba que la autorización de datos esté (aviso de ejemplo).
+        { rolId, id: 'autorizacion', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'curioso', foco: 'tarjetas', autorizacion: true, titulo: TEXTOS.autorizacion.titulo, texto: TEXTOS.autorizacion.texto });
+        // ---- fin casos2 ----
     } else if (rolId === 'familia') {
       p.push(
         { rolId, id: 'espera', hash: '#/mi/resumen', accion: c.devuelve ? 'devolver' : 'proponer', quien: 'kinesis', emocion: 'curioso', foco: 'tarjetas', titulo: T.sinNovedades, texto: T.sinNovedadesTexto },
         de(del('familia', '#/mi/resumen'), { id: 'aprobado', hash: '#/mi/resumen', accion: 'aprobar', quien: 'kinesis', emocion: 'celebra', foco: 'tarjetas' }),
-        { rolId, id: 'archivos', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'animo', foco: 'tarjetas', titulo: T.archivosFamilia, texto: T.archivosFamiliaTexto });
+        { rolId, id: 'archivos', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'animo', foco: 'tarjetas', titulo: T.archivosFamilia, texto: T.archivosFamiliaTexto },
+        // ---- casos2 ---- Versión breve para la familia, que es quien carga los documentos.
+        { rolId, id: 'autorizacion', hash: '#/mi/archivos', quien: 'kinesis', emocion: 'curioso', foco: 'tarjetas', autorizacion: true, titulo: TEXTOS.autorizacion.titulo, texto: TEXTOS.autorizacion.textoFamilia });
+        // ---- fin casos2 ----
     } else {   // coordinación
       p.push(
         de(del('coordinacion', '#/mi/cursos'), { id: 'cursos', hash: '#/mi/cursos', quien: 'kinesis', emocion: 'animo', foco: 'tabla' }),
         deGuia(1, { id: 'estudiantes', hash: '#/mi/estudiantes', quien: 'kinesis', emocion: 'animo', foco: 'tabla', texto: T.estudiantesCoord(c) }),
+        // ---- casos2 ---- Paso de autorizaciones: va justo después de registrar estudiantes, que es cuando importa saber que su autorización existe.
+        { rolId, id: 'autorizacion', hash: '#/mi/estudiantes', quien: 'kinesis', emocion: 'curioso', foco: 'tabla', autorizacion: true, titulo: TEXTOS.autorizacion.titulo, texto: TEXTOS.autorizacion.texto },
+        // ---- fin casos2 ----
         deGuia(2, { id: 'categorias', hash: '#/mi/categorias', quien: 'kinesis', emocion: 'pensando', foco: 'tabla' }),
         deGuia(3, { id: 'cifras', hash: '#/mi/resumen', accion: c.devuelve ? 'devolver' : 'proponer', quien: 'kinesis', emocion: 'celebra', foco: 'tarjetas', texto: T.cifras(c) }));
     }
@@ -229,6 +250,11 @@
     refs.barra = h('span', { class: 'tut__barra-valor' });
     refs.titulo = h('h2', { class: 'tut__titulo', id: 'tut-titulo', tabindex: '-1' });
     refs.texto = h('p', { class: 'tut__texto', id: 'tut-texto' });
+    // ---- casos2 ---- Casilla del paso de autorizaciones: de ejemplo, no guarda nada. Va marcada, y puede desmarcarse sin efecto.
+    refs.autorizacion = h('div', { class: 'tut__auth', hidden: true },
+      h('label', { class: 'tut__auth-casilla' }, h('input', { type: 'checkbox', id: 'tut-autorizacion', checked: true }), h('span', null, TEXTOS.autorizacion.casilla)),
+      h('p', { class: 'tut__auth-nota' }, TEXTOS.autorizacion.nota));
+    // ---- fin casos2 ----
     refs.opciones = h('div', { class: 'tut__opciones', role: 'group', 'aria-label': TEXTOS.decision.titulo });
     refs.atras = h('button', { class: 'btn btn--suave tut__btn', type: 'button', onclick: (e) => ir(est.i - 1, e.currentTarget) }, TEXTOS.ui.atras);
     refs.siguiente = h('button', { class: 'btn tut__btn tut__btn--principal', type: 'button', onclick: siguiente }, TEXTOS.ui.siguiente);
@@ -236,7 +262,7 @@
     const enlace = (texto, fn, id) => h('button', { class: 'tut__enlace', type: 'button', id, onclick: fn }, texto);
     tarjeta = h('aside', { class: 'tut', role: 'dialog', 'aria-modal': 'false', 'aria-labelledby': 'tut-titulo', 'aria-describedby': 'tut-texto', 'aria-label': null },
       h('div', { class: 'tut__cab' }, refs.mascWrap, h('div', { class: 'tut__cab-texto' }, refs.meta, h('div', { class: 'tut__barra', role: 'presentation' }, refs.barra))),
-      refs.titulo, refs.texto, refs.opciones,
+      refs.titulo, refs.texto, refs.autorizacion, refs.opciones,
       h('div', { class: 'tut__botones' }, refs.atras, refs.siguiente),
       h('div', { class: 'tut__extras' },
         enlace(TEXTOS.ui.cambiarRol, () => abrirSelector({ foco: 'rol' }), 'tut-cambiar-rol'),
@@ -263,6 +289,9 @@
     refs.opciones.replaceChildren(...(p.opciones || []).map((o) => h('button', { class: 'tut__opcion', type: 'button', 'data-quien': o.quien, onclick: (e) => saltarA(o.ir, e) },
       masc(o.quien, 'contento', 'base', 36), h('span', null, o.texto))));
     refs.opciones.hidden = !(p.opciones && p.opciones.length);
+    // casos2: la casilla de autorización solo aparece en su paso, y siempre vuelve marcada.
+    refs.autorizacion.hidden = !p.autorizacion;
+    if (p.autorizacion) refs.autorizacion.querySelector('input').checked = true;
     refs.atras.disabled = est.i === 0;
     refs.siguiente.textContent = est.i === n - 1 ? TEXTOS.ui.terminar : TEXTOS.ui.siguiente;
     if (anunciar) aviso.textContent = TEXTOS.ui.vivo(est.i + 1, n, p.titulo);
@@ -412,7 +441,7 @@
     history.replaceState(null, '', location.pathname + (resto ? '?' + resto : '') + '#/tutorial');
   }
 
-  // La Guía lista los 25 recorridos (5 por rol) con «Probar este ejemplo». Se agrega al final de la pantalla sin tocar su archivo.
+  // La Guía lista los 30 recorridos (6 por rol; casos2) con «Probar este ejemplo». Se agrega al final de la pantalla sin tocar su archivo.
   function listaDeRol(rolId) {
     const r = rolDe(rolId);
     return h('details', { class: 'tut-lista__rol', 'data-rol': rolId },
