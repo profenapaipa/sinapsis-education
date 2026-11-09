@@ -64,11 +64,11 @@
           h('h1', { id: 'ent-h1' }, E.MARCA.nombre),
           h('p', { class: 'ent-lema' }, E.MARCA.lema),
           h('div', { class: 'ent-portada__acciones' },
-            h('button', { class: 'btn ent-empezar', type: 'button', 'aria-describedby': 'ent-empezar-linea', onclick: () => (MT.tutorial ? MT.tutorial.abrir() : ir('ent-quien')) }, T.portada.empezar),   // quien3: abre el selector del tutorial con un clic (antes solo desplazaba a los roles y en algunos navegadores no se notaba)
+            h('button', { class: 'btn ent-empezar', type: 'button', 'aria-describedby': 'ent-empezar-linea', onclick: () => (MT.recorridoPortal ? MT.recorridoPortal.elegir() : ir('ent-quien')) }, T.portada.empezar),   // dentro: el recorrido ocurre dentro de Kinesis o Wisfox   // quien3: abre el selector del tutorial con un clic (antes solo desplazaba a los roles y en algunos navegadores no se notaba)
             h('p', { class: 'ent-empezar-linea', id: 'ent-empezar-linea' }, T.portada.empezarLinea),
             h('button', { class: 'ent-enlace ent-ir-roles', type: 'button', onclick: () => ir('ent-quien') }, T.portada.yaSe),
             // Entrada discreta al tutorial guiado (js/tutorial.js): elegir rol y ejemplo y recorrer las pantallas reales.
-            h('button', { class: 'ent-enlace', type: 'button', id: 'btn-ver-tutorial', onclick: () => MT.tutorial && MT.tutorial.abrir() }, 'Ver el tutorial'),
+            h('button', { class: 'ent-enlace', type: 'button', id: 'btn-ver-tutorial', onclick: () => MT.recorridoPortal && MT.recorridoPortal.elegir() }, 'Ver el tutorial'),
             rol ? h('a', { class: 'ent-enlace', href: '#/portales/' + rol.marca }, T.portada.seguir(rol.nombre)) : null))));
   }
 
@@ -79,7 +79,7 @@
     const C = T.camino; const P = C.proyectos;
     const { marca, icono } = MT.ui;
     const reto = MT.narrativa.linea('reto');
-    const tutorial = (rol) => { if (MT.tutorial) MT.tutorial.iniciar({ rol }); };
+    const tutorial = (rol) => { if (MT.recorridoPortal) MT.recorridoPortal.abrir(rol); };   // dentro: abre el recorrido del portal del rol
     const botonRol = (id) => { const r = MT.roles.por(id);
       return h('button', { class: 'ent-proy__rol', type: 'button', 'data-rol': id, onclick: () => tutorial(id) }, icono(r.icono), h('span', null, r.nombre)); };
     const tarjeta = (id, espacio, cuerpo, pie) => h('article', { class: 'ent-proy ent-aparece', 'data-proyecto': id, 'data-espacio': espacio, 'aria-labelledby': 'ent-proy-' + id },

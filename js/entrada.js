@@ -105,7 +105,7 @@
     },
     rol: {
       titulo: '¿Quién eres?',                                                 // aprobado (acortado de «¿Quién eres? Empieza por aquí»)
-      bajada: 'Elige tu rol y el tutorial guiado te lleva paso a paso por la plataforma.', // quien2: borrador por aprobar
+      bajada: 'Elige tu rol y el recorrido guiado te acompaña dentro de Kinesis o Wisfox, paso a paso.', // quien2: borrador por aprobar
       enEspacio: (espacio) => 'Tutorial en ' + espacio,                       // quien2
       directo: '¿Prefieres explorar por tu cuenta? Entra directo a ',          // quien2
       ejemplos: 'Ver todos los ejemplos',                                      // quien2                               // adaptado de «Elige tu rol y te mostramos por dónde empezar»
@@ -342,7 +342,7 @@
     const R = TEXTOS.rol; const st = MT.store;
     const recorrer = (r) => {
       st.cambiar((s) => { s.rol = r.id; });
-      if (MT.tutorial) MT.tutorial.iniciar({ rol: r.id }); else location.hash = '#/portales/' + r.marca;
+      if (MT.recorridoPortal) MT.recorridoPortal.abrir(r.id); else location.hash = '#/portales/' + r.marca;   // dentro
     };
     const opcion = (r) => {
       const espacio = r.marca === 'wisfox' ? 'wisfox' : 'kinesis';
@@ -355,7 +355,7 @@
       h('div', { class: 'ent-rol-niky', 'data-espacio': ESPACIO.niky }, h('span', { class: 'ent-rol__icono ent-rol__icono--niky', 'aria-hidden': 'true' }, MT.ui.marca('valeria')), h('p', { class: 'suave' }, R.niky)),
       h('p', { class: 'ent-rol-directo' }, R.directo,
         h('a', { href: '#/portales/kinesis' }, 'Kinesis'), ' · ', h('a', { href: '#/portales/wisfox' }, 'Wisfox'), ' · ',
-        h('button', { class: 'ent-enlace', type: 'button', onclick: () => MT.tutorial && MT.tutorial.abrir() }, R.ejemplos)));
+        h('button', { class: 'ent-enlace', type: 'button', onclick: () => MT.recorridoPortal && MT.recorridoPortal.elegir() }, R.ejemplos)));
   }
   // ---- fin quien2 ----
 

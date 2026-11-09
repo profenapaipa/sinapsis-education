@@ -181,8 +181,8 @@ async function flujo() {
   // ---- fin ligera ----
   await pulsar('Soy docente');
   // ---- espacio ---- quien2: «¿Quién eres?» abre ahora el tutorial guiado del rol (decisión del dueño, 9 nov); antes llevaba directo al portal.
-  afirmar('elegir docente abre su tutorial guiado y guarda el rol', ventana().MT.tutorial.estado.activo && ventana().MT.tutorial.estado.rol === 'docente' && ventana().MT.store.obtener().rol === 'docente', ventana().location.hash);
-  ventana().document.dispatchEvent(new (ventana().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
+  // dentro: «¿Quién eres?» abre el portal del rol y le pide su recorrido guiado (el tutorial ocurre dentro de Kinesis o Wisfox).
+  afirmar('elegir docente abre Kinesis con su recorrido guiado y guarda el rol', ventana().location.hash === '#/portales/kinesis' && (ventana().MT.recorridoPortal.estado() || {}).rol === 'docente' && ventana().MT.store.obtener().rol === 'docente', ventana().location.hash);
   await ir('#/guia/docente'); ventana().MT.router.recargar();
   // ---- fin espacio ----
   afirmar('la franja dice con qué rol se mira', doc().getElementById('rol-actual').textContent.includes('Docente'));
@@ -1406,8 +1406,8 @@ async function flujoEntrada() {
     const b = [...D().querySelectorAll('#ent-quien button')].find((x) => x.textContent.includes(texto)); b.click(); await espera(350);
     // espacio: «¿Quién eres?» lleva directo al portal del rol (ya no a la guía); la guía y su compañera se abren aparte.
     // quien2: elegir el rol abre el tutorial guiado en ese rol y guarda el rol (antes llevaba directo al portal).
-    afirmar(`entrada: elegir «${texto}» abre el tutorial guiado en ese rol y guarda el rol`, MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === id && MTw().store.obtener().rol === id, JSON.stringify({ a: MTw().tutorial.estado.activo, r: MTw().tutorial.estado.rol, h: W().location.hash }));
-    W().document.dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
+    // dentro: el rol abre su portal (Wisfox para estudiante, Kinesis para los demás) y le pide el recorrido de ese rol.
+    afirmar(`entrada: elegir «${texto}» abre su portal con el recorrido guiado de ese rol y guarda el rol`, W().location.hash === '#/portales/' + (id === 'estudiante' ? 'wisfox' : 'kinesis') && (MTw().recorridoPortal.estado() || {}).rol === id && MTw().store.obtener().rol === id, JSON.stringify({ e: MTw().recorridoPortal.estado(), h: W().location.hash }));
     await ir('#/guia/' + id); await espera(250);
     afirmar(`entrada: la guía de «${texto}» la acompaña ${mascota}`, new RegExp('Te acompaña ' + mascota).test((D().querySelector('.ent-companera') || {}).textContent || ''));
   }
@@ -1417,15 +1417,18 @@ async function flujoEntrada() {
   // ---- fin espacio ----
   localStorage.clear(); await cargar('#/', 390, 844); await espera(350);
   [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(600);
-  afirmar('entrada: coordinación es una opción más y abre su tutorial guiado', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'coordinacion');
-  W().document.dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
+  afirmar('entrada: coordinación es una opción más y abre Kinesis con su recorrido guiado', W().location.hash === '#/portales/kinesis' && (MTw().recorridoPortal.estado() || {}).rol === 'coordinacion');
   await cargar('#/', 390, 844); await espera(350);   // quien2: el tutorial dejó otra pantalla; las siguientes miden la portada
   afirmar('entrada: «¿Quién eres?» deja entrar directo a los portales sin tutorial', !!D().querySelector('#ent-quien a[href="#/portales/kinesis"]') && !!D().querySelector('#ent-quien a[href="#/portales/wisfox"]'));
   afirmar('quien2: la franja trae «Tutorial guiado» siempre visible y lleva al selector del tutorial', !!D().querySelector('.franja .franja-tutorial[href="#/tutorial"]') && D().querySelector('.franja-tutorial').getBoundingClientRect().height >= 39.5);
   afirmar('quien2: el botón principal de la portada dice qué ganas y lo explica en una línea', /Recorre la plataforma con un ejemplo/.test(D().querySelector('.ent-empezar').textContent) && D().querySelector('.ent-empezar').getAttribute('aria-describedby') === 'ent-empezar-linea' && !!D().getElementById('ent-empezar-linea'));
   await cargar('#/', 390, 844); await espera(400);
   D().querySelector('.ent-empezar').click(); await espera(600);
-  afirmar('quien3: el botón principal «Recorre la plataforma con un ejemplo» abre el selector del tutorial con un clic', !!D().querySelector('.tut-sel, .tut-selector, [data-tut-selector], .tut-overlay, .tut-modal') || !!(MTw().tutorial.estado && (MTw().tutorial.estado.selector || MTw().tutorial.estado.activo)) || /Elige un ejemplo/.test(D().body.innerText), D().body.innerText.slice(0, 80));
+  // dentro: el botón principal abre la elección de rol; cada rol lleva al recorrido dentro de su portal. Escape cierra y devuelve el foco.
+  afirmar('quien3: el botón principal abre con un clic la elección de rol del recorrido guiado (diálogo con los cinco roles y foco en el primero)', !!MTw().recorridoPortal.dialogo() && D().querySelectorAll('.rp-dlg .rp-rol').length === 5 && D().activeElement === D().querySelector('.rp-dlg .rp-rol') && D().querySelector('.rp-dlg').getAttribute('aria-modal') === 'true');
+  D().querySelector('.rp-dlg [data-rol="estudiante"]').click(); await espera(500);
+  afirmar('dentro: elegir estudiante en el diálogo abre Wisfox con su recorrido', W().location.hash === '#/portales/wisfox' && (MTw().recorridoPortal.estado() || {}).rol === 'estudiante' && !MTw().recorridoPortal.dialogo());
+  await cargar('#/', 390, 844); await espera(350); D().querySelector('.ent-empezar').click(); await espera(300);
   D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250); await cargar('#/', 390, 844); await espera(350);
   afirmar('entrada: la portada nunca escribe el texto «null» (modo normal)', !/null/.test(D().querySelector('.entrada').innerText));
 
@@ -1494,8 +1497,8 @@ async function flujoEntrada() {
   localStorage.clear(); localStorage.setItem('mosaicotelar.presentacion', JSON.stringify({ activo: true, paso: 0, oculto: false })); await cargar('#/', 1280, 800); await espera(600);
   afirmar('entrada: un estado guardado del modo presentación ya no oculta el camino de la portada', !D().documentElement.dataset.presentacion && !!D().getElementById('ent-camino'));
   localStorage.clear(); await cargar('&caso=2#/', 1280, 800); await espera(1500);
-  afirmar('entrada: entrar con ?caso=2 abre el tutorial guiado en ese ejemplo (sin modo presentación)', MTw().tutorial.estado.activo && MTw().tutorial.estado.caso === 2 && !MTw().presentacion.activo() && !D().getElementById('guion-mesa'), JSON.stringify({ a: MTw().tutorial.estado.activo, c: MTw().tutorial.estado.caso }));
-  MTw().tutorial.salir();
+  // dentro: ?caso=N (QR impresos) abre el recorrido dentro del portal (docente en Kinesis si no viene ?rol=).
+  afirmar('entrada: entrar con ?caso=2 abre Kinesis con el recorrido guiado (sin modo presentación)', W().location.hash === '#/portales/kinesis' && (MTw().recorridoPortal.estado() || {}).rol === 'docente' && !MTw().presentacion.activo() && !D().getElementById('guion-mesa'), W().location.hash);
   // ---- fin nikylibre ----
   localStorage.clear(); await cargar('#/mi/resumen', 390, 844); await espera(500);
   afirmar('entrada: un enlace profundo (#/mi/...) no pasa por la portada', !D().querySelector('.ent-portada'));
@@ -1597,18 +1600,19 @@ async function flujoMovil() {
 async function flujoRecorrido() {
   const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;   // recorrido: los atajos de otros flujos son locales a ellos
   const tecla = (key) => D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true, cancelable: true }));
+  // dentro: #/tutorial/<rol> y recorrido:abrir ya no recorren la plataforma: abren el portal del rol y le piden su recorrido.
+  const rp = () => MTw().recorridoPortal.estado() || {};
   await ir('#/tutorial/orientacion'); await espera(900);
-  afirmar('recorrido: #/tutorial/<rol> empieza directo en ese rol, sin pasar por el selector', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'orientacion', JSON.stringify({ activo: MTw().tutorial.estado.activo, rol: MTw().tutorial.estado.rol }));
-  tecla('Escape'); await espera(250);
+  afirmar('recorrido: #/tutorial/<rol> abre el portal de ese rol con su recorrido guiado', W().location.hash === '#/portales/kinesis' && rp().rol === 'orientacion', JSON.stringify(rp()));
   await ir('#/'); await espera(300);
   W().postMessage({ tipo: 'recorrido:abrir', portal: 'wisfox', rol: 'estudiante' }, '*'); await espera(900);
-  afirmar('recorrido: el mensaje recorrido:abrir abre el recorrido del rol pedido', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'estudiante', JSON.stringify({ activo: MTw().tutorial.estado.activo, rol: MTw().tutorial.estado.rol }));
-  tecla('Escape'); await espera(250);
+  afirmar('recorrido: el mensaje recorrido:abrir abre Wisfox con el recorrido del rol pedido', W().location.hash === '#/portales/wisfox' && rp().rol === 'estudiante', JSON.stringify(rp()));
+  await ir('#/'); await espera(300);
   W().postMessage({ tipo: 'recorrido:abrir', portal: 'otro', rol: 'docente' }, '*'); await espera(500);
-  afirmar('recorrido: un mensaje con un portal que no es Kinesis ni Wisfox se ignora', !MTw().tutorial.estado.activo);
+  afirmar('recorrido: un mensaje con un portal que no es Kinesis ni Wisfox se ignora', W().location.hash === '#/' && rp().rol === 'estudiante');
   W().postMessage({ tipo: 'recorrido:abrir', portal: 'kinesis', rol: 'no-existe' }, '*'); await espera(900);
-  afirmar('recorrido: un rol inválido cae al rol del portal (docente en Kinesis)', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'docente', JSON.stringify({ rol: MTw().tutorial.estado.rol }));
-  tecla('Escape'); await espera(250);
+  afirmar('recorrido: un rol inválido cae al rol del portal (docente en Kinesis)', W().location.hash === '#/portales/kinesis' && rp().rol === 'docente', JSON.stringify(rp()));
+  await ir('#/'); await espera(300);
   // ---- iafuente ---- dentro del tutorial, Niky pide al servidor la respuesta PREPARADA (no gasta cuota ni depende de Gemini).
   fuera: { const ia = () => MTw().ia;
     afirmar('iafuente: fuera del tutorial no se pide ninguna respuesta preparada', ia().codigoDeEjemplo('disenar') === null);
@@ -1686,8 +1690,7 @@ async function flujoPortada3() {
   afirmar('portada3: el camino y «¿Quién eres?» ya no muestran mascotas (se reservan para el tutorial)', !D().querySelector('#ent-camino .mascota, #ent-quien .mascota'), String(D().querySelectorAll('#ent-camino .mascota, #ent-quien .mascota').length));
   afirmar('portada3: los botones de rol miden al menos 44 px de alto', [...D().querySelectorAll('.ent-proy__rol')].every((b) => b.getBoundingClientRect().height >= 43.5));
   D().querySelector('[data-proyecto="kinesis"] [data-rol="orientacion"]').click(); await espera(900);
-  afirmar('portada3: el botón de rol abre el tutorial guiado en ese rol', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'orientacion', JSON.stringify({ a: MTw().tutorial.estado.activo, r: MTw().tutorial.estado.rol }));
-  D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(300);
+  afirmar('portada3: el botón de rol abre Kinesis con el recorrido guiado de ese rol', W().location.hash === '#/portales/kinesis' && (MTw().recorridoPortal.estado() || {}).rol === 'orientacion', W().location.hash);
   await cargar('#/', 1280, 800); await espera(400);
   D().getElementById('ent-preguntar-niky').click(); await espera(500);
   afirmar('portada3: «Pregúntale a Niky» abre el panel de Niky', !!MTw().ia.panel.abierto);
@@ -1759,16 +1762,16 @@ async function flujoTutorial() {
   afirmar('tutorial: con el modo calmado la tarjeta y el anillo no se animan', cs('.tut') === 'none' && (!D().querySelector('.tut-foco') || cs('.tut-foco') === 'none'), cs('.tut'));
   // ---- nikylibre ---- Por qué: el modo presentación se reemplazó por el tutorial (decisión del dueño, 9 nov). Los QR y enlaces que ya circulan
   // con ?caso=N (y #/caso/N) deben seguir sirviendo: ahora abren el tutorial en ese ejemplo, como docente salvo que venga ?rol= válido.
-  const enTut = () => JSON.stringify({ a: MTw().tutorial.estado.activo, r: MTw().tutorial.estado.rol, c: MTw().tutorial.estado.caso, g: !!D().getElementById('guion-mesa'), p: D().documentElement.dataset.presentacion || null });
+  // dentro: ?caso=N y #/caso/N siguen sirviendo (QR impresos) y abren el recorrido DENTRO del portal del rol (docente salvo ?rol= válido).
+  const enRp = () => JSON.stringify({ h: W().location.hash, r: (MTw().recorridoPortal.estado() || {}).rol || null, g: !!D().getElementById('guion-mesa') });
   localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=3'; await new Promise((r) => { f.onload = r; }); await espera(1500);
-  afirmar('tutorial: ?caso=3 abre el tutorial guiado en el ejemplo 3 como docente, sin barra del guion ni modo presentación', enTut() === JSON.stringify({ a: true, r: 'docente', c: 3, g: false, p: null }) && MTw().casos.numero() === 3, enTut());
-  localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=4&rol=familia'; await new Promise((r) => { f.onload = r; }); await espera(1500);
-  afirmar('tutorial: ?caso=4&rol=familia abre el ejemplo 4 con el rol pedido', enTut() === JSON.stringify({ a: true, r: 'familia', c: 4, g: false, p: null }), enTut());
+  afirmar('tutorial: ?caso=3 abre Kinesis con el recorrido guiado como docente, sin barra del guion', enRp() === JSON.stringify({ h: '#/portales/kinesis', r: 'docente', g: false }), enRp());
+  localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=4&rol=estudiante'; await new Promise((r) => { f.onload = r; }); await espera(1500);
+  afirmar('tutorial: ?caso=4&rol=estudiante abre Wisfox con el recorrido del estudiante', enRp() === JSON.stringify({ h: '#/portales/wisfox', r: 'estudiante', g: false }), enRp());
   localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=2&rol=nadie'; await new Promise((r) => { f.onload = r; }); await espera(1500);
-  afirmar('tutorial: un ?rol= que no existe cae en docente', enTut() === JSON.stringify({ a: true, r: 'docente', c: 2, g: false, p: null }), enTut());
-  W().location.hash = '#/caso/5'; await espera(1500);
-  afirmar('tutorial: escribir #/caso/5 con la página abierta abre el tutorial en el ejemplo 5', MTw().tutorial.estado.activo && MTw().tutorial.estado.caso === 5 && !D().getElementById('guion-mesa'), enTut());
-  MTw().tutorial.salir();
+  afirmar('tutorial: un ?rol= que no existe cae en docente', enRp() === JSON.stringify({ h: '#/portales/kinesis', r: 'docente', g: false }), enRp());
+  W().location.hash = '#/'; await espera(400); W().location.hash = '#/caso/5'; await espera(1500);
+  afirmar('tutorial: escribir #/caso/5 con la página abierta abre el recorrido en Kinesis', W().location.hash === '#/portales/kinesis' && !D().getElementById('guion-mesa'), enRp());
   // ---- fin nikylibre ----
   localStorage.clear();
 }

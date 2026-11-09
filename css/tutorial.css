@@ -144,3 +144,28 @@ html[data-tutorial="activo"] body { padding-bottom: var(--tut-alto, 0px); }
 .tut-lista__rol li > span { display: grid; min-width: 0; }
 .tut-lista__rol small { color: var(--tinta-suave); }
 @media (max-width: 560px) { .tut-lista__rol li { flex-direction: column; align-items: stretch; } }
+
+/* ---- dentro ---- Elegir rol para el recorrido dentro del portal, y la nota de respaldo. */
+.rp-fondo { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, var(--tinta) 45%, transparent); }
+.rp-dlg { width: min(560px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 1.1rem 1.1rem 1.2rem; background: var(--papel); color: var(--tinta);
+  border: 2px solid var(--tinta); border-radius: 18px; box-shadow: 0 10px 30px rgba(0, 0, 0, .25); }
+.rp-cab { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; }
+.rp-cab h2 { margin: 0; font-family: var(--fuente-titulo); font-size: 1.35rem; line-height: 1.2; }
+.rp-dlg > .suave { margin: .4rem 0 .9rem; }
+.rp-grupo { margin-top: .8rem; }
+.rp-grupo__t { display: flex; align-items: center; gap: .5rem; margin: 0 0 .45rem; font-weight: 800; }
+.rp-grupo__logo { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--hundido); }
+.rp-grupo__logo svg { width: 22px; height: 22px; }
+.rp-roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: .5rem; }
+.rp-rol { display: flex; align-items: center; gap: .55rem; min-height: 52px; padding: .5rem .7rem; font: inherit; font-weight: 700; text-align: left; cursor: pointer;
+  color: var(--tinta); background: var(--papel); border: 2px solid var(--tinta); border-radius: 12px; }
+.rp-rol__icono { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: #fff; background: var(--hilo-kinesis); }
+.rp-rol[data-espacio="wisfox"] .rp-rol__icono { background: var(--hilo-wisfox); }
+.rp-rol__icono svg { width: 20px; height: 20px; }
+.rp-rol:hover { background: var(--hundido); }
+.rp-rol:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+.rp-nota { position: fixed; z-index: 70; left: 50%; transform: translateX(-50%); bottom: 96px; display: flex; align-items: center; gap: .6rem; max-width: min(92vw, 520px);
+  padding: .6rem .7rem .6rem 1rem; background: var(--papel); color: var(--tinta); border: 2px solid var(--tinta); border-radius: 14px; box-shadow: 0 8px 20px rgba(0, 0, 0, .2); }
+.rp-nota p { margin: 0; font-weight: 700; }
+@media (min-width: 861px) { .rp-nota { bottom: 24px; } }
+/* ---- fin dentro ---- */

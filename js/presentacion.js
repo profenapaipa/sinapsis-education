@@ -21,14 +21,15 @@
   /* Entrar directo a un ejemplo: la dirección termina en #/caso/3 (también vale ?caso=3, que es lo que llevan los QR impresos).
      Se limpia la dirección y se abre el tutorial guiado en ese ejemplo. */
   async function desdeUrl() {
-    if (!MT.casos || !MT.tutorial) return;
+    if (!MT.casos || !(MT.tutorial || MT.recorridoPortal)) return;
     const m = /^#\/caso\/(\d+)\/?$/.exec(location.hash) || /[?&]caso=(\d+)/.exec(location.search);
     const n = m ? Number(m[1]) : 0;
     if (!(n >= 1 && n <= MT.casos.lista.length)) return;
     const pedido = (/[?&]rol=([a-z]+)/.exec(location.search) || [])[1];
     const rol = ROLES.includes(pedido) ? pedido : 'docente';
     history.replaceState(null, '', location.pathname + '#/');
-    await MT.tutorial.iniciar({ rol, caso: n });
+    // dentro: el recorrido ocurre dentro del portal del rol; el número de ejemplo lo elige la persona en el portal.
+    if (MT.recorridoPortal) MT.recorridoPortal.abrir(rol); else await MT.tutorial.iniciar({ rol, caso: n });
   }
 
   // Escribir #/caso/3 con la página ya abierta también funciona (no recarga la página, solo cambia el hash).

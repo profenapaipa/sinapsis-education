@@ -479,7 +479,9 @@
       MT.router.rutas.inicio.render(main, ctx);
       // ---- recorrido ---- #/tutorial/<rol> empieza directo en ese rol (entrada desde dentro de Kinesis y Wisfox); sin rol, el selector de siempre.
       const m = /^#\/tutorial\/([a-z]+)/.exec(location.hash);
-      if (m && ROLES.includes(m[1])) iniciar({ rol: m[1] }); else abrirSelector();
+      // dentro: el recorrido ya no corre sobre la plataforma sino dentro del portal del rol (decisión del dueño, 9 nov).
+      if (MT.recorridoPortal) { if (m && ROLES.includes(m[1])) MT.recorridoPortal.abrir(m[1]); else MT.recorridoPortal.elegir(); }
+      else if (m && ROLES.includes(m[1])) iniciar({ rol: m[1] }); else abrirSelector();
     },
   });
   // ---- recorrido ---- Kinesis y Wisfox (dentro del marco) piden abrir el recorrido sin recargar:
@@ -490,7 +492,8 @@
     if (e.origin !== ORIGEN_PORTALES && e.origin !== location.origin) return;
     const d = e.data;
     if (!d || typeof d !== 'object' || d.tipo !== 'recorrido:abrir' || !['kinesis', 'wisfox'].includes(d.portal)) return;
-    iniciar({ rol: ROLES.includes(d.rol) ? d.rol : (d.portal === 'wisfox' ? 'estudiante' : 'docente') });
+    const rol = ROLES.includes(d.rol) ? d.rol : (d.portal === 'wisfox' ? 'estudiante' : 'docente');
+    if (MT.recorridoPortal) MT.recorridoPortal.abrir(rol); else iniciar({ rol });   // dentro: se reenvía al portal como recorrido:iniciar
   });
 
   if (/[?&]tutorial=1/.test(location.search)) {
