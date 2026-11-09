@@ -42,6 +42,7 @@
   // Las páginas secundarias, en el orden en que se necesitan. Cada una conserva su ruta de siempre.
   const PAGINAS_MAS = [
     { ruta: 'inicio', hash: '#/', etiqueta: 'Inicio', icono: 'inicio' },
+    { ruta: 'guia', hash: '#/guia', etiqueta: 'Guía', icono: 'libro', soloMovil: true },   // en pantalla grande la Guía va en el riel; en el celular pasa aquí para que la barra quede en cinco
     { ruta: 'mapa', hash: '#/mapa', etiqueta: 'Mapa', icono: 'mapa' },
     { ruta: 'recorrido', hash: '#/recorrido', etiqueta: 'Roles y datos', icono: 'docente' },
     { ruta: 'planes', hash: '#/planes', etiqueta: 'Participa', icono: 'logros', id: 'plan-chip' },
@@ -67,7 +68,7 @@
       ...orden.map((portal) => h('a', Object.assign({ href: '#/portales/' + portal, class: 'riel-item' + (portal === principal ? ' riel-item--principal' : ''), 'data-portal': portal, 'data-espacio': portal },
         portal === principal ? { title: 'Tu portal' } : {}),
         marca(portal), PORTALES[portal].nombre, portal === principal ? h('span', { class: 'solo-lectores' }, ' (tu portal)') : null, h('i', { class: 'riel-vivo', 'aria-hidden': 'true' }))),
-      h('a', { href: '#/guia', class: 'riel-item', 'data-ruta': 'guia' }, icono('libro'), 'Guía'),
+      h('a', { href: '#/guia', class: 'riel-item riel-item--guia', 'data-ruta': 'guia' }, icono('libro'), 'Guía'),
     ];
   }
   let rolPintado;
@@ -93,7 +94,7 @@
     botonMas = h('button', { class: 'riel-item', id: 'btn-mas', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'menu-mas' },
       MT.ui.svg('<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>'), 'Más');
     abajo.append(construirSelectorRol(), botonMas);
-    document.getElementById('mas-paginas').replaceChildren(...PAGINAS_MAS.map((p) => h('li', null,
+    document.getElementById('mas-paginas').replaceChildren(...PAGINAS_MAS.map((p) => h('li', p.soloMovil ? { class: 'mas-solo-movil' } : null,
       h('a', Object.assign({ href: p.hash, 'data-ruta': p.ruta }, p.id ? { id: p.id } : {}), icono(p.icono), h('span', { class: 'mas-texto' }, p.etiqueta)))));
     botonMas.addEventListener('click', (e) => { e.stopPropagation(); alternar(botonMas, menuMas, null, true); });
     // Elegir una página o activar el modo presentación cierra el menú: ya hizo lo que había que hacer.

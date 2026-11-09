@@ -139,6 +139,9 @@ main:focus { outline: none; }
 .riel .riel-rol svg { width: 40px; height: 40px; }
 .riel .riel-ctl__texto { font-size: .64rem; letter-spacing: -.01em; text-align: center; white-space: nowrap; }   /* «Coordinación» cabe en una línea en los 70 px del riel */
 
+/* La Guía repetida dentro de «Más» solo se necesita en el celular. */
+.mas-solo-movil { display: none; }
+
 /* ---------- Celular ---------- */
 @media (max-width: 860px) {
   .cuerpo { margin-left: 0; padding-bottom: 5.6rem; }
@@ -148,6 +151,9 @@ main:focus { outline: none; }
   .riel-items, .riel-abajo { display: contents; }
   .riel a, .riel button, .riel .riel-ctl { flex: 1 1 0; width: auto; min-width: 0; padding: .35rem .3rem; font-size: .72rem; }
   .riel a svg, .riel button svg { width: 24px; height: 24px; }
+  /* Cinco ítems en la barra: Inicio, Kinesis, Wisfox, rol y Más. La Guía pasa a «Más». */
+  .riel .riel-item--guia { display: none; }
+  .mas-solo-movil { display: list-item; }
   .riel .riel-rol { margin: 0; border-top: 0; border-radius: 12px; padding-top: .35rem; }
   .riel .riel-rol svg { width: 30px; height: 30px; }
   /* «Coordinación» es el nombre más largo: con 10,2 px cabe en una línea dentro de un sexto de la barra a 390 px. */

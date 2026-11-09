@@ -173,7 +173,7 @@ async function flujo() {
   doc().getElementById('riel-inicio').click(); await espera(400);
   afirmar('rol: desde un portal, «Inicio» del riel vuelve a la portada sin perder el rol', ventana().location.hash === '#/' && ventana().MT.store.obtener().rol === 'coordinacion');
   // Se deja todo como estaba para las pruebas que siguen: sin rol y en la portada.
-  ventana().MT.store.cambiar((s) => { s.rol = null; }); await espera(100);
+  ventana().MT.store.cambiar((s) => { s.rol = null; }); await ventana().MT.vivos.reiniciar(); await ir('#/'); await espera(200);
   // ---- fin rol ----
   // ---- fin ligera ----
   await pulsar('Soy docente');
@@ -1524,13 +1524,13 @@ async function flujoMovil() {
 
   // ---- ligera ---- Móvil: una sola navegación de máximo cuatro ítems, sin desborde, en los dos estados (sin rol y con rol).
   // ---- niky ---- (cambió: Niky ya no es un ítem de la barra inferior; es el botón flotante que se apoya sobre ella, así que la barra queda con tres ítems)
-  for (const [rolM, esperado] of [[null, 'Kinesis|Wisfox|Guía|Más'], ['docente', 'Kinesis (tu portal)|Wisfox|Guía|Más'], ['estudiante', 'Wisfox (tu portal)|Kinesis|Guía|Más']]   /* espacio: cuatro ítems (≤ 4) */) {
+  for (const [rolM, esperado] of [[null, 'Inicio|Kinesis|Wisfox|Mi rol|Más'], ['docente', 'Inicio|Kinesis (tu portal)|Wisfox|Docente|Más'], ['estudiante', 'Inicio|Wisfox (tu portal)|Kinesis|Estudiante|Más']]   /* rol: cinco ítems (≤ 5): Inicio, los dos portales, el selector de rol y Más; la Guía pasa a «Más» */) {
     // ---- fin niky ----
     localStorage.clear(); await cargar('#/mapa', 390, 844); await espera(300);
     if (rolM) { ventana().MT.store.cambiar((s) => { s.rol = rolM; }); await espera(150); }
-    const items = [...D().querySelectorAll('.riel .riel-item')].filter(visible);
+    const items = [...D().querySelectorAll('.riel .riel-item, .riel .riel-ctl')].filter(visible);
     const fuera = items.filter((x) => { const r = x.getBoundingClientRect(); return r.right > ventana().innerWidth + 1 || r.left < -1; });
-    afirmar(`móvil 390 (${rolM || 'sin rol'}): la barra inferior tiene ${esperado.split('|').length} ítems, todos dentro de la pantalla y de al menos 44 px`, items.map((x) => x.textContent.trim()).join('|') === esperado && items.length <= 4 && fuera.length === 0 && items.every((x) => x.getBoundingClientRect().height >= 44), items.map((x) => x.textContent.trim()).join('|'));
+    afirmar(`móvil 390 (${rolM || 'sin rol'}): la barra inferior tiene ${esperado.split('|').length} ítems, todos dentro de la pantalla y de al menos 44 px`, items.map((x) => x.textContent.trim()).join('|') === esperado && items.length <= 5 && fuera.length === 0 && items.every((x) => x.getBoundingClientRect().height >= 44), items.map((x) => x.textContent.trim()).join('|'));
     afirmar(`móvil 390 (${rolM || 'sin rol'}): sin desborde horizontal`, sinDesborde());
   }
   await abrirMas(D());
