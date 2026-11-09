@@ -229,7 +229,23 @@ async function flujo() {
   await ir('#/portales');
   afirmar('los tres portales se muestran en paralelo con su flujo', doc().querySelectorAll('.portal').length === 3 && doc().querySelectorAll('.carril-paso').length === 9);
   await comoRol('docente', '#/mi');
-  afirmar('el espacio tiene barra lateral, encabezado y cifras', !!doc().querySelector('.lateral .lockup') && !!doc().querySelector('.hero') && !!doc().querySelector('.panel-cifras'));
+  // ---- espacio ---- Por qué: Mi espacio ya no tiene barra lateral propia (parecía otra aplicación); tiene la cabecera única, la subnavegación en pestañas y las cifras.
+  afirmar('el espacio tiene cabecera única, subnavegación y cifras', !!doc().querySelector('.cab-pantalla h1') && !!doc().querySelector('.subnav') && !doc().querySelector('.lateral') && !!doc().querySelector('.panel-cifras'));
+  afirmar('espacio: un docente nuevo no ve «Paso 5 de 5» en su primera pantalla', !/Paso 5 de 5/.test(textoPagina()));
+  afirmar('espacio: a lo sumo un botón principal en la cabecera', doc().querySelectorAll('.cab-pantalla .btn:not(.btn--suave)').length <= 1);
+  // Todas las vistas comparten la misma cabecera; el modo presentación y ?caso= no se tocaron y los prueban sus bloques propios.
+  { const rutas = ['#/mi', '#/mi/actividades', '#/mapa', '#/planes', '#/hoja', '#/glosario', '#/identidad', '#/piloto', '#/guia/docente', '#/recorrido'];
+    const malas = []; const fuera = [];
+    for (const r of rutas) {
+      await ir(r); ventana().MT.router.recargar(); await espera(150);
+      const c = doc().querySelector('main .cab-pantalla'); const m = c && c.querySelector('.companero-rol svg');
+      if (!(c && doc().querySelectorAll('main h1').length === 1 && m && m.getAttribute('width') === '56' && c.querySelector('nav[aria-label="Dónde estoy"]'))) malas.push(r);
+      if (doc().documentElement.scrollWidth > ventana().innerWidth + 1) fuera.push(r);
+    }
+    afirmar('espacio: todas las vistas comparten la misma cabecera (mascota a 56 px, dónde estoy, un solo h1)', malas.length === 0, malas.join(' '));
+    afirmar('espacio: sin desborde horizontal en las vistas unificadas', fuera.length === 0, fuera.join(' '));
+  }
+  // ---- fin espacio ----
   // ---- ligera ---- sitio previsto para la mascota del rol: existe en el encabezado, vacío y sin ocupar lugar hasta que llegue MT.mascotas.
   { const cr = doc().querySelector('.hero .companero-rol'); afirmar('el encabezado de la vista del rol trae el contenedor .companero-rol, vacío y sin ocupar sitio', !!cr && cr.childElementCount === 0 && cr.getBoundingClientRect().height === 0 && cr.dataset.rol === 'docente'); }
   // ---- fin ligera ----
@@ -1163,8 +1179,10 @@ async function flujoFrontend() {
   afirmar('QA-23: el formulario del chat de ValerIA tiene nombre accesible', !!formChat && !!formChat.getAttribute('aria-label'));
   localStorage.setItem('mosaicotelar.v2', JSON.stringify({ rol: 'docente' }));
   await cargar('#/mi/actividades', 1280, 800); await espera(500);
-  const lateral = D().querySelector('aside.lateral');
-  afirmar('QA-23: la región lateral de Mi espacio tiene nombre accesible', !!lateral && !!lateral.getAttribute('aria-label'));
+  // ---- espacio ---- Por qué: la región lateral se reemplazó por la subnavegación y la ruta «Dónde estoy», ambas navegaciones con nombre.
+  const lateral = D().querySelector('nav.subnav');
+  afirmar('QA-23: la subnavegación de Mi espacio tiene nombre accesible', !!lateral && !!lateral.getAttribute('aria-label') && !!D().querySelector('.cab-pantalla__ruta[aria-label]'));
+  // ---- fin espacio ----
 
   /* QA-26: el inglés de la ruta de Inglés se marca con lang="en" */
   const en = MTw().ui.esIngles;
