@@ -144,12 +144,12 @@ async function flujo() {
   const rielTxt = () => [...doc().querySelectorAll('.riel .riel-item')].map((x) => x.textContent.replace(/\s+/g, ' ').trim());
   afirmar('una sola navegación: hay un riel y ninguna barra de portales aparte', doc().querySelectorAll('nav.riel').length === 1 && !doc().getElementById('barra-portales') && !doc().querySelector('.pestanas'));
   // ---- espacio ---- Por qué: decisión del dueño, no hay «Mi espacio»; el riel lleva siempre Kinesis, Wisfox y Guía (más «Más»). Niky es el botón flotante.
-  afirmar('sin rol, el riel muestra Kinesis, Wisfox y Guía (y «Más»), sin Mi espacio', rielTxt().join('|') === 'Kinesis|Wisfox|Guía|Más', rielTxt().join('|'));
+  afirmar('sin rol, el riel muestra Kinesis, Wisfox, Guía y Quiénes somos (y «Más»), sin Mi espacio', rielTxt().join('|') === 'Kinesis|Wisfox|Guía|Quiénes somos|Más', rielTxt().join('|'));
   // ---- fin espacio ----
   doc().getElementById('btn-mas').click(); await espera(150);
   const enMas = [...doc().querySelectorAll('#menu-mas a')];
   // ---- espacio ---- (los «tres portales» pasaron a la Guía, que está en el riel)
-  afirmar('«Más» alcanza todo lo secundario: portales, mapa, roles y datos, participa, hoja de ruta, glosario, piloto, identidad y créditos', ['mapa', 'recorrido', 'planes', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos'].every((id) => enMas.some((x) => x.dataset.ruta === id && x.getClientRects().length)), enMas.map((x) => x.dataset.ruta).join());
+  afirmar('«Más» alcanza todo lo secundario: portales, mapa, roles y datos, participa, hoja de ruta, glosario, piloto y créditos; Quiénes somos (con Identidad dentro) queda en la lista', ['mapa', 'recorrido', 'planes', 'hoja', 'glosario', 'piloto', 'creditos'].every((id) => enMas.some((x) => x.dataset.ruta === id && x.getClientRects().length)) && enMas.some((x) => x.dataset.ruta === 'quienes'), enMas.map((x) => x.dataset.ruta).join());
   // ---- fin espacio ----
   afirmar('«Más» reúne también lo de uso ocasional: apariencia y modo presentación', !!doc().getElementById('btn-presentacion') && doc().getElementById('btn-presentacion').getClientRects().length > 0 && doc().getElementById('btn-apariencia').getClientRects().length > 0);
   doc().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
@@ -185,7 +185,7 @@ async function flujo() {
   afirmar('la guía tiene pasos, cada uno con su portal', doc().querySelectorAll('.guia-paso').length === 5 && /en kinesis/i.test(textoPagina()) && /en niky/i.test(textoPagina()) && /en wisfox/i.test(textoPagina()));
   // ---- ligera ---- (reemplaza las pruebas de la barra de pestañas)
   // ---- espacio ---- Por qué: con rol, el riel sigue trayendo los dos portales y la Guía; el del rol va primero y marcado («tu portal»).
-  afirmar('con rol docente el riel muestra Kinesis (tu portal), Wisfox, Guía y Más', rielTxt().join('|') === 'Kinesis (tu portal)|Wisfox|Guía|Más' && !!doc().querySelector('.riel .riel-item--principal[data-portal="kinesis"]'), rielTxt().join('|'));
+  afirmar('con rol docente el riel muestra Kinesis (tu portal), Wisfox, Guía, Quiénes somos y Más', rielTxt().join('|') === 'Kinesis (tu portal)|Wisfox|Guía|Quiénes somos|Más' && !!doc().querySelector('.riel .riel-item--principal[data-portal="kinesis"]'), rielTxt().join('|'));
   // ---- fin espacio ----
   // ---- fin ligera ----
   const abiertas = []; ventana().open = (u) => { abiertas.push(u); return null; };
@@ -398,7 +398,7 @@ async function flujo() {
   await comoRol('estudiante', '#/mi/resumen');
   // ---- ligera ---- el rol cambia los ítems del riel: el estudiante ve Wisfox y su espacio, nunca Kinesis.
   // ---- espacio ---- Por qué: ver la primera prueba del riel (sin Mi espacio; el portal del rol va primero).
-  afirmar('con rol estudiante el riel muestra Wisfox (tu portal), Kinesis, Guía y Más', rielTxt().join('|') === 'Wisfox (tu portal)|Kinesis|Guía|Más', rielTxt().join('|'));
+  afirmar('con rol estudiante el riel muestra Wisfox (tu portal), Kinesis, Guía, Quiénes somos y Más', rielTxt().join('|') === 'Wisfox (tu portal)|Kinesis|Guía|Quiénes somos|Más', rielTxt().join('|'));
   // ---- fin espacio ----
   // ---- fin ligera ----
   afirmar('el estudiante ve que la actividad quedó a su medida', /A tu medida/.test(textoPagina()));
@@ -498,7 +498,7 @@ async function flujo() {
     { const v = cs.borderTopWidth + '|' + cs.backgroundColor + '|' + ventana().getComputedStyle(rl.querySelector('svg')).color; afirmar('el botón de inicio es el logo sobre negro (piezas blancas, sin borde ni disco)', /^0px\|rgba\((0, 0, 0, 0|255, 255, 255, 0\.14)\)\|rgb\(250, 247, 242\)$/.test(v), v); }
     { const r = rl.getBoundingClientRect(); const s = rl.querySelector('svg').getBoundingClientRect(); const d = Math.hypot((s.left + s.width / 2) - (r.left + r.width / 2), (s.top + s.height / 2) - (r.top + r.height / 2)); afirmar('el logo del botón de inicio está centrado en su círculo', d < 0.6, 'desvío=' + d.toFixed(2) + ' px'); }
     afirmar('el botón de inicio muestra los hilos de colores', rl.querySelectorAll('.hilos rect').length > 0);
-    afirmar('«Más» nombra la sección Identidad, no Marca', [...ventana().document.querySelectorAll('#menu-mas a')].some((x) => x.textContent.trim() === 'Identidad') && ![...ventana().document.querySelectorAll('#menu-mas a')].some((x) => x.textContent.trim() === 'Marca'));   // ---- ligera: Identidad vive en «Más» ----
+    afirmar('«Más» nombra la sección Quiénes somos (Identidad vive dentro), no Marca', [...ventana().document.querySelectorAll('#menu-mas a')].some((x) => x.textContent.trim() === 'Quiénes somos') && ![...ventana().document.querySelectorAll('#menu-mas a')].some((x) => x.textContent.trim() === 'Marca'));   // ---- ligera: Identidad vive en «Más» ----
     await ir('#/identidad'); await espera(250);
     const muestras = [...ventana().document.querySelectorAll('.muestra-logo')];
     const fondo = (m) => ventana().getComputedStyle(m).backgroundColor;
@@ -1418,7 +1418,7 @@ async function flujoEntrada() {
   const niky = D().querySelector('#ent-panel-niky').innerText;
   afirmar('entrada: Niky: tocar una pregunta muestra la respuesta de ejemplo, lo dice, y la persona decide (Usar o Cambiar)', /Respuesta de ejemplo/.test(niky) && /ejemplos preparados/.test(niky) && /Usar/.test(niky) && /Cambiar/.test(niky));
   afirmar('entrada: los ejemplos no escriben en los datos (actividades y ajustes quedan igual)', antes === JSON.stringify(MTw().store.obtener().actividades) + JSON.stringify(MTw().store.obtener().ajustes));
-  afirmar('entrada: en los ejemplos solo hay códigos de estudiante (8A-01...), sin nombres', /P-\d\d/.test(D().querySelector('#ent-panel-kinesis').innerText) && !/[Ss]ofía|[Jj]uan |[Mm]aría/.test(D().querySelector('.entrada').innerText));
+  afirmar('entrada: en los ejemplos solo hay códigos de estudiante (8A-01...), sin nombres', /8A-\d\d/.test(D().querySelector('#ent-panel-kinesis').innerText) && !/[Ss]ofía|[Jj]uan |[Mm]aría/.test(D().querySelector('.entrada').innerText));
 
   // Rol: una pregunta, cada opción avanza sola a la guía y la mascota del rol acompaña
   for (const [texto, id, mascota] of [['Soy estudiante', 'estudiante', 'Wisfox'], ['Soy docente', 'docente', 'Kinesis'], ['Soy familia', 'familia', 'Kinesis'], ['Soy de orientación', 'orientacion', 'Kinesis']]) {
@@ -1722,7 +1722,7 @@ async function flujoCasos2() {
   afirmar('casos2: el caso de Tecnología no desborda a 390 px en ningún rol', desborde.length === 0, desborde.slice(0, 5).join(' | '));
   // Datos antiguos: un almacén con «P-03» se migra a «8A-03» sin perder nada.
   localStorage.clear(); await cargar('#/', 1280, 800); await espera(300);
-  const viejo = JSON.parse(localStorage.getItem('mosaicotelar.v2') || 'null');   // la clave real del almacén (js/store.js)
+  const viejo = JSON.parse(localStorage.getItem('mosaicotelar.v2') || 'null') || JSON.parse(JSON.stringify(MTw().store.obtener()));   // la clave real del almacén (js/store.js)
   if (viejo) {
     localStorage.setItem('mosaicotelar.v2', JSON.stringify(viejo).replace(/8A-/g, 'P-'));
     await cargar('#/mi/estudiantes', 1280, 800); await espera(300);

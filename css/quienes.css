@@ -19,12 +19,12 @@
 .quienes-fases { counter-reset: fase; }
 .quienes-fases li { counter-increment: fase; line-height: 1.5; }
 .quienes-fases li::before { content: counter(fase); display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; border: 2px solid var(--tinta, #1a1714);
-  background: #fff; font-weight: 800; font-size: .875rem; }
+  background: var(--papel, #fff); color: var(--tinta, #1a1714); font-weight: 800; font-size: .875rem; }
 .quienes-fases li { display: block; position: relative; padding-left: 2.25rem; }
 .quienes-fases li::before { position: absolute; left: 0; top: .1rem; }
 
 /* Identidad desplegable: el resumen es un botón grande (≥44 px) con foco visible. */
-.quienes-identidad { border: 2px solid var(--tinta, #1a1714); border-radius: 14px; background: #fff; overflow: clip; }
+.quienes-identidad { border: 2px solid var(--tinta, #1a1714); border-radius: 14px; background: var(--papel, #fff); color: var(--tinta, #1a1714); overflow: clip; }
 .quienes-identidad > summary { display: grid; gap: .15rem; min-height: 44px; padding: .85rem 3rem .85rem 1rem; cursor: pointer; list-style: none; position: relative; }
 .quienes-identidad > summary::-webkit-details-marker { display: none; }
 .quienes-identidad > summary::after { content: '+'; position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); font-size: 1.5rem; font-weight: 800; line-height: 1; }
