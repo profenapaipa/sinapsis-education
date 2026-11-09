@@ -1197,7 +1197,7 @@ async function flujoDemostracion() {
   await cargar('#/', 1280, 800); await espera(500);
   const pedidos = []; ventana().Element.prototype.scrollIntoView = function (o) { pedidos.push(o && o.behavior); };
   // ---- entrada ---- (cambió: el botón de la bienvenida es «Empezar» (un <button>, no un enlace a #roles) y lleva al camino con el mismo desplazamiento)
-  const entrar = () => D().querySelector('.ent-empezar');
+  const entrar = () => D().querySelector('.ent-ir-roles');   // quien3: el botón principal ahora abre el tutorial; el desplazamiento suave se mide con «Ya sé quién soy»
   // ---- fin entrada ----
   afirmar('QA-08: sin calmado, el botón de la bienvenida se desplaza con suavidad y <html> trae scroll-behavior suave', !!entrar() && (entrar().click(), pedidos[pedidos.length - 1] === 'smooth') && ventana().getComputedStyle(D().documentElement).scrollBehavior === 'smooth' && ventana().MT.movimiento.suave() === true, pedidos.join());
   D().documentElement.dataset.movimiento = 'calmado';
@@ -1423,6 +1423,10 @@ async function flujoEntrada() {
   afirmar('entrada: «¿Quién eres?» deja entrar directo a los portales sin tutorial', !!D().querySelector('#ent-quien a[href="#/portales/kinesis"]') && !!D().querySelector('#ent-quien a[href="#/portales/wisfox"]'));
   afirmar('quien2: la franja trae «Tutorial guiado» siempre visible y lleva al selector del tutorial', !!D().querySelector('.franja .franja-tutorial[href="#/tutorial"]') && D().querySelector('.franja-tutorial').getBoundingClientRect().height >= 39.5);
   afirmar('quien2: el botón principal de la portada dice qué ganas y lo explica en una línea', /Recorre la plataforma con un ejemplo/.test(D().querySelector('.ent-empezar').textContent) && D().querySelector('.ent-empezar').getAttribute('aria-describedby') === 'ent-empezar-linea' && !!D().getElementById('ent-empezar-linea'));
+  await cargar('#/', 390, 844); await espera(400);
+  D().querySelector('.ent-empezar').click(); await espera(600);
+  afirmar('quien3: el botón principal «Recorre la plataforma con un ejemplo» abre el selector del tutorial con un clic', !!D().querySelector('.tut-sel, .tut-selector, [data-tut-selector], .tut-overlay, .tut-modal') || !!(MTw().tutorial.estado && (MTw().tutorial.estado.selector || MTw().tutorial.estado.activo)) || /Elige un ejemplo/.test(D().body.innerText), D().body.innerText.slice(0, 80));
+  D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250); await cargar('#/', 390, 844); await espera(350);
   afirmar('entrada: la portada nunca escribe el texto «null» (modo normal)', !/null/.test(D().querySelector('.entrada').innerText));
 
   // ---- historia ---- Por qué: la entrada y las guías cuentan una sola historia (bienvenida, reto, guía, acción, logro) con la voz de MT.narrativa; se mide que
