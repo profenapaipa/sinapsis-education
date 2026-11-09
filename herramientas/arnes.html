@@ -158,6 +158,23 @@ async function flujo() {
   // ---- niky ---- (cambió: el botón «Niky» del riel se sustituyó por el botón flotante; #btn-ia sigue en el documento, sin mostrarse, para que nada que lo busque se rompa)
   afirmar('Niky tiene un único acceso a la vista, el botón flotante (el del riel se conserva oculto)', doc().querySelectorAll('#btn-ia').length === 1 && !!doc().querySelector('.riel #btn-ia') && doc().querySelector('#btn-ia').getClientRects().length === 0 && doc().querySelectorAll('#niky-fab').length === 1 && doc().getElementById('niky-fab').getClientRects().length > 0);
   // ---- fin niky ----
+  // ---- rol ----
+  // Por qué: el cambio de rol y el regreso al inicio deben estar siempre a la vista (riel y barra inferior), también en un portal inmersivo.
+  afirmar('rol: el riel trae «Inicio» y el selector de rol con la mascota y el nombre del rol', !!doc().querySelector('#riel-inicio[href="#/"]') && !!doc().querySelector('#riel-rol svg.mascota') && doc().getElementById('riel-rol').getAttribute('aria-expanded') === 'false');
+  doc().getElementById('riel-rol').click(); await espera(150);
+  afirmar('rol: el selector del riel abre los cinco roles, con el foco dentro', !doc().getElementById('menu-rol-riel').hidden && doc().querySelectorAll('#menu-rol-riel button[data-rol]').length === 5 && doc().getElementById('menu-rol-riel').contains(doc().activeElement));
+  doc().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
+  afirmar('rol: Escape cierra el selector del riel y devuelve el foco a su botón', doc().getElementById('menu-rol-riel').hidden && doc().activeElement === doc().getElementById('riel-rol'));
+  for (const [r, p] of [['estudiante', 'wisfox'], ['docente', 'kinesis'], ['orientacion', 'kinesis'], ['familia', 'kinesis'], ['coordinacion', 'kinesis']]) {
+    doc().getElementById('riel-rol').click(); await espera(120);
+    doc().querySelector('#menu-rol-riel [data-rol="' + r + '"]').click(); await espera(500);
+    afirmar(`rol: elegir ${r} en el riel cambia el rol y lleva a ${p}`, ventana().MT.store.obtener().rol === r && ventana().location.hash === '#/portales/' + p, ventana().location.hash);
+  }
+  doc().getElementById('riel-inicio').click(); await espera(400);
+  afirmar('rol: desde un portal, «Inicio» del riel vuelve a la portada sin perder el rol', ventana().location.hash === '#/' && ventana().MT.store.obtener().rol === 'coordinacion');
+  // Se deja todo como estaba para las pruebas que siguen: sin rol y en la portada.
+  ventana().MT.store.cambiar((s) => { s.rol = null; }); await espera(100);
+  // ---- fin rol ----
   // ---- fin ligera ----
   await pulsar('Soy docente');
   // ---- espacio ---- Por qué: «¿Quién eres?» lleva directo al portal del rol, no a una guía ni a Mi espacio (decisión del dueño). La guía se abre aparte.
