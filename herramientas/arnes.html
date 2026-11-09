@@ -1104,7 +1104,8 @@ async function flujoDemostracion() {
   const origenes = Object.values((MTw() || ventana().MT).config.portales).map((u) => new URL(u).origin);
   const connect = (csp.match(/connect-src ([^;]+)/) || [, ''])[1];
   const urlsPortales = Object.values(ventana().MT ? ventana().MT.config.portales : (MTw() || ventana().MT).config.portales);
-  afirmar('sin red: la política deja comprobar (sondear) solo las dos rutas de los portales, no todo el dominio', urlsPortales.every((u) => connect.split(/\s+/).includes(u)) && !/\*|https:\/\/[^\/\s]+(?=\s|$)/.test(connect), connect);
+  // contacto: el dueño autorizó el formulario con FormSubmit; formsubmit.co es el UNICO dominio completo permitido (el envío va a su /ajax/).
+  afirmar('sin red: la política deja comprobar (sondear) solo las dos rutas de los portales, no todo el dominio (además de formsubmit.co para Contacto)', urlsPortales.every((u) => connect.split(/\s+/).includes(u)) && !/\*|https:\/\/[^\/\s]+(?=\s|$)/.test(connect.replace(/\shttps:\/\/formsubmit\.co(?=\s|$)/, '')), connect);
   afirmar('sin red: la página enlaza el manifiesto', /<link rel="manifest" href="manifest\.webmanifest">/.test(idx));
   // En la copia empaquetada (empaquetar.py) los dos scripts del head van unidos en js/inicio.js, con la red de seguridad primero.
   const jsInicioUnido = idx.includes('js/inicio.js') ? ((await texto('../js/inicio.js')) || '') : '';
