@@ -15,7 +15,7 @@
   --m-verde: var(--hilo-kinesis);  --m-verde: color-mix(in srgb, var(--hilo-kinesis) 78%, #ffffff);
   --m-ambar: var(--hilo-wisfox);   --m-ambar: color-mix(in srgb, var(--hilo-wisfox) 92%, #ffffff);
   --m-azul: var(--hilo-valeria);   --m-azul: color-mix(in srgb, var(--hilo-valeria) 74%, #ffffff);
-  --m-oso: #94603E;  /* marrón miel de oso: más claro que antes para que no se confunda con un mapache; el único color que no sale de un hilo */
+  --m-oso: #A06A42;  /* marrón miel de oso: más claro que antes para que no se confunda con un mapache; el único color que no sale de un hilo */
   /* Grosor del contorno. Va en el svg y se hereda, así los trazos que traen su propio stroke-width (miembros, hilos) lo conservan. */
   stroke-width: 3;
 }
@@ -42,7 +42,7 @@
 .mascota .m-corazon { fill: var(--hilo-mosaico); stroke: var(--m-trazo); stroke-width: 2; }
 .mascota .m-piel { fill: var(--piel); }
 .mascota .m-crema { fill: var(--m-crema); stroke: none; }
-.mascota .m-gafa { fill: var(--m-brillo); fill-opacity: .4; stroke: var(--m-detalle); stroke-width: 2.8; }
+.mascota .m-gafa { fill: var(--m-crema); stroke: #4A2E1C; stroke-width: 2.2; }
 .mascota .m-ojo { fill: var(--m-detalle); }
 .mascota .m-brillo { fill: var(--m-brillo); }
 .mascota .m-nariz { fill: var(--m-detalle); }
@@ -70,3 +70,5 @@ html[data-movimiento="calmado"] .mascota--viva .m-ojos { animation: none !import
 @keyframes m-rebote { 0% { transform: none; } 35% { transform: translateY(-4%) scale(.97, 1.04); } 100% { transform: none; } }
 html[data-movimiento="calmado"] .mascota--rebota { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { .mascota--rebota { animation: none !important; } }
+
+.mascota .m-puente { stroke: #4A2E1C; stroke-width: 2.2; fill: none; }
