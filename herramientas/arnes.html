@@ -178,8 +178,9 @@ async function flujo() {
   // ---- fin rol ----
   // ---- fin ligera ----
   await pulsar('Soy docente');
-  // ---- espacio ---- Por qué: «¿Quién eres?» lleva directo al portal del rol, no a una guía ni a Mi espacio (decisión del dueño). La guía se abre aparte.
-  afirmar('elegir docente lleva directo al portal de su rol (Kinesis)', ventana().location.hash === '#/portales/kinesis' && ventana().MT.store.obtener().rol === 'docente', ventana().location.hash);
+  // ---- espacio ---- quien2: «¿Quién eres?» abre ahora el tutorial guiado del rol (decisión del dueño, 9 nov); antes llevaba directo al portal.
+  afirmar('elegir docente abre su tutorial guiado y guarda el rol', ventana().MT.tutorial.estado.activo && ventana().MT.tutorial.estado.rol === 'docente' && ventana().MT.store.obtener().rol === 'docente', ventana().location.hash);
+  ventana().document.dispatchEvent(new (ventana().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
   await ir('#/guia/docente'); ventana().MT.router.recargar();
   // ---- fin espacio ----
   afirmar('la franja dice con qué rol se mira', doc().getElementById('rol-actual').textContent.includes('Docente'));
@@ -1442,6 +1443,7 @@ async function flujoEntrada() {
   [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(600);
   afirmar('entrada: coordinación es una opción más y abre su tutorial guiado', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'coordinacion');
   W().document.dispatchEvent(new (W().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true, cancelable: true })); await espera(250);
+  await cargar('#/', 390, 844); await espera(350);   // quien2: el tutorial dejó otra pantalla; las siguientes miden la portada
   afirmar('entrada: «¿Quién eres?» deja entrar directo a los portales sin tutorial', !!D().querySelector('#ent-quien a[href="#/portales/kinesis"]') && !!D().querySelector('#ent-quien a[href="#/portales/wisfox"]'));
   afirmar('entrada: la portada nunca escribe el texto «null» (modo normal)', !/null/.test(D().querySelector('.entrada').innerText));
 
