@@ -11,7 +11,7 @@
    propios del tutorial (TEXTOS): selector, bienvenidas, resúmenes finales y rótulos. Son borrador por aprobar del dueño.
 
    Reglas que se respetan:
-   - Códigos P-01 a P-10 y datos ficticios; nada de nombres, diagnósticos ni cifras.
+   - Códigos 8A-01 a 8A-10 y datos ficticios; nada de nombres, diagnósticos ni cifras.
    - Niky hoy responde con ejemplos preparados; propone, la persona decide. Los textos no prometen nada que no exista.
    - Atrás vuelve a cargar el ejemplo y repite las acciones hasta ese paso, para que la pantalla nunca contradiga el texto (por ejemplo,
      que la familia vea «aprobado» en un paso que dice «todavía no hay novedades»).

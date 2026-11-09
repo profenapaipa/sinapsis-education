@@ -5,7 +5,7 @@
    grupo cuentan lo que construyeron. Hay cinco casos preparados y funcionales, pero en cada exposición se usa uno solo: se elige en el
    selector del guion (modo presentación) o con la dirección del sitio, por ejemplo ?caso=3.
 
-   Qué trae cada caso (todo con códigos P-01 a P-10, sin nombres ni diagnósticos):
+   Qué trae cada caso (todo con códigos 8A-01 a 8A-10, sin nombres ni diagnósticos):
    - una asignatura, una actividad y el estudiante con quien se cuenta la historia;
    - el perfil de apoyos de ese estudiante, ya guardado;
    - lo que Niky propone al docente y lo que le explica al estudiante (respuestas de ejemplo, no un modelo conectado);
@@ -30,7 +30,7 @@
   const CASOS = [
     /* ---------------------------------------------------------------- 1. Inglés: es el ejemplo de partida de la plataforma */
     {
-      n: 1, etiqueta: 'Inglés: «Mi rutina del día»', asignatura: 'Inglés', estudiante: 'P-03', titulo: 'Mi rutina del día',
+      n: 1, etiqueta: 'Inglés: «Mi rutina del día»', asignatura: 'Inglés', estudiante: '8A-03', titulo: 'Mi rutina del día',
       perfil: null, actividad: null, // usa el perfil y la actividad que ya trae la plataforma
       ideas: 'Necesito una actividad de 20 minutos para enseñar el present simple a grado 8.º.',
       ayuda: { etiqueta: 'No entiendo la s del verbo', pregunta: 'No entiendo cuándo se le pone la s al verbo.' },
@@ -39,8 +39,8 @@
 
     /* ---------------------------------------------------------------- 2. Matemáticas: tiempo adicional y vocabulario de apoyo */
     {
-      n: 2, etiqueta: 'Matemáticas: proporcionalidad', asignatura: 'Matemáticas', estudiante: 'P-07', titulo: 'Recetas y escalas: razón y proporción',
-      perfil: null, // P-07 ya trae tiempo adicional y vocabulario de apoyo
+      n: 2, etiqueta: 'Matemáticas: proporcionalidad', asignatura: 'Matemáticas', estudiante: '8A-07', titulo: 'Recetas y escalas: razón y proporción',
+      perfil: null, // 8A-07 ya trae tiempo adicional y vocabulario de apoyo
       actividad: {
         id: 'a2', titulo: 'Recetas y escalas: razón y proporción', asignatura: 'Matemáticas', tema: 'Razón y proporción',
         descripcion: 'Los estudiantes cambian una receta de limonada de 2 a 6 vasos y descubren qué se mantiene igual. Cada uno elige cómo mostrar su resultado: con una tabla, un dibujo o explicándolo en voz alta.',
@@ -64,8 +64,8 @@
 
     /* ---------------------------------------------------------------- 3. Ciencias naturales: descansos y recibir la instrucción por dos canales */
     {
-      n: 3, etiqueta: 'Ciencias naturales: cadenas alimentarias', asignatura: 'Ciencias naturales', estudiante: 'P-02', titulo: 'Quién come a quién: cadenas alimentarias',
-      perfil: null, // P-02 ya trae descansos activos e instrucciones orales y escritas
+      n: 3, etiqueta: 'Ciencias naturales: cadenas alimentarias', asignatura: 'Ciencias naturales', estudiante: '8A-02', titulo: 'Quién come a quién: cadenas alimentarias',
+      perfil: null, // 8A-02 ya trae descansos activos e instrucciones orales y escritas
       actividad: {
         id: 'a3', titulo: 'Quién come a quién: cadenas alimentarias', asignatura: 'Ciencias naturales', tema: 'Ecosistemas y cadenas alimentarias',
         descripcion: 'Los estudiantes arman en parejas una cadena alimentaria con tarjetas y flechas. Cada uno elige cómo presentarla: dibujándola, escribiéndola o contándola.',
@@ -89,8 +89,8 @@
 
     /* ---------------------------------------------------------------- 4. Lengua castellana: evitar leer en voz alta frente al curso */
     {
-      n: 4, etiqueta: 'Lengua castellana: escribir un cuento', asignatura: 'Lengua castellana', estudiante: 'P-05', titulo: 'Escribo un cuento corto',
-      perfil: { id: 'P-05', piar: true, apoyos: ['Evitar leer en voz alta frente al curso', 'Instrucciones en pasos cortos y numerados'], fortalezas: ['Escribe con mucha imaginación'] },
+      n: 4, etiqueta: 'Lengua castellana: escribir un cuento', asignatura: 'Lengua castellana', estudiante: '8A-05', titulo: 'Escribo un cuento corto',
+      perfil: { id: '8A-05', piar: true, apoyos: ['Evitar leer en voz alta frente al curso', 'Instrucciones en pasos cortos y numerados'], fortalezas: ['Escribe con mucha imaginación'] },
       actividad: {
         id: 'a4', titulo: 'Escribo un cuento corto', asignatura: 'Lengua castellana', tema: 'El cuento: inicio, nudo y desenlace',
         descripcion: 'Los estudiantes arman un cuento con tarjetas de personaje, lugar y problema. Cada uno elige cómo contarlo: escribiéndolo, dibujándolo en viñetas o grabándolo.',
@@ -114,9 +114,9 @@
 
     /* ---------------------------------------------------------------- 5. Ciencias sociales: orientación devuelve el ajuste con una nota */
     {
-      n: 5, etiqueta: 'Ciencias sociales: línea de tiempo (con devolución)', asignatura: 'Ciencias sociales', estudiante: 'P-08', titulo: 'Línea de tiempo de la Independencia',
+      n: 5, etiqueta: 'Ciencias sociales: línea de tiempo (con devolución)', asignatura: 'Ciencias sociales', estudiante: '8A-08', titulo: 'Línea de tiempo de la Independencia',
       // Empieza con dos apoyos: por eso la primera versión del ajuste queda incompleta y orientación la devuelve.
-      perfil: { id: 'P-08', piar: true, apoyos: ['Apoyo visual junto al texto', 'Una sola tarea a la vez'], fortalezas: ['Recuerda las fechas con facilidad'] },
+      perfil: { id: '8A-08', piar: true, apoyos: ['Apoyo visual junto al texto', 'Una sola tarea a la vez'], fortalezas: ['Recuerda las fechas con facilidad'] },
       devuelve: {
         nota: 'A este perfil también le sirven los descansos activos. Ya lo agregué: vuelve a generar el ajuste.',
         apoyoNuevo: 'Descansos activos cada 15 minutos',

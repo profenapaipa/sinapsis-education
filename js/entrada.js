@@ -13,7 +13,7 @@
 
    Los mini ejemplos usan el caso de la exposición guiada que esté elegido (por defecto el 1, Inglés) para que la mesa y el recorrido cuenten la
    misma historia, y leen de los datos de partida (MT.datos.semilla), nunca de lo que la persona haya cambiado: son de lectura, no escriben nada.
-   Todo con códigos de estudiante (P-03), sin nombres.
+   Todo con códigos de estudiante (8A-03), sin nombres.
 
    Las mascotas llegan de MT.mascotas (js/mascotas.js, de otra rama). Aquí solo se les da sitio con clases (css/entrada.css): ningún estilo depende
    de cómo estén dibujadas por dentro, para que el dibujo definitivo entre sin tocar la entrada. */

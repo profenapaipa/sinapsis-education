@@ -315,7 +315,7 @@ async function flujo() {
   // 4. Docente propone un ajuste
   await ir('#/mi/ajustes'); await espera(200);
   await pulsar('Nuevo ajuste');
-  poner(doc().querySelector('dialog[open] [name="estudiante"]'), 'P-03'); await espera(100);
+  poner(doc().querySelector('dialog[open] [name="estudiante"]'), '8A-03'); await espera(100);
   afirmar('el ajuste previsualiza cambios concretos con su razón', doc().querySelectorAll('dialog[open] .vista-previa li').length >= 3);
   enDialogo('Enviar a orientación').click(); await espera(300);
   afirmar('el ajuste queda en revisión', /En revisión/.test(textoPagina()));
@@ -325,7 +325,7 @@ async function flujo() {
   // 5. Docente deja una nota visible para la familia
   await ir('#/mi/notas'); await espera(200);
   await pulsar('Nueva nota');
-  poner(doc().querySelector('dialog[open] [name="estudiante"]'), 'P-03');
+  poner(doc().querySelector('dialog[open] [name="estudiante"]'), '8A-03');
   poner(doc().querySelector('dialog[open] [name="texto"]'), 'Hoy participó mucho en pareja.');
   poner(doc().querySelector('dialog[open] [name="familia"]'), 'si');
   enDialogo('Guardar').click(); await espera(300);
@@ -350,7 +350,7 @@ async function flujo() {
   afirmar('orientación guarda un archivo clínico y lo ve', /informe-clinico\.pdf/.test(textoPagina()));
   await ir('#/mi/estudiantes'); await espera(200);
   afirmar('orientación ve los apoyos de los perfiles', /Instrucciones en pasos cortos/.test(textoPagina()));
-  [...doc().querySelectorAll('button')].find((b) => b.getAttribute('aria-label') === 'Editar a P-01').click(); await espera(250);
+  [...doc().querySelectorAll('button')].find((b) => b.getAttribute('aria-label') === 'Editar a 8A-01').click(); await espera(250);
   afirmar('orientación puede editar apoyos', !!doc().querySelector('dialog[open] .checks'));
   enDialogo('Cancelar').click(); await espera(150);
 
@@ -405,7 +405,7 @@ async function flujo() {
   afirmar('coordinación no ve los apoyos de los estudiantes', !/Tiempo adicional|pasos cortos/.test(textoPagina()));
   await pulsar('Nuevo estudiante');
   enDialogo('Crear estudiante').click(); await espera(300);
-  afirmar('coordinación crea un estudiante con código nuevo', /P-11/.test(textoPagina()));
+  afirmar('coordinación crea un estudiante con código nuevo', /8A-11/.test(textoPagina()));
   await ir('#/mi/cursos'); await espera(200);
   await pulsar('Nuevo curso');
   poner(doc().querySelector('dialog[open] [name="nombre"]'), '9.°-A'); enDialogo('Guardar').click(); await espera(300);
@@ -1376,7 +1376,7 @@ async function flujoEntrada() {
   const niky = D().querySelector('#ent-panel-niky').innerText;
   afirmar('entrada: Niky: tocar una pregunta muestra la respuesta de ejemplo, lo dice, y la persona decide (Usar o Cambiar)', /Respuesta de ejemplo/.test(niky) && /ejemplos preparados/.test(niky) && /Usar/.test(niky) && /Cambiar/.test(niky));
   afirmar('entrada: los ejemplos no escriben en los datos (actividades y ajustes quedan igual)', antes === JSON.stringify(MTw().store.obtener().actividades) + JSON.stringify(MTw().store.obtener().ajustes));
-  afirmar('entrada: en los ejemplos solo hay códigos de estudiante (P-01...), sin nombres', /P-\d\d/.test(D().querySelector('#ent-panel-kinesis').innerText) && !/[Ss]ofía|[Jj]uan |[Mm]aría/.test(D().querySelector('.entrada').innerText));
+  afirmar('entrada: en los ejemplos solo hay códigos de estudiante (8A-01...), sin nombres', /P-\d\d/.test(D().querySelector('#ent-panel-kinesis').innerText) && !/[Ss]ofía|[Jj]uan |[Mm]aría/.test(D().querySelector('.entrada').innerText));
 
   // Rol: una pregunta, cada opción avanza sola a la guía y la mascota del rol acompaña
   for (const [texto, id, mascota] of [['Soy estudiante', 'estudiante', 'Wisfox'], ['Soy docente', 'docente', 'Kinesis'], ['Soy familia', 'familia', 'Kinesis'], ['Soy de orientación', 'orientacion', 'Kinesis']]) {

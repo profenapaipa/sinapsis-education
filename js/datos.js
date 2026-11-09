@@ -1,6 +1,6 @@
 /* datos.js: los datos de partida y las reglas del negocio.
 
-   Todo lo que trae la plataforma de partida es de ejemplo: los estudiantes son códigos (P-01 a P-10), sin
+   Todo lo que trae la plataforma de partida es de ejemplo: los estudiantes son códigos (8A-01 a 8A-10), sin
    nombres, y no hay diagnósticos en ninguna parte. Lo que se crea después queda en el navegador de quien lo crea.
    La información clínica solo existe como archivos con visibilidad "clínico", que ve únicamente orientación. */
 (function (MT) {
@@ -29,12 +29,12 @@
       cursos: [{ id: 'c1', nombre: '8.°-A' }, { id: 'c2', nombre: '8.°-B' }],
       categorias: categoriasBase.map((nombre, i) => ({ id: 'k' + (i + 1), nombre })),
       estudiantes: [
-        est('P-01'),
-        est('P-02', { piar: true, apoyos: ['Descansos activos cada 15 minutos', 'Instrucciones orales y escritas'], fortalezas: ['Explica con ejemplos propios'] }),
-        est('P-03', { piar: true, apoyos: ['Instrucciones en pasos cortos y numerados', 'Apoyo visual junto al texto', 'Tiempo adicional del 50 %', 'Evitar leer en voz alta frente al curso', 'Una sola tarea a la vez'], fortalezas: ['Aprende muy bien con imágenes', 'Trabaja con entusiasmo en pareja'] }),
-        est('P-04'), est('P-05'), est('P-06'),
-        est('P-07', { piar: true, apoyos: ['Vocabulario de apoyo', 'Tiempo adicional del 50 %'], fortalezas: ['Buena memoria para el vocabulario nuevo'] }),
-        est('P-08'), est('P-09', { curso: 'c2' }), est('P-10', { curso: 'c2' }),
+        est('8A-01'),
+        est('8A-02', { piar: true, apoyos: ['Descansos activos cada 15 minutos', 'Instrucciones orales y escritas'], fortalezas: ['Explica con ejemplos propios'] }),
+        est('8A-03', { piar: true, apoyos: ['Instrucciones en pasos cortos y numerados', 'Apoyo visual junto al texto', 'Tiempo adicional del 50 %', 'Evitar leer en voz alta frente al curso', 'Una sola tarea a la vez'], fortalezas: ['Aprende muy bien con imágenes', 'Trabaja con entusiasmo en pareja'] }),
+        est('8A-04'), est('8A-05'), est('8A-06'),
+        est('8A-07', { piar: true, apoyos: ['Vocabulario de apoyo', 'Tiempo adicional del 50 %'], fortalezas: ['Buena memoria para el vocabulario nuevo'] }),
+        est('8A-08'), est('8A-09', { curso: 'c2' }), est('8A-10', { curso: 'c2' }),
       ],
       actividades: [{
         id: 'a1', titulo: 'Mi rutina del día', asignatura: 'Inglés', tema: 'Present simple',

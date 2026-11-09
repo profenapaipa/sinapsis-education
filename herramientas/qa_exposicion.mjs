@@ -11,11 +11,11 @@ const fallas = [];
 const ok = (cond, msg) => { if (!cond) { fallas.push(msg); console.log('  FALLA:', msg); } };
 const texto = () => nav.evaluar('document.body.innerText');
 const quiz = {
-  1: { estudiante: 'P-03', actividad: 'Mi rutina del día', ideas: 'Actividad de 20 minutos', ayuda: 'tercera persona', apoyo: 'Tiempo adicional del 50 %' },
-  2: { estudiante: 'P-07', actividad: 'Recetas y escalas', ideas: 'recetas y escalas', ayuda: 'razón', apoyo: 'Vocabulario de apoyo' },
-  3: { estudiante: 'P-02', actividad: 'cadenas alimentarias', ideas: 'quién come a quién', ayuda: 'productores', apoyo: 'Descansos activos cada 15 minutos' },
-  4: { estudiante: 'P-05', actividad: 'Escribo un cuento corto', ideas: 'escribo un cuento', ayuda: 'inicio', apoyo: 'Evitar leer en voz alta frente al curso' },
-  5: { estudiante: 'P-08', actividad: 'Línea de tiempo de la Independencia', ideas: 'línea de tiempo', ayuda: '1819', apoyo: 'Apoyo visual junto al texto' },
+  1: { estudiante: '8A-03', actividad: 'Mi rutina del día', ideas: 'Actividad de 20 minutos', ayuda: 'tercera persona', apoyo: 'Tiempo adicional del 50 %' },
+  2: { estudiante: '8A-07', actividad: 'Recetas y escalas', ideas: 'recetas y escalas', ayuda: 'razón', apoyo: 'Vocabulario de apoyo' },
+  3: { estudiante: '8A-02', actividad: 'cadenas alimentarias', ideas: 'quién come a quién', ayuda: 'productores', apoyo: 'Descansos activos cada 15 minutos' },
+  4: { estudiante: '8A-05', actividad: 'Escribo un cuento corto', ideas: 'escribo un cuento', ayuda: 'inicio', apoyo: 'Evitar leer en voz alta frente al curso' },
+  5: { estudiante: '8A-08', actividad: 'Línea de tiempo de la Independencia', ideas: 'línea de tiempo', ayuda: '1819', apoyo: 'Apoyo visual junto al texto' },
 };
 
 for (let n = 1; n <= 5; n++) {
@@ -66,11 +66,11 @@ console.log('\nSelector de caso y empezar de nuevo');
 await nav.evaluar(`(() => { const s = document.getElementById('guion-caso'); s.value = '4'; s.dispatchEvent(new Event('change')); return 1; })()`);
 await nav.esperar(3500);
 let r = JSON.parse(await nav.evaluar(`JSON.stringify({ caso: MT.casos.numero(), est: MT.store.obtener().vinculo, paso: MT.presentacion.paso(), sel: document.getElementById('guion-caso').value })`));
-ok(r.caso === 4 && r.est === 'P-05' && r.paso === 0 && r.sel === '4', 'el selector no cargó el caso 4: ' + JSON.stringify(r));
+ok(r.caso === 4 && r.est === '8A-05' && r.paso === 0 && r.sel === '4', 'el selector no cargó el caso 4: ' + JSON.stringify(r));
 await nav.evaluar(`document.getElementById('btn-reiniciar-mesa').click(); 1`);
 await nav.esperar(3500);
 r = JSON.parse(await nav.evaluar(`JSON.stringify({ caso: MT.casos.numero(), ajustes: MT.store.obtener().ajustes.length, est: MT.store.obtener().vinculo })`));
-ok(r.caso === 4 && r.ajustes === 0 && r.est === 'P-05', 'empezar de nuevo no volvió al principio del caso 4: ' + JSON.stringify(r));
+ok(r.caso === 4 && r.ajustes === 0 && r.est === '8A-05', 'empezar de nuevo no volvió al principio del caso 4: ' + JSON.stringify(r));
 
 // Fuera del modo presentación la plataforma no cambia: Niky responde lo de siempre y el selector no existe.
 console.log('\nFuera del modo presentación');

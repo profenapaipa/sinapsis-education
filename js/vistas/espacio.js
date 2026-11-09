@@ -61,7 +61,7 @@
         { id: 'fortalezas', etiqueta: 'Fortalezas (una por línea)', tipo: 'area', filas: 3, valor: e ? e.fortalezas.join('\n') : '' });
     }
     dlg.formulario({ titulo: e ? 'Editar a ' + e.id : 'Nuevo estudiante', campos, textoGuardar: e ? 'Guardar cambios' : 'Crear estudiante',
-      extra: h('p', { class: 'suave' }, 'Los estudiantes se identifican con un código (P-01, P-02…). No escribas nombres ni documentos: esta es una demostración.'),
+      extra: h('p', { class: 'suave' }, 'Los estudiantes se identifican con un código (8A-01, 8A-02…). No escribas nombres ni documentos: esta es una demostración.'),
       onGuardar: (v) => {
         const datos = { curso: v.curso };
         if (rol === 'orientacion') Object.assign(datos, { piar: v.piar === 'si', apoyos: v.apoyos, fortalezas: v.fortalezas.split('\n').map((x) => x.trim()).filter(Boolean) });
