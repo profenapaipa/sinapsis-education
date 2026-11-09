@@ -10,7 +10,7 @@
 <pre id="resultado" style="position:fixed;top:0;left:0;max-width:100%;background:#fff;color:#000;font:11px monospace;white-space:pre-wrap"></pre>
 <script>
 const SECC = { docente: ['resumen', 'estudiantes', 'actividades', 'ajustes', 'notas', 'archivos'], orientacion: ['resumen', 'ajustes', 'estudiantes', 'notas', 'archivos'], familia: ['resumen', 'archivos'], coordinacion: ['resumen', 'estudiantes', 'cursos', 'categorias'], estudiante: ['resumen', 'ruta', 'logros', 'archivos'] };
-const RUTAS = [[null, '#/'], [null, '#/mi'], [null, '#/mapa/conexiones'], [null, '#/mapa/distingue'], [null, '#/valeria/chat'], [null, '#/valeria/conexion'], [null, '#/recorrido/camino'], [null, '#/recorrido/roles'], [null, '#/recorrido/datos'], [null, '#/portales'], [null, '#/portales/kinesis'], [null, '#/portales/wisfox'], [null, '#/portales/valeria'], [null, '#/glosario'], [null, '#/creditos'], [null, '#/planes/formas'], [null, '#/planes/acompanamiento'], [null, '#/registro/lista'], [null, '#/registro/conversar'], [null, '#/guia/docente'], [null, '#/guia/estudiante'], [null, '#/hoja/propuesta'], [null, '#/hoja/arquitectura'], [null, '#/hoja/etapas'], [null, '#/piloto'], [null, '#/identidad'],
+const RUTAS = [[null, '#/'], [null, '#/mi/resumen'], [null, '#/mapa/conexiones'], [null, '#/mapa/distingue'], [null, '#/valeria/chat'], [null, '#/valeria/conexion'], [null, '#/recorrido/camino'], [null, '#/recorrido/roles'], [null, '#/recorrido/datos'], [null, '#/portales'], [null, '#/portales/kinesis'], [null, '#/portales/wisfox'], [null, '#/portales/valeria'], [null, '#/glosario'], [null, '#/creditos'], [null, '#/planes/formas'], [null, '#/planes/acompanamiento'], [null, '#/registro/lista'], [null, '#/registro/conversar'], [null, '#/guia/docente'], [null, '#/guia/estudiante'], [null, '#/hoja/propuesta'], [null, '#/hoja/arquitectura'], [null, '#/hoja/etapas'], [null, '#/piloto'], [null, '#/identidad'],
   ...Object.entries(SECC).flatMap(([rol, l]) => l.map((x) => [rol, '#/mi/' + x]))];
 const ANCHOS = [390, 1280];
 const TEMAS = ['claro', 'oscuro'];
@@ -143,10 +143,14 @@ async function flujo() {
   // y todo lo secundario vive en un único menú «Más». Estas pruebas reemplazan a las del riel de seis ítems y a las de la barra de pestañas.
   const rielTxt = () => [...doc().querySelectorAll('.riel .riel-item')].map((x) => x.textContent.replace(/\s+/g, ' ').trim());
   afirmar('una sola navegación: hay un riel y ninguna barra de portales aparte', doc().querySelectorAll('nav.riel').length === 1 && !doc().getElementById('barra-portales') && !doc().querySelector('.pestanas'));
-  afirmar('sin rol, el riel muestra lo mínimo: Inicio, Elegir rol, Niky y Más', rielTxt().join('|') === 'Inicio|Elegir rol|Niky|Más', rielTxt().join('|'));
+  // ---- espacio ---- Por qué: decisión del dueño, no hay «Mi espacio»; el riel lleva siempre Kinesis, Wisfox y Guía (más «Más»). Niky es el botón flotante.
+  afirmar('sin rol, el riel muestra Kinesis, Wisfox y Guía (y «Más»), sin Mi espacio', rielTxt().join('|') === 'Kinesis|Wisfox|Guía|Más', rielTxt().join('|'));
+  // ---- fin espacio ----
   doc().getElementById('btn-mas').click(); await espera(150);
   const enMas = [...doc().querySelectorAll('#menu-mas a')];
-  afirmar('«Más» alcanza todo lo secundario: portales, mapa, roles y datos, participa, hoja de ruta, glosario, piloto, identidad y créditos', ['portales', 'mapa', 'recorrido', 'planes', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos'].every((id) => enMas.some((x) => x.dataset.ruta === id && x.getClientRects().length)), enMas.map((x) => x.dataset.ruta).join());
+  // ---- espacio ---- (los «tres portales» pasaron a la Guía, que está en el riel)
+  afirmar('«Más» alcanza todo lo secundario: portales, mapa, roles y datos, participa, hoja de ruta, glosario, piloto, identidad y créditos', ['mapa', 'recorrido', 'planes', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos'].every((id) => enMas.some((x) => x.dataset.ruta === id && x.getClientRects().length)), enMas.map((x) => x.dataset.ruta).join());
+  // ---- fin espacio ----
   afirmar('«Más» reúne también lo de uso ocasional: apariencia y modo presentación', !!doc().getElementById('btn-presentacion') && doc().getElementById('btn-presentacion').getClientRects().length > 0 && doc().getElementById('btn-apariencia').getClientRects().length > 0);
   doc().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
   afirmar('Escape cierra «Más» y devuelve el foco a su botón', doc().getElementById('menu-mas').hidden && doc().activeElement === doc().getElementById('btn-mas') && doc().getElementById('btn-mas').getAttribute('aria-expanded') === 'false');
@@ -156,14 +160,19 @@ async function flujo() {
   // ---- fin niky ----
   // ---- fin ligera ----
   await pulsar('Soy docente');
-  afirmar('elegir docente lleva a su guía de inicio rápido', ventana().location.hash === '#/guia/docente');
+  // ---- espacio ---- Por qué: «¿Quién eres?» lleva directo al portal del rol, no a una guía ni a Mi espacio (decisión del dueño). La guía se abre aparte.
+  afirmar('elegir docente lleva directo al portal de su rol (Kinesis)', ventana().location.hash === '#/portales/kinesis' && ventana().MT.store.obtener().rol === 'docente', ventana().location.hash);
+  await ir('#/guia/docente'); ventana().MT.router.recargar();
+  // ---- fin espacio ----
   afirmar('la franja dice con qué rol se mira', doc().getElementById('rol-actual').textContent.includes('Docente'));
   afirmar('la guía tiene pasos, cada uno con su portal', doc().querySelectorAll('.guia-paso').length === 5 && /en kinesis/i.test(textoPagina()) && /en niky/i.test(textoPagina()) && /en wisfox/i.test(textoPagina()));
   // ---- ligera ---- (reemplaza las pruebas de la barra de pestañas)
-  afirmar('con rol docente el riel muestra solo lo suyo: Kinesis, Mi espacio, Niky y Más (sin Wisfox)', rielTxt().join('|') === 'Kinesis|Mi espacio|Niky|Más', rielTxt().join('|'));
+  // ---- espacio ---- Por qué: con rol, el riel sigue trayendo los dos portales y la Guía; el del rol va primero y marcado («tu portal»).
+  afirmar('con rol docente el riel muestra Kinesis (tu portal), Wisfox, Guía y Más', rielTxt().join('|') === 'Kinesis (tu portal)|Wisfox|Guía|Más' && !!doc().querySelector('.riel .riel-item--principal[data-portal="kinesis"]'), rielTxt().join('|'));
+  // ---- fin espacio ----
   // ---- fin ligera ----
   const abiertas = []; ventana().open = (u) => { abiertas.push(u); return null; };
-  await pulsar('Ir a Kinesis'); await espera(600);
+  await pulsar('Abrir Kinesis'); await espera(600);
   const marcoK = doc().querySelector('.vivos iframe');
   afirmar('Ir a Kinesis lo muestra dentro de la plataforma', ventana().location.hash === '#/portales/kinesis' && !!marcoK && marcoK.getAttribute('src') === ventana().MT.config.portales.kinesis && abiertas.length === 0, ventana().location.hash);
   afirmar('el ítem del portal se marca como actual y el portal queda como abierto', doc().querySelector('.riel [data-portal="kinesis"]').getAttribute('aria-current') === 'page' && doc().querySelector('.riel [data-portal="kinesis"]').classList.contains('riel-item--abierto'));   // ---- ligera: ítem del riel en lugar de pestaña ----
@@ -180,13 +189,15 @@ async function flujo() {
   await ir('#/portales/wisfox'); await espera(700);
   const marcoW = doc().querySelector('.vivos iframe[src="' + ventana().MT.config.portales.wisfox + '"]');
   afirmar('un portal que no es del rol se abre por su dirección (#/portales/wisfox) dentro de la plataforma', !!marcoW && ventana().location.hash === '#/portales/wisfox' && !!doc().querySelector('.riel'));
-  afirmar('el riel del docente no tiene ítem de Wisfox: solo lo de su rol', !doc().querySelector('.riel [data-portal="wisfox"]'));
+  // ---- espacio ---- Por qué: los dos portales están siempre disponibles en el riel.
+  afirmar('el riel del docente también trae Wisfox, sin marcar como principal', !!doc().querySelector('.riel [data-portal="wisfox"]') && !doc().querySelector('.riel [data-portal="wisfox"].riel-item--principal'));
+  // ---- fin espacio ----
   afirmar('Kinesis y Wisfox quedan abiertos a la vez', ventana().MT.vivos.abiertos().includes('kinesis') && ventana().MT.vivos.abiertos().includes('wisfox'));
   // ---- fin ligera ----
   // Los portales son persistentes: volver a ellos no los recarga, y se ven dos a la vez
   let cargas = 0; marcoK.addEventListener('load', () => cargas++); marcoW.addEventListener('load', () => cargas++);
   doc().querySelector('.riel [data-portal="kinesis"]').click(); await espera(400);   // ---- ligera: ítem del riel ----
-  await ir('#/mi'); await espera(300);
+  await ir('#/mi/resumen'); await espera(300);
   afirmar('al salir de los portales siguen en el documento, ocultos', marcoK.isConnected && marcoW.isConnected && marcoK.closest('[hidden]'));
   doc().querySelector('.riel [data-portal="kinesis"]').click(); await espera(500);   // ---- ligera: ítem del riel ----
   afirmar('volver a un portal NO lo recarga: conserva lo que se estaba haciendo', cargas === 0 && marcoK.isConnected && !marcoK.closest('[hidden]'), 'cargas=' + cargas);
@@ -213,7 +224,7 @@ async function flujo() {
   await ir('#/mi/ajustes'); ventana().MT.router.recargar();
   afirmar('donde se decide un ajuste se explica qué es un ajuste', /Qué es un ajuste/i.test(textoPagina()));
   // Las siglas se explican al tocarlas
-  await ir('#/mi'); ventana().MT.router.recargar(); await espera(250);
+  await ir('#/mi/resumen'); ventana().MT.router.recargar(); await espera(250);
   const termino = doc().querySelector('#app .termino');
   afirmar('la primera vez que aparece una sigla se vuelve un botón', !!termino && termino.tagName === 'BUTTON');
   if (termino) { termino.click(); await espera(250); }
@@ -222,19 +233,22 @@ async function flujo() {
   await ir('#/glosario');
   afirmar('el glosario explica PIAR, DUA, ajuste y mínimo privilegio', ['PIAR', 'DUA', 'Ajuste', 'Mínimo privilegio'].every((t) => textoPagina().includes(t)));
   await ir('#/guia/docente'); ventana().MT.router.recargar();
-  await pulsar('Trabajar en Mi espacio');
-  afirmar('Trabajar en Mi espacio lleva al espacio del rol', ventana().location.hash === '#/mi/resumen');
+  // ---- espacio ---- Por qué: la guía solo informa; su botón lleva al portal principal del rol, no a Mi espacio.
+  afirmar('la guía no ofrece «Trabajar en Mi espacio» ni «Hacerlo aquí»', !hallar('Trabajar en Mi espacio') && !hallar('Hacerlo aquí'));
+  await pulsar('Abrir Kinesis');
+  afirmar('«Abrir Kinesis» en la guía lleva al portal', ventana().location.hash === '#/portales/kinesis');
+  // ---- fin espacio ----
   await ir('#/guia/estudiante'); ventana().MT.router.recargar();
   afirmar('la guía del estudiante apunta a Wisfox como portal principal', /Tu portal principal es Wisfox/.test(textoPagina()));
   await ir('#/portales');
   afirmar('los tres portales se muestran en paralelo con su flujo', doc().querySelectorAll('.portal').length === 3 && doc().querySelectorAll('.carril-paso').length === 9);
-  await comoRol('docente', '#/mi');
+  await comoRol('docente', '#/mi/resumen');
   // ---- espacio ---- Por qué: Mi espacio ya no tiene barra lateral propia (parecía otra aplicación); tiene la cabecera única, la subnavegación en pestañas y las cifras.
   afirmar('el espacio tiene cabecera única, subnavegación y cifras', !!doc().querySelector('.cab-pantalla h1') && !!doc().querySelector('.subnav') && !doc().querySelector('.lateral') && !!doc().querySelector('.panel-cifras'));
   afirmar('espacio: un docente nuevo no ve «Paso 5 de 5» en su primera pantalla', !/Paso 5 de 5/.test(textoPagina()));
   afirmar('espacio: a lo sumo un botón principal en la cabecera', doc().querySelectorAll('.cab-pantalla .btn:not(.btn--suave)').length <= 1);
   // Todas las vistas comparten la misma cabecera; el modo presentación y ?caso= no se tocaron y los prueban sus bloques propios.
-  { const rutas = ['#/mi', '#/mi/actividades', '#/mapa', '#/planes', '#/hoja', '#/glosario', '#/identidad', '#/piloto', '#/guia/docente', '#/recorrido'];
+  { const rutas = ['#/mi/resumen', '#/mi/actividades', '#/mapa', '#/planes', '#/hoja', '#/glosario', '#/identidad', '#/piloto', '#/guia/docente', '#/recorrido'];
     const malas = []; const fuera = [];
     for (const r of rutas) {
       await ir(r); ventana().MT.router.recargar(); await espera(150);
@@ -247,7 +261,9 @@ async function flujo() {
   }
   // ---- fin espacio ----
   // ---- ligera ---- sitio previsto para la mascota del rol: existe en el encabezado, vacío y sin ocupar lugar hasta que llegue MT.mascotas.
-  { const cr = doc().querySelector('.hero .companero-rol'); afirmar('el encabezado de la vista del rol trae el contenedor .companero-rol, vacío y sin ocupar sitio', !!cr && cr.childElementCount === 0 && cr.getBoundingClientRect().height === 0 && cr.dataset.rol === 'docente'); }
+  // ---- espacio ---- Por qué: el .companero-rol ahora lo llena la cabecera única con la mascota del rol a 56 px.
+  { const cr = doc().querySelector('.cab-pantalla .companero-rol'); afirmar('la cabecera de la vista del rol trae la mascota en .companero-rol a 56 px', !!cr && cr.childElementCount === 1 && cr.dataset.rol === 'docente' && cr.getBoundingClientRect().height === 56); }
+  // ---- fin espacio ----
   // ---- fin ligera ----
 
   try { traza.push('paso 2: ' + ventana().MT.db.lista('actividades').length + '/' + (localStorage.getItem('mosaicotelar.v2') || '').length); } catch (e) { /* aún sin app */ }
@@ -338,16 +354,18 @@ async function flujo() {
 
   try { traza.push('paso 8: ' + ventana().MT.db.lista('actividades').length + '/' + (localStorage.getItem('mosaicotelar.v2') || '').length); } catch (e) { /* aún sin app */ }
   // 8. Familia ve lo aprobado, sin diagnóstico
-  await comoRol('familia', '#/mi');
+  await comoRol('familia', '#/mi/resumen');
   afirmar('la familia ve el ajuste aprobado con su razón', /Ajustes aprobados/.test(textoPagina()) && /Su perfil indica|Tiene tiempo adicional|Es un apoyo/.test(textoPagina()));
   afirmar('la familia ve la nota marcada para ella', /Hoy participó mucho en pareja/.test(textoPagina()));
   afirmar('la familia no ve diagnóstico', !CLINICOS.test(textoPagina()));
 
   try { traza.push('paso 9: ' + ventana().MT.db.lista('actividades').length + '/' + (localStorage.getItem('mosaicotelar.v2') || '').length); } catch (e) { /* aún sin app */ }
   // 9. Estudiante: recibe la versión a su medida, hace el quiz y gana logros
-  await comoRol('estudiante', '#/mi');
+  await comoRol('estudiante', '#/mi/resumen');
   // ---- ligera ---- el rol cambia los ítems del riel: el estudiante ve Wisfox y su espacio, nunca Kinesis.
-  afirmar('con rol estudiante el riel muestra Wisfox, Mi espacio, Niky y Más (sin Kinesis)', rielTxt().join('|') === 'Wisfox|Mi espacio|Niky|Más', rielTxt().join('|'));
+  // ---- espacio ---- Por qué: ver la primera prueba del riel (sin Mi espacio; el portal del rol va primero).
+  afirmar('con rol estudiante el riel muestra Wisfox (tu portal), Kinesis, Guía y Más', rielTxt().join('|') === 'Wisfox (tu portal)|Kinesis|Guía|Más', rielTxt().join('|'));
+  // ---- fin espacio ----
   // ---- fin ligera ----
   afirmar('el estudiante ve que la actividad quedó a su medida', /A tu medida/.test(textoPagina()));
   for (let i = 0; i < 4; i++) {
@@ -407,7 +425,9 @@ async function flujo() {
   [...doc().querySelectorAll('.modulo')].find((b) => b.textContent.includes('Aprobación')).click(); await espera(200);
   afirmar('tocar un módulo explica y ofrece abrirlo en la plataforma', /Quién lo usa/.test(textoPagina()) && !!hallar('Abrir en la plataforma') && doc().querySelectorAll('.mapa-svg path.activa').length >= 2);
   hallar('Abrir en la plataforma').click(); await espera(300);
-  afirmar('abrir un módulo lleva al espacio del rol que lo usa', ventana().location.hash === '#/mi/ajustes' && ventana().MT.store.obtener().rol === 'orientacion');
+  // ---- espacio ---- Por qué: el módulo abre el portal del rol que lo usa (orientación, Kinesis), ya no Mi espacio.
+  afirmar('abrir un módulo lleva al portal del rol que lo usa', ventana().location.hash === '#/portales/kinesis' && ventana().MT.store.obtener().rol === 'orientacion');
+  // ---- fin espacio ----
   // El tono: el sentido humano y pedagógico primero, sin culpar a la docencia ni nombrar a otras empresas
   await ir('#/'); await espera(300);
   // ---- entrada ---- (cambió: el sentido, los tres términos y las leyes pasaron del cuerpo del inicio al plegable «Saber más»; se despliega antes de leer el texto.
@@ -501,7 +521,7 @@ async function flujo() {
   try { traza.push('paso 13: ' + ventana().MT.db.lista('actividades').length + '/' + (localStorage.getItem('mosaicotelar.v2') || '').length); } catch (e) { /* aún sin app */ }
   // 13. Nada de código ni de repositorio a la vista, en ninguna pantalla
   let enlacesRepo = 0; let textoCodigo = 0;
-  for (const r of ['#/', '#/mi', '#/portales', '#/guia/docente', '#/hoja/propuesta', '#/hoja/arquitectura', '#/mapa/conexiones', '#/recorrido/roles', '#/valeria/conexion', '#/hoja', '#/piloto', '#/identidad']) {
+  for (const r of ['#/', '#/mi/resumen', '#/portales', '#/guia/docente', '#/hoja/propuesta', '#/hoja/arquitectura', '#/mapa/conexiones', '#/recorrido/roles', '#/valeria/conexion', '#/hoja', '#/piloto', '#/identidad']) {
     await ir(r); await espera(150);
     enlacesRepo += doc().querySelectorAll('a[href*="github.com"], a[href*="githubusercontent"]').length + [...doc().querySelectorAll('iframe')].filter((f) => !f.closest('.vivos') || !Object.values(ventana().MT.config.portales).includes(f.getAttribute('src'))).length;
     if (/\bGitHub\b|repositorio|código fuente|Código público/i.test(doc().body.innerText)) textoCodigo += 1;
@@ -535,10 +555,12 @@ async function flujo() {
   afirmar('hay siete formas de acompañamiento y tres rutas posibles', doc().querySelectorAll('.servicio').length === 7 && doc().querySelectorAll('#app .plan-tarjeta').length === 3);
   afirmar('implementación, asesoría y acompañamiento figuran entre los servicios', ['Implementación', 'Asesoría pedagógica', 'Acompañamiento del piloto', 'Capacitación'].every((t) => textoPagina().includes(t)));
   // Las funciones Pro se ven con candado y solo explican
-  await comoRol('coordinacion', '#/mi'); await espera(250);
+  await comoRol('coordinacion', '#/mi/resumen'); await espera(250);
   const pros = [...doc().querySelectorAll('.nav-pro')];
   afirmar('coordinación ve lo que viene como "próximamente" en su menú', pros.length === 3 && pros.every((b) => /Próximamente/.test(b.textContent)), String(pros.length));
-  afirmar('lo que ya funciona sigue desbloqueado: sus secciones siguen siendo enlaces', doc().querySelectorAll('.nav-lateral a').length === 4);
+  // ---- espacio ---- Por qué: la barra lateral se volvió subnavegación (modo presentación y enlaces directos).
+  afirmar('lo que ya funciona sigue desbloqueado: sus secciones siguen siendo enlaces', doc().querySelectorAll('.subnav > a').length === 4);
+  // ---- fin espacio ----
   pros[0].click(); await espera(250);
   afirmar('lo que viene explica qué es, dice que está en desarrollo y ofrece que le avisen', /En desarrollo/.test(doc().querySelector('dialog[open]') ? doc().querySelector('dialog[open]').innerText : '') && !!enDialogo('Quiero que me avisen'));
   doc().querySelector('dialog[open]').close(); await espera(150);
@@ -757,7 +779,7 @@ async function flujo() {
 
 // Las pantallas en modo presentación: tamaños de proyector (1920x1080, 1280x720) y celular, en los dos temas.
 const TAMANOS_PRES = [[1920, 1080], [1280, 720], [390, 844]];
-const RUTAS_PRES = [[null, '#/'], [null, '#/mi'], [null, '#/portales'], [null, '#/portales/kinesis'], [null, '#/portales/wisfox'], ['docente', '#/mi/ajustes'], ['estudiante', '#/mi/resumen'], [null, '#/recorrido/camino']];
+const RUTAS_PRES = [[null, '#/'], [null, '#/mi/resumen'], [null, '#/portales'], [null, '#/portales/kinesis'], [null, '#/portales/wisfox'], ['docente', '#/mi/ajustes'], ['estudiante', '#/mi/resumen'], [null, '#/recorrido/camino']];
 
 // Lo que además se mide cuando el modo presentación está activo.
 function medirPresentacion(ancho) {
@@ -859,7 +881,7 @@ async function flujoDemostracion() {
   afirmar('presentación: Alt+P lo vuelve a activar', D().documentElement.dataset.presentacion === 'activa' && visible(guion()));
   afirmar('presentación: sin Alt, la tecla p no activa nada (no choca con quien escribe)', (() => { D().dispatchEvent(new (ventana().KeyboardEvent)('keydown', { code: 'KeyP', key: 'p', bubbles: true })); return D().documentElement.dataset.presentacion === 'activa'; })());
   // Recordar el modo al recargar
-  await cargar('#/mi', 1280, 720); await espera(500);
+  await cargar('#/mi/resumen', 1280, 720); await espera(500);
   afirmar('presentación: recargar la página no saca del modo (y recuerda el paso)', D().documentElement.dataset.presentacion === 'activa' && visible(guion()) && MTw().presentacion.paso() === pasos.length - 3);
 
   /* ===== 2. Reinicio de un clic ===== */
@@ -900,9 +922,9 @@ async function flujoDemostracion() {
   const rr = resp('kinesis').getBoundingClientRect();
   afirmar('sin conexión: el respaldo ocupa el lugar del portal (no es una cajita)', rr.width > ventana().innerWidth * 0.6 && rr.height > 250, Math.round(rr.width) + 'x' + Math.round(rr.height));
   const tr = resp('kinesis').innerText;
-  afirmar('sin conexión: el respaldo explica qué pasa y qué sigue funcionando', /se abre desde internet/.test(tr) && /Lo que sigue funcionando/i.test(tr) && /Mi espacio/.test(tr) && /datos de ejemplo/.test(tr) && /se guarda en este dispositivo/.test(tr), tr);
+  afirmar('sin conexión: el respaldo explica qué pasa y qué sigue funcionando', /se abre desde internet/.test(tr) && /Lo que sigue funcionando/i.test(tr) && /La guía/.test(tr) && /ejemplos preparados/.test(tr), tr);   // espacio: ya no se promete Mi espacio
   const botonesR = [...resp('kinesis').querySelectorAll('button, a.btn')].map((x) => x.textContent.trim());
-  afirmar('sin conexión: ofrece ir a Mi espacio, intentar de nuevo y abrir aparte', botonesR.includes('Ver Kinesis en Mi espacio') && botonesR.includes('Intentar de nuevo') && botonesR.includes('Abrir aparte'), botonesR.join());
+  afirmar('sin conexión: ofrece intentar de nuevo y abrir aparte, y ya no ir a Mi espacio', !botonesR.some((x) => /Mi espacio/.test(x)) && botonesR.includes('Intentar de nuevo') && botonesR.includes('Abrir aparte'), botonesR.join());
   afirmar('sin conexión: el aviso del respaldo es amable (sin culpar ni mostrar errores técnicos)', !/error|falló|fallo|culpa|ERR_/i.test(tr));
   [...resp('kinesis').querySelectorAll('button')].find((b) => /Intentar de nuevo/.test(b.textContent)).click(); await espera(400);
   afirmar('sin conexión: "Intentar de nuevo" sin red lo dice y deja el respaldo a la vista', /Todavía no se puede abrir/.test(resp('kinesis').innerText) && visible(resp('kinesis')));
@@ -1012,7 +1034,7 @@ async function flujoDemostracion() {
   ventana().MT.seguridad.comprobar();
   afirmar('robustez: llamarlo dos veces no duplica el panel', D().querySelectorAll('#red-de-seguridad').length === 1);
   // Un error de ejecución que sí deja la pantalla usable: no se tapa
-  await cargar('#/mi', 1280, 800); await espera(500);
+  await cargar('#/mi/resumen', 1280, 800); await espera(500);
   ventana().dispatchEvent(new (ventana().ErrorEvent)('error', { message: 'prueba' })); await espera(900);
   afirmar('robustez: un error suelto con la pantalla usable no la tapa', !D().getElementById('red-de-seguridad'));
   // Teclado: todo control visible se alcanza con Tab (ninguno con tabindex negativo)
@@ -1297,13 +1319,16 @@ async function flujoEntrada() {
   for (const [texto, id, mascota] of [['Soy estudiante', 'estudiante', 'Wisfox'], ['Soy docente', 'docente', 'Kinesis'], ['Soy familia', 'familia', 'Kinesis'], ['Soy de orientación', 'orientacion', 'Kinesis']]) {
     await cargar('#/', 390, 844); await espera(350);
     const b = [...D().querySelectorAll('#ent-quien button')].find((x) => x.textContent.includes(texto)); b.click(); await espera(350);
-    afirmar(`entrada: elegir «${texto}» avanza solo a su guía, guarda el rol y la acompaña ${mascota}`, W().location.hash === '#/guia/' + id && MTw().store.obtener().rol === id && new RegExp('Te acompaña ' + mascota).test((D().querySelector('.ent-companera') || {}).textContent || ''), W().location.hash);
+    // espacio: «¿Quién eres?» lleva directo al portal del rol (ya no a la guía); la guía y su compañera se abren aparte.
+    afirmar(`entrada: elegir «${texto}» avanza solo a su portal, guarda el rol y queda marcado como «tu portal»`, W().location.hash === '#/portales/' + (id === 'estudiante' ? 'wisfox' : 'kinesis') && MTw().store.obtener().rol === id && !!D().querySelector('.riel .riel-item--principal'), W().location.hash);
+    await ir('#/guia/' + id); await espera(250);
+    afirmar(`entrada: la guía de «${texto}» la acompaña ${mascota}`, new RegExp('Te acompaña ' + mascota).test((D().querySelector('.ent-companera') || {}).textContent || ''));
   }
   const compa = D().querySelector('.ent-companera').getBoundingClientRect();
   afirmar('entrada: la compañera de la guía es discreta en el celular (menos de 96 px de alto: con la frase de su mascota ocupa dos líneas) y no tapa el título', compa.height < 96 && compa.bottom <= D().querySelector('main h1').getBoundingClientRect().top + 2, Math.round(compa.height) + ' px');
   localStorage.clear(); await cargar('#/', 390, 844); await espera(350);
   [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(300);
-  afirmar('entrada: coordinación sigue disponible como enlace discreto', W().location.hash === '#/guia/coordinacion');
+  afirmar('entrada: coordinación sigue disponible como enlace discreto (lleva a Kinesis)', W().location.hash === '#/portales/kinesis');
 
   // ---- historia ---- Por qué: la entrada y las guías cuentan una sola historia (bienvenida, reto, guía, acción, logro) con la voz de MT.narrativa; se mide que
   // responda en todos los contextos y roles, que sea corta y sin nombres viejos, y que cada ejemplo recorra el arco en pequeño.
@@ -1417,7 +1442,7 @@ async function flujoMovil() {
 
   // ---- ligera ---- Móvil: una sola navegación de máximo cuatro ítems, sin desborde, en los dos estados (sin rol y con rol).
   // ---- niky ---- (cambió: Niky ya no es un ítem de la barra inferior; es el botón flotante que se apoya sobre ella, así que la barra queda con tres ítems)
-  for (const [rolM, esperado] of [[null, 'Inicio|Elegir rol|Más'], ['docente', 'Kinesis|Mi espacio|Más'], ['estudiante', 'Wisfox|Mi espacio|Más']]) {
+  for (const [rolM, esperado] of [[null, 'Kinesis|Wisfox|Guía|Más'], ['docente', 'Kinesis (tu portal)|Wisfox|Guía|Más'], ['estudiante', 'Wisfox (tu portal)|Kinesis|Guía|Más']]   /* espacio: cuatro ítems (≤ 4) */) {
     // ---- fin niky ----
     localStorage.clear(); await cargar('#/mapa', 390, 844); await espera(300);
     if (rolM) { ventana().MT.store.cambiar((s) => { s.rol = rolM; }); await espera(150); }

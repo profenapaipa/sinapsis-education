@@ -102,7 +102,7 @@
         { rol: 'familia', hash: '#/mi/resumen', titulo: 'La familia ve la novedad', texto: 'Solo aparece lo ya aprobado, con su razón y en lenguaje sencillo.' },
         { rol: 'estudiante', hash: '#/mi/resumen', titulo: 'El estudiante recibe la actividad a su medida', texto: 'La practica, responde el quiz y gana logros a su ritmo.' },
         { rol: 'docente', hash: '#/mi/resumen', titulo: 'La docencia ve el progreso', texto: 'Con lo que pasó, decide el siguiente paso. El ciclo vuelve a empezar.' },
-        { rol: '', hash: '#/portales', titulo: 'Los tres portales', texto: 'Kinesis, Niky y Wisfox son los proyectos de los que nace esta plataforma. Aquí se ven juntos.' },
+        { rol: '', hash: '#/guia', titulo: 'Los tres portales', texto: 'Kinesis, Niky y Wisfox son los proyectos de los que nace esta plataforma. Aquí se ven juntos.' },
       ],
     },
   };

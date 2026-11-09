@@ -83,7 +83,7 @@
     const items = document.getElementById('riel-items'); const abajo = document.getElementById('riel-abajo');
     dinamico = h('span', { class: 'riel-dinamico' });
     // Niky: un único botón, siempre el mismo. Abre el panel lateral de la IA (el lugar fijo de Niky), que se trabaja aparte.
-    const niky = h('button', { class: 'riel-item', id: 'btn-ia', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'slot-ia', 'data-espacio': 'valeria' }, marca('valeria'), 'Niky');
+    const niky = h('button', { class: 'riel-ia', id: 'btn-ia', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'slot-ia', 'data-espacio': 'valeria' }, marca('valeria'), 'Niky');
     niky.addEventListener('click', () => MT.ia.panel.alternar());
     items.append(dinamico, niky);
     menuMas = document.getElementById('menu-mas');

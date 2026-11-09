@@ -78,7 +78,8 @@
     const c = pagina(main, { etiqueta: 'Guía', titulo: 'Tu guía de inicio rápido', descripcion: 'Elige tu rol y mira los pasos. Cada paso dice en qué portal ocurre; para hacerlo, abre ese portal.', rol,
       ruta: [{ t: MT.nombre, href: '#/' }, { t: 'Guía', href: '#/guia' }, { t: r.nombre }], volver: { href: '#/guia', texto: 'Volver a la guía' } });
     // La mascota del rol acompaña la guía (una fila pequeña sobre el título). La entrada de js/entrada.js la dibuja; aquí solo se le da sitio.
-    // La mascota del rol ya está en la cabecera única (comun.js); no hace falta una compañera aparte.
+    // Además de la mascota de la cabecera, la frase de acompañamiento de la entrada («Te acompaña …») va bajo la línea, igual que antes.
+    if (MT.entrada && MT.comun.cabActual) MT.comun.cabActual.poner({ extra: MT.entrada.companera(rol) });
     c.append(pestanasRol(rol));
     c.append(h('section', { class: 'siguiente-banner' },
       h('div', null, h('p', { class: 'etiqueta' }, 'Tu meta como ' + r.nombre.toLowerCase()), h('h2', null, g.meta), h('p', null, 'Tu portal principal es ' + PORTALES[g.principal].nombre + '.')),
