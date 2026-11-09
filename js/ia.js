@@ -67,12 +67,18 @@
     const limpio = recortar(tarea, texto);
     if (info.modo === 'servidor') {
       try {
+        // iafuente: disenar y ajustar pueden tardar hasta 20 s en el peor caso (el servidor reintenta una vez si Gemini se cuelga; lo normal son 2 s).
+        // Con el tope de 10 s se veria el texto de ejemplo aunque la IA habria respondido. Mientras tanto el chat muestra «Niky esta pensando…».
+        const espera = ['disenar', 'ajustar'].includes(tarea) ? Math.max(cfg.espera || 0, 22000) : (cfg.espera || 8000);
+        // Perfil: el codigo del estudiante del caso en pantalla (8A-NN). El servidor arma de ahi el perfil de apoyos; el texto del perfil nunca viaja desde la pagina.
+        const caso = MT.casos && MT.casos.activo ? MT.casos.activo() : null;
+        const perfil = caso && /^8A-\d\d$/.test(caso.estudiante || '') && ['ajustar', 'ayuda', 'orientar', 'familia'].includes(tarea) ? caso.estudiante : null;
         const r = await fetch((cfg.base || '') + '/api/valeria', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           // El servidor conoce seis tareas; las preguntas guía de las burbujas viajan como «general».
-          body: JSON.stringify({ tarea: ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar'].includes(tarea) ? tarea : 'general', texto: limpio }),
-          signal: AbortSignal.timeout((cfg.espera || 8000) + 2000),
+          body: JSON.stringify({ tarea: ['disenar', 'ajustar', 'ayuda', 'orientar', 'familia', 'coordinar'].includes(tarea) ? tarea : 'general', texto: limpio, ...(perfil ? { perfil } : {}) }),
+          signal: AbortSignal.timeout(espera + 2000),
         });
         if (!r.ok) throw new Error('servidor ' + r.status);
         const d = await r.json();
