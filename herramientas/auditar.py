@@ -146,7 +146,7 @@ def correr_arnes(navegador, puerto):
     proc = subprocess.Popen([navegador, '--headless=new', '--disable-gpu', '--hide-scrollbars', f'--user-data-dir={perfil}', url],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
-        limite = time.time() + 600
+        limite = time.time() + 1200   # casos2: el arnés suma 30 recorridos del tutorial y los de casos2; con 600 s se acababa el tiempo
         while Silencioso.resultado is None and time.time() < limite:
             time.sleep(1)
     finally:
@@ -155,7 +155,7 @@ def correr_arnes(navegador, puerto):
         else:
             proc.terminate()
     if Silencioso.resultado is None:
-        raise RuntimeError('El arnés no devolvió resultados en 10 minutos.')
+        raise RuntimeError('El arnés no devolvió resultados en 20 minutos.')
     return Silencioso.resultado
 
 
