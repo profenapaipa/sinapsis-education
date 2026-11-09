@@ -266,6 +266,30 @@
     programar();
   }
 
+  /* Niky como la única IA de los portales. Kinesis y Wisfox son aplicaciones aparte, dentro de un marco: cuando una persona toca allí «apoyo con IA»,
+     la aplicación avisa a la plataforma con un mensaje y es Niky quien abre la conversación. Contrato acordado con el equipo de Kinesis:
+       window.parent.postMessage({ tipo: 'niky:abrir', portal: 'kinesis' | 'wisfox', tarea: '<id corto>', contexto: '<texto>' | { rol, pantalla, borrador } }, 'https://profenapaipa.github.io')
+     Solo se atienden mensajes de ese origen, del tipo exacto y de un portal conocido; el texto se recorta y nunca se ejecuta ni se inserta como HTML. */
+  const ORIGEN_PORTALES = 'https://profenapaipa.github.io';
+  const TAREAS_PORTAL = {
+    'ordenar-nota-bitacora': (c) => 'Ayúdame a ordenar esta nota de bitácora' + (c ? ': ' + c : '.'),
+    'ajustar-actividad': (c) => 'Ayúdame a ajustar esta actividad' + (c ? ': ' + c : '.'),
+    'pista': (c) => 'Dame una pista' + (c ? ' sobre: ' + c : '.'),
+    'explicar': (c) => 'Explícame esto con otras palabras' + (c ? ': ' + c : '.'),
+  };
+  function alMensajeDePortal(e) {
+    if (e.origin !== ORIGEN_PORTALES) return;
+    const d = e.data;
+    if (!d || typeof d !== 'object' || d.tipo !== 'niky:abrir' || !['kinesis', 'wisfox'].includes(d.portal)) return;
+    const tarea = typeof d.tarea === 'string' ? d.tarea.slice(0, 60) : '';
+    const c = d.contexto;
+    const contexto = (typeof c === 'string' ? c : c && typeof c === 'object' && typeof c.borrador === 'string' ? c.borrador : '').replace(/\s+/g, ' ').trim().slice(0, 200);
+    const armar = TAREAS_PORTAL[tarea];
+    ocultarBurbuja(false);
+    MT.ia.panel.abrir({ texto: armar ? armar(contexto) : (contexto || 'Necesito ayuda con esta pantalla.'), tarea: 'general' });
+  }
+  window.addEventListener('message', alMensajeDePortal);
+
   MT.niky = { CONTEXTOS, dondeEstoy, sugerencias, saludo, emocion, ocultarBurbuja, mostrarBurbuja };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })(window.MT = window.MT || {});

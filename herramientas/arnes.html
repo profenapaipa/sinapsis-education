@@ -735,6 +735,21 @@ async function flujo() {
     afirmar('carrusel: con ?caso= (exposición guiada) no aparece', !c());
     localStorage.clear(); await cargar('#/', 1280, 800); await espera(300);
   }
+  // ---- niky:abrir ---- Por qué: Niky es la única IA; Kinesis y Wisfox le avisan con un mensaje entre ventanas (contrato en js/niky.js).
+  {
+    localStorage.clear(); await cargar('#/', 1280, 800); await espera(500);
+    const W2 = ventana(); const ventanaN = () => doc().getElementById('slot-ia');
+    const enviar = (datos, origen) => W2.dispatchEvent(new W2.MessageEvent('message', { data: datos, origin: origen }));
+    enviar({ tipo: 'niky:abrir', portal: 'kinesis', tarea: 'ordenar-nota-bitacora', contexto: { rol: 'docente', pantalla: 'bitacora', borrador: 'hoy trabajamos fracciones' } }, 'https://otro-sitio.example'); await espera(400);
+    afirmar('niky:abrir: un mensaje de otro origen se ignora', ventanaN().hidden);
+    enviar({ tipo: 'otra-cosa', portal: 'kinesis' }, 'https://profenapaipa.github.io'); enviar({ tipo: 'niky:abrir', portal: 'inventado' }, 'https://profenapaipa.github.io'); await espera(300);
+    afirmar('niky:abrir: un tipo o un portal desconocidos se ignoran', ventanaN().hidden);
+    enviar({ tipo: 'niky:abrir', portal: 'kinesis', tarea: 'ordenar-nota-bitacora', contexto: { rol: 'docente', pantalla: 'bitacora', borrador: 'hoy trabajamos fracciones <b>x</b>' } }, 'https://profenapaipa.github.io'); await espera(1500);
+    afirmar('niky:abrir: desde un portal válido abre a Niky con la tarea', !ventanaN().hidden && /ordenar esta nota de bitácora/i.test(ventanaN().innerText) && /fracciones/.test(ventanaN().innerText), ventanaN().innerText.slice(0, 120));
+    afirmar('niky:abrir: el texto recibido no se inserta como HTML', !ventanaN().querySelector('b'));
+    W2.MT.ia.panel.cerrar();
+  }
+  // ---- fin niky:abrir ----
   // ---- fin carrusel ----
   // ---- fin logo (agente de marca) ----
   // ---- mascotas ----
