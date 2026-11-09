@@ -259,6 +259,21 @@ async function flujo() {
     afirmar('espacio: todas las vistas comparten la misma cabecera (mascota a 56 px, dónde estoy, un solo h1)', malas.length === 0, malas.join(' '));
     afirmar('espacio: sin desborde horizontal en las vistas unificadas', fuera.length === 0, fuera.join(' '));
   }
+  // Decisión del dueño: no hay un «Mi espacio» como destino. #/mi pelado redirige al portal del rol; las rutas #/mi/<sección> quedan para la exposición guiada.
+  await ir('#/mi'); await espera(300);
+  afirmar('espacio: #/mi fuera del modo presentación lleva al portal del rol (docente: Kinesis)', ventana().location.hash === '#/portales/kinesis', ventana().location.hash);
+  { const malos = [];
+    for (const r of ['#/', '#/guia', '#/guia/docente', '#/mapa', '#/planes', '#/hoja', '#/glosario', '#/recorrido', '#/portales/kinesis']) {
+      await ir(r); await espera(120);
+      const e = [...doc().querySelectorAll('a[href^="#/mi"], .riel a[href*="/mi"], #menu-mas a[href*="/mi"]')].filter((x) => !x.closest('.franja-guia'));
+      const b = [...doc().querySelectorAll('main button')].filter((x) => /Mi espacio/.test(x.textContent));
+      if (e.length || b.length) malos.push(r);
+    }
+    afirmar('espacio: ningún enlace ni botón visible lleva a Mi espacio fuera de la exposición guiada', malos.length === 0, malos.join(' '));
+    await ir('#/guia'); await espera(150);
+    afirmar('espacio: la Guía es solo lectura (sin formularios, campos ni quizes) y enlaza a Kinesis y Wisfox', !doc().querySelector('main form, main input, main textarea, main select') && !!hallar('Abrir Kinesis') && !!hallar('Abrir Wisfox'));
+    afirmar('espacio: el riel conserva el ítem Guía como actual en #/guia', !!doc().querySelector('.riel a[data-ruta="guia"][aria-current="page"]'));
+  }
   // ---- fin espacio ----
   // ---- ligera ---- sitio previsto para la mascota del rol: existe en el encabezado, vacío y sin ocupar lugar hasta que llegue MT.mascotas.
   // ---- espacio ---- Por qué: el .companero-rol ahora lo llena la cabecera única con la mascota del rol a 56 px.
