@@ -88,24 +88,144 @@
     return 'general';
   }
 
-  async function consultar(texto, tareaForzada) {
+  /* ---------------------------------------------------------------- sesiones: una conversación por tarea
+     El estado guarda s.ia = { sesiones: [{ id, titulo, tarea, mensajes, nuevo }], activa }. Antes era solo la lista de mensajes; como hay
+     estados viejos en el navegador de la gente (y como js/casos.js todavía hace `s.ia = []` para empezar limpio), TODA lectura pasa por
+     sesionesDe(s): si encuentra la forma antigua o nada, la convierte sin perder mensajes (pasan a la primera sesión, «Conversación»). */
+  const MAX_SESIONES = 5;
+  const MAX_MENSAJES = 30;
+  const idNuevo = () => 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const TITULOS = {
+    'ordenar-nota-bitacora': 'Ordenar nota de bitácora', 'ajustar-actividad': 'Ajustar actividad', pista: 'Pista', explicar: 'Explicar',
+    general: 'Duda libre', libre: 'Duda libre', ajustar: 'Ajustar actividad', disenar: 'Diseñar actividad', ayuda: 'Ayuda', apoyos: 'Apoyos',
+    revisar: 'Revisar ajuste', 'explicar-familia': 'Explicar a la familia', casa: 'En casa', progreso: 'Mi ruta', portales: 'Portales',
+    mapa: 'Mapa', estado: 'Estado', planes: 'Participar', piloto: 'Piloto', 'que-es': 'Qué es esto', empezar: 'Por dónde empezar', pantalla: 'Esta pantalla',
+  };
+  function tituloDe(tarea) {
+    if (TITULOS[tarea]) return TITULOS[tarea];
+    const t = String(tarea || '').replace(/[-_]+/g, ' ').trim();
+    return t ? (t.charAt(0).toUpperCase() + t.slice(1)).slice(0, 28) : 'Conversación';
+  }
+  const mensajesValidos = (l) => (Array.isArray(l) ? l.filter((m) => m && typeof m === 'object' && typeof m.texto === 'string') : []);
+
+  function sesionesDe(s) {
+    let ia = s.ia;
+    if (Array.isArray(ia)) ia = s.ia = { sesiones: [{ id: idNuevo(), titulo: 'Conversación', tarea: null, mensajes: mensajesValidos(ia), nuevo: false }], activa: '' };
+    else if (!ia || typeof ia !== 'object' || !Array.isArray(ia.sesiones)) ia = s.ia = { sesiones: [], activa: '' };
+    ia.sesiones = ia.sesiones.filter((x) => x && typeof x === 'object').slice(0, MAX_SESIONES);
+    for (const x of ia.sesiones) {
+      if (typeof x.id !== 'string' || !x.id) x.id = idNuevo();
+      x.titulo = typeof x.titulo === 'string' && x.titulo ? x.titulo.slice(0, 40) : 'Conversación';
+      x.mensajes = mensajesValidos(x.mensajes);
+      x.tarea = typeof x.tarea === 'string' && x.tarea ? x.tarea : null;
+      x.nuevo = !!x.nuevo;
+    }
+    if (!ia.sesiones.length) ia.sesiones.push({ id: idNuevo(), titulo: 'Conversación', tarea: null, mensajes: [], nuevo: false });
+    if (!ia.sesiones.some((x) => x.id === ia.activa)) ia.activa = ia.sesiones[0].id;
+    return ia;
+  }
+  const sesionActiva = (s) => { const ia = sesionesDe(s); return ia.sesiones.find((x) => x.id === ia.activa); };
+  const hayMensajes = (s) => sesionesDe(s).sesiones.some((x) => x.mensajes.length > 0);
+  const sinLeer = (s) => sesionesDe(s).sesiones.filter((x) => x.nuevo).length;
+
+  /* Borradores y posición de lectura de cada pestaña. Viven en memoria (no en el estado guardado): un borrador a medias no vale la pena
+     escribirlo en cada pulsación, y al recargar la página se parte limpio. Se podan cuando la pestaña desaparece. */
+  const memoria = new Map();
+  const recuerdo = (id) => { if (!memoria.has(id)) memoria.set(id, { borrador: '', scroll: null }); return memoria.get(id); };
+  const ocupadas = new Set();         // sesiones esperando respuesta
+  let chatsSueltos = 0;               // chats montados fuera de la ventana (la pantalla propia de Niky): ahí la respuesta ya se está viendo
+
+  const aviso = (texto) => window.dispatchEvent(new CustomEvent('mt-ia-aviso', { detail: { texto } }));
+  const cara = (emocion, ms) => { try { if (MT.niky && MT.niky.emocion) MT.niky.emocion(emocion, ms); } catch (e) { /* sin botón: no pasa nada */ } };
+
+  /* Abre o reutiliza la pestaña de una tarea. `tarea` es la clave (la misma tarea siempre cae en la misma pestaña), `titulo` es opcional.
+     Si ya hay 5 y la tarea es nueva, el mensaje va a la pestaña activa: es mejor eso que borrar la conversación de alguien. */
+  function asegurarSesion({ tarea, titulo } = {}) {
+    let id = null;
+    MT.store.cambiar((s) => {
+      const ia = sesionesDe(s);
+      const clave = tarea || null;
+      let x = clave && ia.sesiones.find((y) => y.tarea === clave);
+      if (!x && clave) {
+        // La conversación vacía sin tarea (la de siempre al abrir por primera vez) se aprovecha en vez de dejarla huérfana.
+        const vacia = ia.sesiones.length === 1 && !ia.sesiones[0].tarea && !ia.sesiones[0].mensajes.length ? ia.sesiones[0] : null;
+        if (vacia) { x = vacia; x.tarea = clave; x.titulo = (titulo || tituloDe(clave)).slice(0, 40); }
+        else if (ia.sesiones.length < MAX_SESIONES) { x = { id: idNuevo(), titulo: (titulo || tituloDe(clave)).slice(0, 40), tarea: clave, mensajes: [], nuevo: false }; ia.sesiones.push(x); }
+        else aviso('Ya hay ' + MAX_SESIONES + ' pestañas. Cierra una para abrir otra; esta pregunta va a la pestaña actual.');
+      }
+      if (!x) x = ia.sesiones.find((y) => y.id === ia.activa);
+      ia.activa = x.id; x.nuevo = false; id = x.id;
+    });
+    return id;
+  }
+  function nuevaSesion() {
+    let id = null;
+    MT.store.cambiar((s) => {
+      const ia = sesionesDe(s);
+      if (ia.sesiones.length >= MAX_SESIONES) { aviso('Ya hay ' + MAX_SESIONES + ' pestañas. Cierra una para abrir otra.'); id = ia.activa; return; }
+      const x = { id: idNuevo(), titulo: 'Duda libre', tarea: null, mensajes: [], nuevo: false };
+      ia.sesiones.push(x); ia.activa = x.id; id = x.id;
+    });
+    return id;
+  }
+  function activarSesion(id) {
+    MT.store.cambiar((s) => { const ia = sesionesDe(s); const x = ia.sesiones.find((y) => y.id === id); if (x) { ia.activa = id; x.nuevo = false; } });
+  }
+  function cerrarSesion(id) {
+    MT.store.cambiar((s) => {
+      const ia = sesionesDe(s);
+      const i = ia.sesiones.findIndex((y) => y.id === id);
+      if (i < 0 || ia.sesiones.length === 1) return;     // la última no se cierra: siempre queda dónde escribir
+      ia.sesiones.splice(i, 1);
+      if (ia.activa === id) { ia.activa = ia.sesiones[Math.min(i, ia.sesiones.length - 1)].id; ia.sesiones.find((y) => y.id === ia.activa).nuevo = false; }
+    });
+    memoria.delete(id); ocupadas.delete(id);
+  }
+
+  /* Una pregunta en una pestaña. `sesionId` se fija al enviar: si la persona cambia de pestaña mientras Niky responde, la respuesta llega
+     a la pestaña donde se preguntó, no a la que se esté viendo. */
+  async function consultar(texto, tareaForzada, sesionId) {
     const st = MT.store;
     const tarea = tareaForzada || inferirTarea(texto);
-    st.cambiar((s) => { s.ia.push({ rol: 'yo', texto }); if (s.ia.length > 30) s.ia.shift(); });
-    let respuesta;
-    if (tarea === 'general') {
-      await demora(350);
-      respuesta = { fuente: info.modo === 'servidor' ? 'respaldo' : 'ejemplo', texto: MT.datos.respuestasIA.general };
-    } else {
-      const base = tarea === 'ajustar' ? (st.obtener().actividad || texto) : texto;
-      respuesta = await preguntar({ tarea, texto: base });
-    }
+    const sid = sesionId || sesionActiva(st.obtener()).id;
+    let existe = true;
     st.cambiar((s) => {
-      s.ia.push({ rol: 'ia', texto: respuesta.texto, fuente: respuesta.fuente });
-      if (s.ia.length > 30) s.ia.shift();
+      const x = sesionesDe(s).sesiones.find((y) => y.id === sid);
+      if (!x) { existe = false; return; }
+      x.mensajes.push({ rol: 'yo', texto }); if (x.mensajes.length > MAX_MENSAJES) x.mensajes.shift();
+      ocupadas.add(sid);
+    });
+    if (!existe) return null;
+    cara('pensando');
+    let respuesta; let fallo = false;
+    try {
+      if (tarea === 'general') {
+        await demora(350);
+        respuesta = { fuente: info.modo === 'servidor' ? 'respaldo' : 'ejemplo', texto: MT.datos.respuestasIA.general };
+      } else {
+        const base = tarea === 'ajustar' ? (st.obtener().actividad || texto) : texto;
+        respuesta = await preguntar({ tarea, texto: base });
+      }
+    } catch (e) {
+      fallo = true;
+      respuesta = { fuente: 'respaldo', texto: 'No pude responder ahora. Intenta de nuevo en un momento.' };
+    }
+    ocupadas.delete(sid);
+    st.cambiar((s) => {
+      const ia = sesionesDe(s);
+      const x = ia.sesiones.find((y) => y.id === sid);
+      if (x) {
+        x.mensajes.push({ rol: 'ia', texto: respuesta.texto, fuente: respuesta.fuente });
+        if (x.mensajes.length > MAX_MENSAJES) x.mensajes.shift();
+        // Una respuesta que nadie está viendo queda marcada: de ahí sale el contador del botón.
+        x.nuevo = !(ia.activa === sid && (panel.abierto || chatsSueltos > 0));
+      }
       MT.store.logro('ia');
       if (tarea === 'disenar') s.actividad = respuesta.texto;
     });
+    // La cara del botón: duda si hubo error o respaldo; si no, celebra un momento y vuelve a reposo.
+    if (fallo || respuesta.fuente === 'respaldo') { cara('contento'); cara('duda', 3500); }
+    else { cara('contento'); cara('celebra', 2500); }
     return respuesta;
   }
 
@@ -115,10 +235,13 @@
       : h('span', { class: 'sello sello--aviso' }, 'Simulada');
   }
 
-  /* El chat. Se monta en cualquier contenedor; cada instancia se suscribe al estado compartido. */
-  function montarChat(contenedor, sugerencias) {
+  /* El chat. Se monta en cualquier contenedor y muestra la pestaña activa; cada instancia se suscribe al estado compartido.
+     `opciones.enVentana` lo pone la ventana de Niky: quien monta el chat fuera de ella (la pantalla propia de Niky) cuenta como
+     «viendo» las respuestas, y por eso no las marca como sin leer. */
+  function montarChat(contenedor, sugerencias, opciones) {
     const st = MT.store;
-    let ocupado = false;
+    const enVentana = !!(opciones && opciones.enVentana);
+    let mostrada = null;            // id de la pestaña pintada, para guardar su borrador y su posición al cambiar
     const estadoEl = h('div', { class: 'chat__estado' });
     const lista = h('div', { class: 'chat__mensajes', role: 'log', 'aria-live': 'polite', 'aria-label': 'Conversación con Niky' });
     const chips = h('div', { class: 'chat__sugerencias' });
@@ -126,57 +249,69 @@
     const boton = h('button', { class: 'btn', type: 'submit' }, 'Enviar');
     const form = h('form', { class: 'chat__form', 'aria-label': 'Mensaje para Niky', onsubmit: (e) => { e.preventDefault(); mandar(campo.value); } }, campo, boton);
     campo.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); mandar(campo.value); } });
+    campo.addEventListener('input', () => { if (mostrada) recuerdo(mostrada).borrador = campo.value; });
+    lista.addEventListener('scroll', () => {
+      if (!mostrada) return;
+      // Pegado al final se recuerda como «null»: así una pestaña que sigue recibiendo mensajes se queda abajo y no en una posición vieja.
+      recuerdo(mostrada).scroll = lista.scrollHeight - lista.scrollTop - lista.clientHeight < 8 ? null : lista.scrollTop;
+    });
 
     async function mandar(texto, tarea) {
       const limpio = String(texto || '').trim();
-      if (!limpio || ocupado) return;
-      ocupado = true; boton.disabled = true; campo.value = '';
-      await consultar(limpio, tarea);
-      ocupado = false; boton.disabled = false;
-      // La respuesta se pintó cuando todavía estaba «ocupado»: sin este repintado «Niky está pensando…» quedaba junto a la respuesta.
-      pintarMensajes(st.obtener());
+      const sid = sesionActiva(st.obtener()).id;
+      if (!limpio || ocupadas.has(sid)) return;
+      campo.value = ''; recuerdo(sid).borrador = '';
+      await consultar(limpio, tarea, sid);
     }
 
     function pintarEstado() {
       estadoEl.replaceChildren(chipModo(), h('span', { class: 'suave' },
         info.modo === 'servidor' ? 'Respuestas de un modelo de lenguaje.' : 'Respuestas de ejemplo. Se conectará a un modelo real.'));
     }
-    function pintarMensajes(s) {
+    function pintar(s) {
+      const x = sesionActiva(s);
+      if (mostrada !== x.id) {
+        // Cambio de pestaña: se guarda el borrador de la anterior (ya se guarda al escribir) y se recupera el de la nueva.
+        mostrada = x.id; campo.value = recuerdo(x.id).borrador;
+      }
       const nodos = [];
-      if (!s.ia.length) {
+      if (!x.mensajes.length) {
         nodos.push(h('div', { class: 'msg msg--ia' }, ricoTexto('Hola, soy **Niky**, la guía de ' + MT.nombre + '. Puedo ayudar al docente a diseñar una actividad y al estudiante a resolver sus dudas. Todo lo que respondo es una propuesta: decide quien enseña.')));
       }
-      for (const m of s.ia) {
+      for (const m of x.mensajes) {
         nodos.push(h('div', { class: 'msg msg--' + m.rol }, ricoTexto(m.texto),
           m.rol === 'ia' && m.fuente ? h('small', null, m.fuente === 'ejemplo' ? 'Respuesta de ejemplo' : m.fuente === 'respaldo' ? 'Respuesta de respaldo' : 'Generada en vivo') : null));
       }
+      const ocupado = ocupadas.has(x.id);
       if (ocupado) nodos.push(h('div', { class: 'msg msg--ia' }, 'Niky está pensando…'));
+      boton.disabled = ocupado;
       lista.replaceChildren(...nodos);
-      lista.scrollTop = lista.scrollHeight;
+      const r = recuerdo(x.id);
+      lista.scrollTop = r.scroll == null ? lista.scrollHeight : r.scroll;
     }
     function pintarChips() {
       chips.replaceChildren(...(sugerencias || []).map((sug) =>
         h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => mandar(sug.texto, sug.tarea) }, sug.etiqueta)));
     }
 
-    const repintar = (s) => pintarMensajes(s);
-    const desuscribir = st.suscribir(repintar);
+    const desuscribir = st.suscribir(pintar);
     const alModo = () => pintarEstado();
     window.addEventListener('mt-ia-modo', alModo);
+    if (!enVentana) chatsSueltos++;
 
     contenedor.replaceChildren(h('div', { class: 'chat' }, estadoEl, lista, chips, form));
-    pintarEstado(); pintarChips(); pintarMensajes(st.obtener());
+    pintarEstado(); pintarChips(); pintar(st.obtener());
 
     return {
       enviar: mandar,
       foco: () => campo.focus(),
-      destruir() { desuscribir(); window.removeEventListener('mt-ia-modo', alModo); },
+      destruir() { desuscribir(); window.removeEventListener('mt-ia-modo', alModo); if (!enVentana) chatsSueltos = Math.max(0, chatsSueltos - 1); },
     };
   }
 
   /* La ventana de Niky: el lugar fijo de la IA en todos los espacios. Sigue siendo el aside #slot-ia (así los casos, el modo presentación y
      los botones «Pedir ideas a Niky» no cambian), pero ahora es una ventana flotante y NO modal, junto al botón de js/niky.js: la persona
-     puede seguir leyendo la pantalla mientras conversa. El estilo está en css/niky.css. */
+     puede seguir leyendo la pantalla mientras conversa. Arriba lleva las pestañas, una por tarea. El estilo está en css/niky.css. */
   const panel = {
     chat: null,
     abierto: false,
@@ -195,19 +330,92 @@
       return [{ etiqueta: 'Diseñar una actividad', texto: 'Necesito una actividad de 20 minutos para enseñar el present simple a grado 8.º.', tarea: 'disenar' },
               { etiqueta: 'Explicar la s del verbo', texto: 'No entiendo cuándo se le pone la s al verbo.', tarea: 'ayuda' }];
     },
+
+    /* La barra de pestañas (WAI-ARIA tabs con activación al enfocar). Una pestaña es un botón role=tab; su «×» es un botón aparte, hermano,
+       porque un botón dentro de otro no es válido. Solo la pestaña activa y su «×» están en el orden de Tab (roving tabindex): se entra con
+       Tab, se recorre con las flechas, Inicio/Fin saltan a los extremos y Supr cierra. */
+    construirPestanas() {
+      const barra = h('div', { class: 'pestanas' });
+      const lista = h('div', { class: 'pestanas__lista', role: 'tablist', 'aria-label': 'Tareas con Niky' });
+      const mas = h('button', { class: 'pestanas__mas', type: 'button', 'aria-label': 'Nueva pestaña', title: 'Nueva pestaña', onclick: () => { nuevaSesion(); this.chat && this.chat.foco(); } }, '+');
+      const anuncio = h('div', { class: 'solo-lectores', 'aria-live': 'polite', role: 'status' });
+      barra.append(lista, mas, anuncio);
+      const decir = (t) => { anuncio.textContent = ''; setTimeout(() => { anuncio.textContent = t; }, 30); };
+      window.addEventListener('mt-ia-aviso', (e) => decir(e.detail.texto));
+
+      const pintar = (s) => {
+        const ia = sesionesDe(s);
+        // Lo que ya no existe se olvida (borradores de pestañas cerradas o de un «Empezar de nuevo»).
+        const vivas = new Set(ia.sesiones.map((x) => x.id));
+        for (const k of [...memoria.keys()]) if (!vivas.has(k)) memoria.delete(k);
+        const hadFoco = lista.contains(document.activeElement) ? document.activeElement : null;
+        const enfocadaId = hadFoco ? (hadFoco.closest('[data-id]') || {}).dataset : null;
+        lista.replaceChildren(...ia.sesiones.map((x) => {
+          const activa = x.id === ia.activa;
+          const t = h('button', { class: 'pestana' + (x.nuevo ? ' pestana--nueva' : ''), type: 'button', role: 'tab', id: 'pestana-' + x.id, 'aria-selected': String(activa),
+            'aria-controls': 'cuerpo-ia', tabindex: activa ? '0' : '-1', title: x.titulo + (ia.sesiones.length > 1 ? ' (Supr cierra la pestaña)' : ''), onclick: () => activarSesion(x.id) },
+            h('span', { class: 'pestana__texto' }, x.titulo),
+            x.nuevo ? h('span', { class: 'pestana__punto', 'aria-label': 'respuesta nueva' }) : null);
+          const c = ia.sesiones.length > 1
+            ? h('button', { class: 'pestana__cerrar', type: 'button', 'aria-label': 'Cerrar la pestaña ' + x.titulo, tabindex: activa ? '0' : '-1', onclick: () => {
+              const i = ia.sesiones.findIndex((y) => y.id === x.id); const vecina = ia.sesiones[i + 1] || ia.sesiones[i - 1];
+              cerrarSesion(x.id); decir('Pestaña ' + x.titulo + ' cerrada.');
+              const d = document.getElementById('pestana-' + (activa ? sesionActiva(MT.store.obtener()).id : (vecina && vecina.id))); if (d) d.focus();
+            } }, '×')
+            : null;
+          return h('div', { class: 'pestana-par' + (activa ? ' pestana-par--activa' : ''), role: 'presentation', 'data-id': x.id }, t, c);
+        }));
+        const cuerpo = document.getElementById('cuerpo-ia');
+        if (cuerpo) { cuerpo.setAttribute('role', 'tabpanel'); cuerpo.setAttribute('aria-labelledby', 'pestana-' + ia.activa); }
+        mas.disabled = ia.sesiones.length >= MAX_SESIONES;
+        mas.title = mas.disabled ? 'Máximo ' + MAX_SESIONES + ' pestañas' : 'Nueva pestaña';
+        const act = lista.querySelector('[aria-selected="true"]');
+        if (act && lista.scrollTo && lista.scrollWidth > lista.clientWidth) { const par = act.parentNode; lista.scrollLeft = Math.max(0, par.offsetLeft - 8); }
+        if (enfocadaId && !lista.contains(document.activeElement)) { const d = document.getElementById('pestana-' + ia.activa); if (d) d.focus(); }
+      };
+      lista.addEventListener('keydown', (e) => {
+        const tabs = [...lista.querySelectorAll('[role="tab"]')];
+        const i = tabs.indexOf(document.activeElement);
+        if (i < 0) return;
+        let j = null;
+        if (e.key === 'ArrowRight') j = (i + 1) % tabs.length;
+        else if (e.key === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+        else if (e.key === 'Home') j = 0;
+        else if (e.key === 'End') j = tabs.length - 1;
+        else if (e.key === 'Delete' && tabs.length > 1) {
+          e.preventDefault();
+          const id = tabs[i].id.slice('pestana-'.length); const vecina = tabs[i + 1] || tabs[i - 1];
+          cerrarSesion(id); decir('Pestaña cerrada.');
+          const d = document.getElementById(vecina.id); if (d) d.focus();
+          return;
+        }
+        if (j == null) return;
+        e.preventDefault();
+        activarSesion(tabs[j].id.slice('pestana-'.length));
+        const d = document.getElementById(tabs[j].id); if (d) d.focus();
+      });
+      MT.store.suscribir(pintar);
+      pintar(MT.store.obtener());
+      return barra;
+    },
+
+    /* Abre la ventana. opciones: { texto, tarea, sesion: { id, titulo } }.
+       Con `sesion` (Kinesis y Wisfox, vía niky:abrir) o con una `tarea`, se abre o REUSA la pestaña de esa tarea y el primer mensaje va allí;
+       sin ninguna de las dos se muestra la pestaña que ya estaba activa. */
     abrir(opciones) {
       const slot = document.getElementById('slot-ia');
       if (!slot) return;
       // Quién la abrió: al cerrar, el foco vuelve ahí (el botón flotante, o el botón «Pedir ideas a Niky» que se tocó).
       const activo = document.activeElement;
       if (!this.abierto && activo && activo !== document.body && !slot.contains(activo)) this.quienAbrio = activo;
-      if (!this.chat) {
+      if (!this.cuerpo) {
         let avatar;
         try { avatar = MT.mascotas.mascota('niky', { tamano: 40, emocion: 'contento' }); } catch (e) { avatar = marca('valeria'); }
         const cab = h('div', { class: 'panel-ia__cab' }, avatar, h('h2', { id: 'titulo-panel-ia' }, 'Niky'),
           h('button', { class: 'btn btn--chico btn--suave cerrar', type: 'button', 'aria-label': 'Cerrar la conversación con Niky', onclick: () => this.cerrar() }, 'Cerrar'));
-        const cuerpo = h('div', { class: 'panel-ia__cuerpo' });
-        slot.replaceChildren(cab, cuerpo);
+        const cuerpo = h('div', { class: 'panel-ia__cuerpo', id: 'cuerpo-ia', role: 'tabpanel' });
+        slot.replaceChildren(cab, this.construirPestanas(), cuerpo);
+        cuerpo.setAttribute('aria-labelledby', 'pestana-' + sesionActiva(MT.store.obtener()).id);
         // No modal: no atrapa el foco ni tapa la pantalla. Tiene nombre y Escape la cierra desde cualquier punto de su interior.
         slot.setAttribute('role', 'dialog');
         slot.setAttribute('aria-modal', 'false');
@@ -215,13 +423,18 @@
         slot.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); this.cerrar(); } });
         this.cuerpo = cuerpo;
       }
+      // Primero se decide la pestaña (esto también la marca como leída) y luego se monta el chat sobre ella.
+      const sesion = opciones && opciones.sesion;
+      const clave = sesion && sesion.id ? sesion.id : (opciones && opciones.texto && opciones.tarea) || null;
+      if (clave) asegurarSesion({ tarea: clave, titulo: sesion && sesion.titulo });
+      else MT.store.cambiar((s) => { sesionActiva(s).nuevo = false; });
       if (this.chat) this.chat.destruir();
-      this.chat = montarChat(this.cuerpo, this.sugerenciasPara());
-      slot.hidden = false;
       this.abierto = true;
+      slot.hidden = false;
+      this.chat = montarChat(this.cuerpo, this.sugerenciasPara(), { enVentana: true });
       const btn = document.getElementById('btn-ia');
       if (btn) btn.setAttribute('aria-expanded', 'true');
-      if (opciones && opciones.texto) { this.chat.enviar(opciones.texto, opciones.tarea); this.chat.foco(); }
+      if (opciones && opciones.texto) { this.chat.enviar(opciones.texto, opciones.sesion ? (opciones.tarea || 'general') : opciones.tarea); this.chat.foco(); }
       else this.chat.foco();
     },
     cerrar() {
@@ -241,5 +454,6 @@
     alternar() { this.abierto ? this.cerrar() : this.abrir(); },
   };
 
-  MT.ia = { info, detectar, puedeHaberServidor, preguntar, consultar, montarChat, panel, chipModo };
+  const sesiones = { MAX: MAX_SESIONES, de: sesionesDe, activa: sesionActiva, hayMensajes, sinLeer, asegurar: asegurarSesion, nueva: nuevaSesion, activar: activarSesion, cerrar: cerrarSesion, titulo: tituloDe };
+  MT.ia = { info, detectar, puedeHaberServidor, preguntar, consultar, montarChat, panel, chipModo, sesiones };
 })(window.MT = window.MT || {});

@@ -17,7 +17,7 @@
   const PASOS = [
     { rol: 'Orientación', rolId: 'orientacion', titulo: 'Se registran los apoyos de un estudiante', texto: 'Orientación marca qué le sirve, sin diagnóstico.', ir: 'estudiantes', hecho: (s) => s.estudiantes.some((e) => e.apoyos.length) },
     { rol: 'Docente', rolId: 'docente', titulo: 'El docente publica una actividad', texto: 'Planeada con los tres principios del DUA y con su quiz.', ir: 'actividades', hecho: (s) => s.actividades.some((a) => a.estado === 'publicada') },
-    { rol: 'Docente', rolId: 'docente', titulo: 'Pide ideas a Niky', texto: 'La guía propone; decide quien enseña.', ir: 'actividades', hecho: (s) => s.ia.length > 0 },
+    { rol: 'Docente', rolId: 'docente', titulo: 'Pide ideas a Niky', texto: 'La guía propone; decide quien enseña.', ir: 'actividades', hecho: (s) => MT.ia.sesiones.hayMensajes(s) },
     { rol: 'Docente', rolId: 'docente', titulo: 'Se ajusta al perfil', texto: 'Cada apoyo se vuelve un cambio concreto, con su razón.', ir: 'ajustes', hecho: (s) => s.ajustes.length > 0 },
     { rol: 'Orientación', rolId: 'orientacion', titulo: 'Orientación aprueba', texto: 'Nada llega al estudiante ni a la familia sin esta decisión.', ir: 'ajustes', hecho: (s) => s.ajustes.some((a) => a.estado === 'aprobado') },
     { rol: 'Familia', rolId: 'familia', titulo: 'La familia ve el proceso', texto: 'Se entera mientras ocurre, no en la entrega de notas.', ir: 'resumen', hecho: (s) => s.eventos.some((e) => e.familia && /aprob/i.test(e.texto)) },

@@ -149,7 +149,9 @@
   }
   function pintarAvatar(emocion) {
     if (!boton) return;
+    const cuenta = boton.querySelector('.niky-boton__cuenta');   // el contador de sin leer sobrevive al cambio de cara
     boton.replaceChildren(avatar(emocion));
+    if (cuenta) boton.append(cuenta);
     boton.dataset.emocion = emocion;
   }
   // Un momento de otra cara y de vuelta a la de reposo; así el botón acompaña sin quedarse "atascado" en una emoción.
@@ -238,19 +240,22 @@
     // El modo presentación y el modo amplio lo esconden con CSS; aquí solo se retira la burbuja pendiente.
     new MutationObserver(() => { if (bloqueado()) ocultarBurbuja(false); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-presentacion', 'data-amplio'] });
 
-    // La cara del botón sigue la conversación: piensa mientras responde, y se muestra dudosa si la respuesta vino de respaldo.
+    /* La cara del botón la mueve js/ia.js mientras conversa (piensa, celebra, duda). Aquí solo se cuida el contador de respuestas sin leer:
+       un número discreto sobre el botón que cuenta las pestañas con respuesta nueva. Va dentro del propio botón para que el lector de
+       pantalla lo diga en su nombre («2 respuestas nuevas»). */
     if (MT.store && MT.store.suscribir) {
-      // Se compara el último mensaje (no la cantidad): el historial tiene tope de 30 y al llenarse la cantidad ya no cambia.
-      let anterior = MT.store.obtener().ia.slice(-1)[0];
-      MT.store.suscribir((s) => {
-        const ultimo = s.ia[s.ia.length - 1];
-        if (ultimo === anterior) return;
-        anterior = ultimo;
-        if (!ultimo) return;
-        if (ultimo.rol === 'yo') emocion('pensando');
-        else if (ultimo.fuente === 'respaldo') emocion('duda', 3500);
-        else emocion('contento');
-      });
+      let contado = -1;
+      const contar = (s) => {
+        const n = MT.ia && MT.ia.sesiones ? MT.ia.sesiones.sinLeer(s) : 0;
+        if (n === contado) return;
+        contado = n;
+        const previa = boton.querySelector('.niky-boton__cuenta');
+        if (previa) previa.remove();
+        if (n > 0) boton.append(h('span', { class: 'niky-boton__cuenta', 'aria-hidden': 'true' }, String(n)));
+        boton.setAttribute('aria-label', NOMBRE_BOTON + (n > 0 ? ' (' + n + (n === 1 ? ' respuesta nueva' : ' respuestas nuevas') + ')' : ''));
+      };
+      MT.store.suscribir(contar);
+      contar(MT.store.obtener());
     }
     window.addEventListener('mt-niky-emocion', (e) => { if (e.detail && e.detail.emocion) emocion(e.detail.emocion, e.detail.ms || 3000); });
   }
@@ -286,7 +291,9 @@
     const contexto = (typeof c === 'string' ? c : c && typeof c === 'object' && typeof c.borrador === 'string' ? c.borrador : '').replace(/\s+/g, ' ').trim().slice(0, 200);
     const armar = TAREAS_PORTAL[tarea];
     ocultarBurbuja(false);
-    MT.ia.panel.abrir({ texto: armar ? armar(contexto) : (contexto || 'Necesito ayuda con esta pantalla.'), tarea: 'general' });
+    // Cada tarea del portal tiene su pestaña: la misma tarea reutiliza la suya y otra tarea abre una nueva (máximo 5).
+    const id = tarea.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'general';
+    MT.ia.panel.abrir({ texto: armar ? armar(contexto) : (contexto || 'Necesito ayuda con esta pantalla.'), tarea: 'general', sesion: { id } });
   }
   window.addEventListener('message', alMensajeDePortal);
 
