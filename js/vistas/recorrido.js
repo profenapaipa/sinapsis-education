@@ -23,7 +23,7 @@
     { rol: 'Familia', rolId: 'familia', titulo: 'La familia ve el proceso', texto: 'Se entera mientras ocurre, no en la entrega de notas.', ir: 'resumen', hecho: (s) => s.eventos.some((e) => e.familia && /aprob/i.test(e.texto)) },
     { rol: 'Estudiante', rolId: 'estudiante', titulo: 'El estudiante la resuelve', texto: 'Recibe la actividad a su medida y completa el quiz.', ir: 'resumen', hecho: (s) => Object.values(s.progreso).some((p) => Object.keys(p.quiz).length) },
   ];
-  const irA = (x) => { st.cambiar((s) => { s.rol = x.rolId; }); location.hash = '#/mi/' + x.ir; };
+  const irA = (x) => { st.cambiar((s) => { s.rol = x.rolId; }); location.hash = '#/portales/' + MT.roles.por(x.rolId).marca; };
 
   function camino(c) {
     const s = st.obtener();
@@ -60,7 +60,7 @@
           h('div', null, h('h3', null, 'Puedes'), h('ul', null, r.haces.map((x) => h('li', null, x)))),
           h('div', null, h('h3', null, 'No puedes'), h('ul', null, r.noHaces.map((x) => h('li', null, x))))),
         h('p', null, h('strong', null, 'Recibes: '), r.recibes), h('p', null, h('strong', null, 'Entregas: '), r.entregas),
-        h('button', { class: 'btn btn--chico', type: 'button', onclick: () => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/mi'; } }, r.boton)))));
+        h('button', { class: 'btn btn--chico', type: 'button', onclick: () => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/portales/' + r.marca; } }, r.boton)))));
   }
 
   function datos(c) {

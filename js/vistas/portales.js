@@ -10,7 +10,10 @@
   const st = MT.store;
 
   const irPortal = (id) => { location.hash = '#/portales/' + id; };
-  const botonPortal = (id, clase) => h('button', { class: 'btn ' + (clase || ''), type: 'button', onclick: () => irPortal(id) }, 'Ir a ' + PORTALES[id].nombre);
+  // «Guía» solo informa: todo lo que se hace se hace dentro de Kinesis y Wisfox, así que sus botones llevan al portal.
+  const botonPortal = (id, clase) => h('button', { class: 'btn ' + (clase || ''), type: 'button', onclick: () => irPortal(id) }, 'Abrir ' + PORTALES[id].nombre);
+  const pestanasRol = (rol) => h('nav', { class: 'pestanas-pagina', 'aria-label': 'Pasos por rol' }, h('a', { href: '#/guia', 'aria-current': !rol ? 'page' : null }, 'Los portales'),
+    MT.roles.lista.map((x) => h('a', { href: '#/guia/' + x.id, 'aria-current': x.id === rol ? 'page' : null }, x.nombre)));
 
   // Un ajuste recorriendo los tres portales: cada paso cae en el carril donde ocurre.
   const FLUJO = [
@@ -26,8 +29,9 @@
   ];
 
   function vistaPortales(main) {
-    const c = pagina(main, { etiqueta: 'Portales', titulo: 'Tres portales, una sola plataforma',
-      descripcion: 'Kinesis, Niky y Wisfox trabajan en paralelo y se pasan el trabajo entre sí. Desde el menú lateral entras al portal de tu rol; aquí están los tres, y puedes tener varios abiertos y volver a cada uno sin perder lo que hacías.' });
+    const c = pagina(main, { etiqueta: 'Guía', titulo: 'Cómo se usa ' + MT.nombre,
+      descripcion: 'Kinesis y Wisfox son los dos portales donde se trabaja; Niky es la ayuda con IA, el botón flotante. Esta guía solo explica: no guarda nada ni pide datos.' });
+    c.append(pestanasRol(null));
 
     c.append(h('div', { class: 'rejilla rejilla--3 portales' }, ORDEN.map((id) => { const p = PORTALES[id]; return h('article', { class: 'tarjeta portal', 'data-espacio': id },
       h('div', { class: 'proyecto-cab' }, marca(id), h('div', null, h('h2', null, p.nombre), h('small', null, p.rotulo))),
@@ -37,7 +41,7 @@
       // Plegado (sinergia de contenido): cada tarjeta dice primero qué es y para quién; lo que se hace ahí queda a un clic.
       h('details', { class: 'plegable plegable--tarjeta' }, h('summary', null, 'Qué haces ahí'), h('ul', null, p.haces.map((x) => h('li', null, x)))),
       h('p', { class: 'portal__entrega' }, p.entrega),
-      h('div', { class: 'acciones' }, botonPortal(id), id === 'valeria' ? null : h('a', { class: 'btn btn--suave', href: id === 'kinesis' ? '#/guia' : '#/guia/estudiante' }, 'Cómo usarlo'))); })));
+      h('div', { class: 'acciones' }, id === 'valeria' ? null : botonPortal(id), id === 'valeria' ? null : h('a', { class: 'btn btn--suave', href: id === 'kinesis' ? '#/guia/docente' : '#/guia/estudiante' }, 'Cómo usarlo'))); })));
 
     // Plegado: la pantalla ofrece primero los tres portales; el recorrido paso a paso queda a un clic.
     c.append(h('details', { class: 'plegable', id: 'h-flujo' },
@@ -59,40 +63,46 @@
         ['Una guía común', 'Niky ayuda en los dos portales y nunca recibe información clínica.'],
         ['Una sola identidad', 'Mismo diseño, mismas reglas de privacidad y mismo lenguaje.'],
       ].map(([t, p]) => h('div', { class: 'tarjeta tarjeta--borde' }, h('h3', null, t), h('p', null, p)))),
-      h('p', { class: 'aviso', style: 'margin-top:1rem' }, 'Hoy, “Mi espacio” reúne el trabajo de los tres portales en una sola pantalla, con todo conectado. Kinesis y Wisfox originales siguen siendo aplicaciones de sus equipos, con sus propios datos: compartir los datos entre ellas es el trabajo del servidor central de la hoja de ruta.'),
-      h('div', { class: 'acciones' }, h('a', { class: 'btn', href: '#/guia' }, 'Mi guía de inicio rápido'), h('a', { class: 'btn btn--suave', href: '#/mapa/conexiones' }, 'Ver el mapa de módulos'))));
+      h('p', { class: 'aviso', style: 'margin-top:1rem' }, 'Kinesis y Wisfox siguen siendo aplicaciones de sus equipos, con sus propios datos: compartir los datos entre ellas es el trabajo del servidor central de la hoja de ruta.'),
+      h('div', { class: 'acciones' }, h('a', { class: 'btn btn--suave', href: '#/mapa/conexiones' }, 'Ver el mapa de módulos'))));
+    // Preguntas frecuentes, plegadas y con lo que la plataforma ya dice en otros sitios (no se repiten textos: se reusan).
+    c.append(h('details', { class: 'plegable', id: 'h-faq' }, h('summary', null, 'Preguntas frecuentes'),
+      h('h3', null, '¿Qué es un ajuste?'), MT.guias.notaAjuste(),
+      h('h3', null, '¿Quién ve qué?'), h('p', null, 'Cada rol ve solo lo suyo. ', h('a', { href: '#/recorrido' }, 'Roles y datos')),
+      h('h3', null, '¿Qué significa cada sigla?'), h('p', null, h('a', { href: '#/glosario' }, 'Glosario'))));
   }
 
   /* ---------------- Guía de inicio rápido por rol ---------------- */
   function vistaGuia(main, { sub }) {
     const rol = sub; const r = MT.roles.por(rol); const g = GUIA[rol];
-    const c = pagina(main, { etiqueta: 'Inicio rápido', titulo: 'Tu guía de inicio rápido', descripcion: 'Elige tu rol y sigue los pasos. Cada paso dice en qué portal ocurre y te lleva a él.', rol });
+    const c = pagina(main, { etiqueta: 'Guía', titulo: 'Tu guía de inicio rápido', descripcion: 'Elige tu rol y mira los pasos. Cada paso dice en qué portal ocurre; para hacerlo, abre ese portal.', rol,
+      ruta: [{ t: MT.nombre, href: '#/' }, { t: 'Guía', href: '#/guia' }, { t: r.nombre }], volver: { href: '#/guia', texto: 'Volver a la guía' } });
     // La mascota del rol acompaña la guía (una fila pequeña sobre el título). La entrada de js/entrada.js la dibuja; aquí solo se le da sitio.
     // La mascota del rol ya está en la cabecera única (comun.js); no hace falta una compañera aparte.
-    c.append(h('nav', { class: 'pestanas-pagina', 'aria-label': 'Elige tu rol' }, MT.roles.lista.map((x) => h('a', { href: '#/guia/' + x.id, 'aria-current': x.id === rol ? 'page' : null }, x.nombre))));
+    c.append(pestanasRol(rol));
     c.append(h('section', { class: 'siguiente-banner' },
       h('div', null, h('p', { class: 'etiqueta' }, 'Tu meta como ' + r.nombre.toLowerCase()), h('h2', null, g.meta), h('p', null, 'Tu portal principal es ' + PORTALES[g.principal].nombre + '.')),
-      h('div', { class: 'acciones' }, botonPortal(g.principal), h('button', { class: 'btn btn--suave', type: 'button', onclick: () => MT.guias.irAqui(rol, 'resumen') }, 'Trabajar en Mi espacio'))));
+      h('div', { class: 'acciones' }, botonPortal(g.principal))));
     c.append(MT.guias.notaAjuste());
     c.append(h('ol', { class: 'guia-pasos' }, g.pasos.map((p, i) => h('li', { class: 'tarjeta guia-paso', 'data-espacio': p.portal },
       h('span', { class: 'n', 'aria-hidden': 'true' }, String(i + 1)),
       h('div', { class: 'guia-paso__texto' }, h('p', { class: 'etiqueta' }, 'En ' + PORTALES[p.portal].nombre), h('h3', null, p.t), h('p', null, p.d)),
       h('div', { class: 'acciones' },
-        p.aqui ? h('button', { class: 'btn btn--chico', type: 'button', onclick: () => MT.guias.irAqui(rol, p.aqui) }, 'Hacerlo aquí') : null,
-        h('button', { class: 'btn btn--chico btn--suave', type: 'button', 'aria-label': 'Ir a ' + PORTALES[p.portal].nombre + ', paso ' + (i + 1), onclick: () => irPortal(p.portal) }, 'Ir a ' + PORTALES[p.portal].nombre))))));
-    c.append(h('p', { class: 'suave' }, '“Ir a” muestra el portal aquí mismo, dentro de la plataforma. “Hacerlo aquí” lo hace en Mi espacio, la versión que reúne los tres. ', h('a', { href: '#/portales' }, 'Ver qué hace cada portal')));
+        h('button', { class: 'btn btn--chico btn--suave', type: 'button', 'aria-label': 'Abrir ' + PORTALES[p.portal].nombre + ', paso ' + (i + 1), onclick: () => irPortal(p.portal) }, 'Abrir ' + PORTALES[p.portal].nombre))))));
+    c.append(h('p', { class: 'suave' }, '“Abrir” muestra el portal aquí mismo, dentro de la plataforma. ', h('a', { href: '#/guia' }, 'Ver qué hace cada portal')));
   }
 
+  /* #/portales (general) quedó como #/guia: la página informativa es una sola. Los portales siguen en #/portales/<id>. */
   const TABS = [{ id: 'general' }, { id: 'kinesis' }, { id: 'valeria' }, { id: 'wisfox' }];
   MT.router.registrar({
     id: 'portales', titulo: 'Portales', subs: TABS,
     espacio: (sub) => (ORDEN.includes(sub) ? sub : ''),
-    render(main, { sub }) { if (sub === 'general') vistaPortales(main); else MT.vivos.mostrar(sub); },
+    render(main, { sub }) { if (sub === 'general') { location.replace('#/guia'); return; } MT.vivos.mostrar(sub); },
   });
+  // #/guia es la página informativa (los portales y cómo se conectan); #/guia/<rol> son los pasos de cada rol, también solo de lectura.
   MT.router.registrar({
-    id: 'guia', titulo: 'Inicio rápido', espacio: '',
-    // La guía abre en el rol de quien la lee; los demás quedan a un clic.
-    subs: () => { const a = st.obtener().rol; const l = MT.roles.lista.map((x) => ({ id: x.id })); return a ? [l.find((x) => x.id === a), ...l.filter((x) => x.id !== a)] : l; },
-    render: vistaGuia,
+    id: 'guia', titulo: 'Guía', espacio: '',
+    subs: () => [{ id: 'general' }, ...MT.roles.lista.map((x) => ({ id: x.id }))],
+    render(main, { sub }) { if (sub === 'general') vistaPortales(main); else vistaGuia(main, { sub }); },
   });
 })(window.MT = window.MT || {});

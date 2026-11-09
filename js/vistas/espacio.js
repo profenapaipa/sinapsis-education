@@ -461,7 +461,7 @@
   function elegirRol(main) {
     const c = MT.comun.pagina(main, { etiqueta: 'Mi espacio', titulo: '¿Quién eres?', descripcion: 'Elige tu rol. Cada uno ve y hace cosas distintas, y todo lo que haces queda en este navegador.' });
     // Cinco opciones compactas: una ficha por rol, con el color de uno de los hilos y un ícono pequeño. Cada una es un botón y se lee completa.
-    c.append(h('div', { class: 'rejilla rejilla--3 rol-opciones' }, MT.roles.lista.map((r) => h('button', { class: 'tarjeta rol-opcion', type: 'button', onclick: () => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/mi'; } },
+    c.append(h('div', { class: 'rejilla rejilla--3 rol-opciones' }, MT.roles.lista.map((r) => h('button', { class: 'tarjeta rol-opcion', type: 'button', onclick: () => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/portales/' + r.marca; } },
       h('span', { class: 'rol-icono' }, icono(r.icono)), h('strong', null, r.nombre), h('span', { class: 'suave' }, r.lema)))));
   }
 
@@ -471,6 +471,11 @@
     subs: () => (S().rol ? SECCIONES[S().rol] : null),
     render(main, { sub }) {
       const rol = S().rol;
+      /* #/mi pelado ya no es un destino (decisión del dueño: no hay un tercer espacio que le quite la interactividad a Kinesis y Wisfox). Fuera
+         del modo presentación lleva al portal del rol, o a Kinesis si no hay rol. Las rutas #/mi/<sección> siguen: la exposición guiada
+         (casos y modo presentación) las usa y también quien llegue por enlace directo. */
+      const presentando = (MT.presentacion && MT.presentacion.activo()) || /[?&]caso=\d+/.test(location.search) || /^#\/caso\//.test(location.hash);
+      if (!presentando && !/^#\/mi\/./.test(location.hash)) { location.replace('#/portales/' + ((rol && MT.roles.por(rol).marca) || 'kinesis')); return; }
       if (!rol) return elegirRol(main);
       const r = MT.roles.por(rol);
       const contenido = MT.comun.espacio(main, { nombre: 'Mi espacio', descripcion: r.nombre, ruta: 'mi', tabs: SECCIONES[rol].concat(MT.plan.PRO_NAV[rol] || []), sub, rolId: rol });
