@@ -310,7 +310,7 @@
       const ventosas = Pierna.map((d) => [0.5, 0.72, 0.9].map((t) => { const [x, y] = qEn(d, t); return `<circle class="m-piel2" cx="${f1(x)}" cy="${f1(y)}" r="${t > 0.8 ? 1.4 : 1.8}"/>`; }).join('')).join('');
       // moteado de la piel: manchitas oscuras y claras (los cromatóforos) repartidas por la cabeza, fuera de la cara
       const r = azar(7); let motas = '';
-      for (let i = 0; i < 26; i++) {
+      for (let i = 0; i < 44; i++) {
         const x = 32 + r() * 56, y = 17 + r() * 58, ra = 0.9 + r() * 2.1, claro = r() > 0.55;
         if (((x - 60) / 28) ** 2 + ((y - 48) / 33) ** 2 > 0.82) continue;
         if (y > 40 && x > 38 && x < 82 && y < 74) continue;    // deja libre la cara
