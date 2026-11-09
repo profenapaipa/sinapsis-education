@@ -151,7 +151,7 @@
       // Anteojos: dos aros redondos y separados, con un puente y lente casi transparente. La variante con ∞ está apagada (ver ANTEOJOS_INFINITO).
       const gafas = ANTEOJOS_INFINITO
         ? `<path class="m-gafa" d="M60 52 C56 41 33 41 33 52 C33 63 56 63 60 52 C64 41 87 41 87 52 C87 63 64 63 60 52 Z"/>`
-        : `<path class="m-gafa" d="M57 50 Q60 46.5 63 50" fill="none"/><circle class="m-gafa" cx="46" cy="52" r="11.5"/><circle class="m-gafa" cx="74" cy="52" r="11.5"/>`;
+        : `<path class="m-puente" d="M57 50 Q60 46.5 63 50"/><circle class="m-gafa" cx="46" cy="52" r="11.5"/><circle class="m-gafa" cx="74" cy="52" r="11.5"/>`;
       return `<ellipse class="m-t m-piel" cx="60" cy="99" rx="25" ry="18"/>`
         + franjas + `<g transform="rotate(4 50 88)">${cola}</g>`
         + `<circle class="m-t m-piel" cx="31" cy="25" r="11.5"/><circle class="m-t m-piel" cx="89" cy="25" r="11.5"/>`
@@ -171,7 +171,7 @@
         .map(([x, y]) => `<circle class="m-piel2" cx="${x}" cy="${y}" r="1.9"/>`).join('');
       // El hilo sale de la punta del tentáculo izquierdo y cuelga en una vuelta. Va antes del brazo para que la punta lo agarre.
       const [x, y] = p.mano;
-      const lana = `<path class="m-t" d="M${x} ${y} c-2 8 -14 10 -17 3 c-3 -6 3 -11 8 -6 c3 3 -1 7 -4 5" stroke-width="8"/><path d="M${x} ${y} c-2 8 -14 10 -17 3 c-3 -6 3 -11 8 -6 c3 3 -1 7 -4 5" stroke="var(--hilo-kinesis)" stroke-width="5"/>`;
+      const lana = `<path class="m-t" d="M${x} ${y} c-2 8 -11 9 -13 3 c-2 -5 3 -9 7 -5 c2 3 -1 6 -3 4" stroke-width="8"/><path d="M${x} ${y} c-2 8 -11 9 -13 3 c-2 -5 3 -9 7 -5 c2 3 -1 6 -3 4" stroke="var(--hilo-kinesis)" stroke-width="5"/>`;
       return `<ellipse class="m-t m-piel" cx="60" cy="90" rx="24" ry="12"/>` + tent + ventosas + sombra(85)
         + lana + `<ellipse class="m-t m-piel" cx="60" cy="50" rx="32" ry="33"/>` + LUZ
         + `<circle class="m-crema" cx="52" cy="29" r="3.2" opacity=".5"/><circle class="m-crema" cx="64" cy="25" r="2.4" opacity=".5"/><circle class="m-crema" cx="75" cy="31" r="3" opacity=".5"/>`
