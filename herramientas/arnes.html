@@ -251,9 +251,10 @@ async function flujo() {
   { const rutas = ['#/mi/resumen', '#/mi/actividades', '#/mapa', '#/planes', '#/hoja', '#/glosario', '#/identidad', '#/piloto', '#/guia/docente', '#/recorrido'];
     const malas = []; const fuera = [];
     for (const r of rutas) {
-      await ir(r); ventana().MT.router.recargar(); await espera(150);
+      await ir(r); ventana().MT.router.recargar(); await espera(350);
       const c = doc().querySelector('main .cab-pantalla'); const m = c && c.querySelector('.companero-rol svg');
-      if (!(c && doc().querySelectorAll('main h1').length === 1 && m && m.getAttribute('width') === '56' && c.querySelector('nav[aria-label="Dónde estoy"]'))) malas.push(r);
+      const ok = [!!c, doc().querySelectorAll('main h1').length === 1, !!m && m.getAttribute('width') === '56', !!(c && c.querySelector('nav[aria-label="Dónde estoy"]'))];
+      if (!ok.every(Boolean)) malas.push(r + ' [' + ok.map(Number).join('') + ']');
       if (doc().documentElement.scrollWidth > ventana().innerWidth + 1) fuera.push(r);
     }
     afirmar('espacio: todas las vistas comparten la misma cabecera (mascota a 56 px, dónde estoy, un solo h1)', malas.length === 0, malas.join(' '));
@@ -270,7 +271,7 @@ async function flujo() {
       if (e.length || b.length) malos.push(r);
     }
     afirmar('espacio: ningún enlace ni botón visible lleva a Mi espacio fuera de la exposición guiada', malos.length === 0, malos.join(' '));
-    await ir('#/guia'); await espera(150);
+    await ir('#/guia'); ventana().MT.router.recargar(); await espera(400);
     afirmar('espacio: la Guía es solo lectura (sin formularios, campos ni quizes) y enlaza a Kinesis y Wisfox', !doc().querySelector('main form, main input, main textarea, main select') && !!hallar('Abrir Kinesis') && !!hallar('Abrir Wisfox'));
     afirmar('espacio: el riel conserva el ítem Guía como actual en #/guia', !!doc().querySelector('.riel a[data-ruta="guia"][aria-current="page"]'));
   }
@@ -1340,7 +1341,9 @@ async function flujoEntrada() {
     afirmar(`entrada: la guía de «${texto}» la acompaña ${mascota}`, new RegExp('Te acompaña ' + mascota).test((D().querySelector('.ent-companera') || {}).textContent || ''));
   }
   const compa = D().querySelector('.ent-companera').getBoundingClientRect();
-  afirmar('entrada: la compañera de la guía es discreta en el celular (menos de 96 px de alto: con la frase de su mascota ocupa dos líneas) y no tapa el título', compa.height < 96 && compa.bottom <= D().querySelector('main h1').getBoundingClientRect().top + 2, Math.round(compa.height) + ' px');
+  // ---- espacio ---- Por qué: la compañera ahora va BAJO el título (en la cabecera única, que lleva arriba la mascota de 56 px); lo que se cuida es que no lo tape.
+  afirmar('entrada: la compañera de la guía es discreta en el celular (menos de 96 px de alto: con la frase de su mascota ocupa dos líneas) y no tapa el título', compa.height < 96 && compa.top >= D().querySelector('main h1').getBoundingClientRect().bottom - 2, Math.round(compa.height) + ' px');
+  // ---- fin espacio ----
   localStorage.clear(); await cargar('#/', 390, 844); await espera(350);
   [...D().querySelectorAll('#ent-quien button')].find((x) => /coordinación/.test(x.textContent)).click(); await espera(300);
   afirmar('entrada: coordinación sigue disponible como enlace discreto (lleva a Kinesis)', W().location.hash === '#/portales/kinesis');

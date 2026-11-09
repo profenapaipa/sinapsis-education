@@ -529,3 +529,7 @@ input[type="file"] { width: 100%; font: 400 1rem var(--fuente); color: var(--tin
   .subnav { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; padding-bottom: .2rem; }
   .subnav a { white-space: nowrap; }
 }
+/* espacio: la acción de la cabecera nunca se sale de la pantalla (en el modo presentación a 720p el candado «Exportar PIAR» se salía 18 px). */
+.cab-pantalla__accion { min-width: 0; }
+.cab-pantalla__accion .acciones { margin-top: 0; justify-content: flex-end; flex-wrap: wrap; }
+.cab-pantalla__accion .btn { max-width: 100%; white-space: normal; text-align: center; }

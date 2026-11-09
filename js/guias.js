@@ -88,7 +88,8 @@
     return h('div', { class: 'franja-guia', role: 'region', 'aria-label': 'Tu guía de inicio rápido' },
       h('span', { class: 'franja-guia__texto' }, i >= 0 ? h('span', null, h('strong', null, `Paso ${i + 1} de ${g.pasos.length} de tu guía: `), g.pasos[i].t) : h('span', null, h('strong', null, 'Tu guía: '), g.meta)),
       h('span', { class: 'acciones' }, h('a', { class: 'btn btn--chico btn--suave', href: '#/guia/' + rol }, 'Volver a mi guía'),
-        sig ? h('button', { class: 'btn btn--chico', type: 'button', onclick: () => ir(sig) }, 'Siguiente: ' + sig.t) : null));
+        // «Siguiente» de la guía es secundario: la acción principal de la pantalla es la de la cabecera (una sola acción principal por pantalla).
+        sig ? h('button', { class: 'btn btn--chico btn--suave', type: 'button', onclick: () => ir(sig) }, 'Siguiente: ' + sig.t) : null));
   }
 
   MT.guias = { PORTALES, ORDEN, GUIA, AJUSTE, pasosEn, seccionesEn, franjaDe, notaAjuste, irAqui, rolActual };
