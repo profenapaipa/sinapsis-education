@@ -151,7 +151,9 @@ async function flujo() {
   // ---- espacio ---- (los «tres portales» pasaron a la Guía, que está en el riel)
   afirmar('«Más» alcanza todo lo secundario: portales, mapa, roles y datos, participa, hoja de ruta, glosario, piloto y créditos; Quiénes somos (con Identidad dentro) queda en la lista', ['mapa', 'recorrido', 'planes', 'hoja', 'glosario', 'piloto', 'creditos'].every((id) => enMas.some((x) => x.dataset.ruta === id && x.getClientRects().length)) && enMas.some((x) => x.dataset.ruta === 'quienes'), enMas.map((x) => x.dataset.ruta).join());
   // ---- fin espacio ----
-  afirmar('«Más» reúne también lo de uso ocasional: apariencia y modo presentación', !!doc().getElementById('btn-presentacion') && doc().getElementById('btn-presentacion').getClientRects().length > 0 && doc().getElementById('btn-apariencia').getClientRects().length > 0);
+  // ---- nikylibre ---- Por qué: el modo presentación se reemplazó por el tutorial guiado (decisión del dueño, 9 nov): «Más» ya no trae su botón.
+  afirmar('«Más» reúne también lo de uso ocasional (apariencia) y ya no trae el botón del modo presentación', !doc().getElementById('btn-presentacion') && doc().getElementById('btn-apariencia').getClientRects().length > 0);
+  // ---- fin nikylibre ----
   doc().dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); await espera(100);
   afirmar('Escape cierra «Más» y devuelve el foco a su botón', doc().getElementById('menu-mas').hidden && doc().activeElement === doc().getElementById('btn-mas') && doc().getElementById('btn-mas').getAttribute('aria-expanded') === 'false');
   afirmar('la franja se calmó: un aviso en una línea y un solo botón (el rol)', doc().querySelectorAll('.franja .btn').length === 1 && !!doc().querySelector('.franja .franja-aviso'));
@@ -884,7 +886,19 @@ async function flujo() {
 const TAMANOS_PRES = [[1920, 1080], [1280, 720], [390, 844]];
 const RUTAS_PRES = [[null, '#/'], [null, '#/mi/resumen'], [null, '#/portales'], [null, '#/portales/kinesis'], [null, '#/portales/wisfox'], ['docente', '#/mi/ajustes'], ['estudiante', '#/mi/resumen'], [null, '#/recorrido/camino']];
 
-// Lo que además se mide cuando el modo presentación está activo.
+// ---- nikylibre ---- Por qué: el modo presentación se retiró (lo reemplaza el tutorial guiado). Estas pantallas se siguen midiendo con el
+// estado guardado ANTIGUO ({activo: true}) para comprobar que ya no enciende nada: ni atributo, ni barra del guion, ni letra grande.
+function medirSinPresentacion(ancho) {
+  const d = doc(); const w = ventana(); const e = d.documentElement; const fallos = [];
+  if (e.dataset.presentacion) fallos.push('un estado guardado antiguo volvió a activar el modo presentación');
+  if (d.getElementById('guion-mesa')) fallos.push('la barra del guion se construyó');
+  if (localStorage.getItem('mosaicotelar.presentacion') !== null) fallos.push('el estado antiguo de la presentación no se borró');
+  const letra = parseFloat(w.getComputedStyle(e).fontSize);
+  if (ancho > 860 && letra !== 16) fallos.push(`la letra base debería seguir en 16 px (es ${letra})`);
+  return fallos;
+}
+// ---- fin nikylibre ----
+// Lo que se medía cuando el modo presentación estaba activo (ya no se usa: queda como referencia de lo que comprobaba).
 function medirPresentacion(ancho) {
   const d = doc(); const w = ventana(); const e = d.documentElement; const fallos = [];
   if (e.dataset.presentacion !== 'activa') return ['el modo presentación no quedó activo'];
@@ -914,7 +928,7 @@ async function casosPresentacion() {
     if (rol) localStorage.setItem('mosaicotelar.v2', JSON.stringify({ rol }));
     await cargar(ruta, ancho, alto); await espera(800);
     for (const tema of TEMAS) {
-      const c = medirCaso('presentación ' + (rol ? rol + ' ' : '') + ruta + ' ' + alto + 'p', ancho, tema, () => medirPresentacion(ancho));
+      const c = medirCaso('presentación antigua ' + (rol ? rol + ' ' : '') + ruta + ' ' + alto + 'p', ancho, tema, () => medirSinPresentacion(ancho));   // ---- nikylibre ----
       salida.casos.push(c); await espera(60);
     }
   }
@@ -927,85 +941,40 @@ async function flujoDemostracion() {
   const MTw = () => ventana().MT; const D = () => doc();
   const CINCO = ['coordinacion', 'orientacion', 'docente', 'familia', 'estudiante'];
 
-  /* ===== 1. Modo presentación ===== */
+  /* ===== 1. Modo presentación: retirado, sus entradas llevan al tutorial guiado ===== */
+  // ---- nikylibre ---- Por qué: decisión del dueño (9 nov, feria CCB): la barra del guion era un borrador por aprobar a la vista del público.
+  // El tutorial guiado recorre los mismos ejemplos; aquí se mide que el modo ya no se pueda encender y que el guion de los casos, del que
+  // sale el tutorial, siga sano. Las entradas ?caso= y #/caso/N se prueban en flujoTutorial.
   localStorage.clear();
   await cargar('#/', 1280, 720); await espera(500);
-  const bp = D().getElementById('btn-presentacion');
-  await abrirMas(D());   // ---- ligera: el botón «Modo presentación» vive en el menú «Más», no en la franja ----
-  afirmar('presentación: hay un botón "Modo presentación" en el menú «Más», con su atajo anunciado', !!bp && bp.getAttribute('aria-keyshortcuts') === 'Alt+P' && bp.getAttribute('aria-pressed') === 'false' && visible(bp));
-  afirmar('presentación: sin activarlo, el sitio no cambia (sin atributo ni guion)', !D().documentElement.dataset.presentacion && !D().getElementById('guion-mesa'));
+  await abrirMas(D());
+  afirmar('presentación retirada: no hay botón «Modo presentación» en «Más» ni en la franja', !D().getElementById('btn-presentacion'));
   const letraAntes = parseFloat(ventana().getComputedStyle(D().documentElement).fontSize);
-  bp.click(); await espera(350);
-  const guion = () => D().getElementById('guion-mesa');
-  afirmar('presentación: el botón activa el modo y muestra el guion', D().documentElement.dataset.presentacion === 'activa' && bp.getAttribute('aria-pressed') === 'true' && visible(guion()));
-  afirmar('presentación: la letra crece (a 1280 px, de 16 a 20 px)', letraAntes === 16 && parseFloat(ventana().getComputedStyle(D().documentElement).fontSize) === 20, String(letraAntes));
-  // ---- ligera ---- Por qué: el riel de abajo ya no lleva enlaces de planes ni hoja de ruta (viven en «Más» y el chip «Participa» se oculta en la mesa); lo que se mide es lo mismo: sin pie y sin «Participa».
-  afirmar('presentación: hay menos navegación (sin pie ni enlace de Participa)', !visible(D().querySelector('.pie')) && !visible(D().getElementById('plan-chip')));
-  // ---- fin ligera ----
-  // honestidad (pedido del dueño): ya no se muestra «Guion de la mesa [por aprobar]» al público.
-  afirmar('presentación: el recorrido no muestra la etiqueta de guion ni la marca de borrador', !/\[por aprobar\]|Guion de la mesa/.test(guion().innerText), guion().innerText.slice(0, 80));
+  D().dispatchEvent(new (ventana().KeyboardEvent)('keydown', { code: 'KeyP', key: 'p', altKey: true, bubbles: true })); await espera(250);
+  afirmar('presentación retirada: Alt+P no enciende nada (sin atributo, sin barra del guion y la letra sigue en 16 px)', !D().documentElement.dataset.presentacion && !D().getElementById('guion-mesa') && letraAntes === 16 && parseFloat(ventana().getComputedStyle(D().documentElement).fontSize) === 16);
+  afirmar('presentación retirada: MT.presentacion queda inerte (activo() es falso aunque se llame a alternar)', (() => { MTw().presentacion.alternar(true); return MTw().presentacion.activo() === false && !D().documentElement.dataset.presentacion; })());
   const pasos = MTw().casos.guion(MTw().casos.actual());
-  afirmar('presentación: el guion recorre los cinco roles', CINCO.every((r) => pasos.some((p) => p.rol === r)), pasos.map((p) => p.rol).join());
+  afirmar('guion de los casos: recorre los cinco roles', CINCO.every((r) => pasos.some((p) => p.rol === r)), pasos.map((p) => p.rol).join());
   const malosPasos = pasos.filter((p) => { const [r = 'inicio', sub] = rutaDe(p.hash); const def = MTw().router.rutas[r]; if (!def) return true; if (r === 'mi' && p.rol) return !(MTw().secciones[p.rol] || []).some((s) => s.id === sub); return false; });
-  afirmar('presentación: cada paso del guion lleva a una pantalla y a una sección que existen para su rol', malosPasos.length === 0, malosPasos.map((p) => p.hash + '/' + p.rol).join());
-  const sig = () => [...D().querySelectorAll('#guion-mesa button')].find((b) => b.textContent.trim() === 'Siguiente');
-  const ant = () => [...D().querySelectorAll('#guion-mesa button')].find((b) => b.textContent.trim() === 'Anterior');
-  afirmar('presentación: en el primer paso "Anterior" está desactivado', ant().disabled && !sig().disabled);
-  // Recorre el guion entero: cada paso cambia de rol y de pantalla, y cae en una pantalla con su título.
-  const fallosPaso = [];
-  for (let i = 1; i < pasos.length; i++) {
-    sig().click(); await espera(300);
-    const hubo = ventana().__errores && ventana().__errores.length;
-    const h1 = D().querySelectorAll('main h1').length + [...D().querySelectorAll('main [role="heading"][aria-level="1"]')].filter(visible).length;
-    if (ventana().location.hash !== pasos[i].hash) fallosPaso.push(`${i}: hash ${ventana().location.hash}`);
-    else if (MTw().store.obtener().rol !== pasos[i].rol) fallosPaso.push(`${i}: rol ${MTw().store.obtener().rol}`);
-    else if (h1 !== 1) fallosPaso.push(`${i}: ${h1} títulos`);
-    else if (hubo) fallosPaso.push(`${i}: errores ${ventana().__errores.join('|')}`);
-    else if (!new RegExp(`Paso ${i + 1} de ${pasos.length}`).test(guion().innerText)) fallosPaso.push(`${i}: el guion no marca el paso`);
-  }
-  afirmar(`presentación: "Siguiente" recorre los ${pasos.length} pasos, cada uno en su rol y su pantalla, sin errores`, fallosPaso.length === 0, fallosPaso.join(' ; '));
-  afirmar('presentación: en el último paso "Siguiente" se desactiva y el foco no se pierde', sig().disabled && doc().activeElement !== doc().body);
-  ant().click(); await espera(300);
-  afirmar('presentación: "Anterior" vuelve un paso', ventana().location.hash === pasos[pasos.length - 2].hash && MTw().presentacion.paso() === pasos.length - 2);
-  // Teclado: las flechas cambian de paso con el foco en el guion; Alt+G lleva el foco al guion
-  ant().focus(); ant().dispatchEvent(new (ventana().KeyboardEvent)('keydown', { key: 'ArrowLeft', bubbles: true })); await espera(300);
-  afirmar('presentación: la flecha izquierda, con el foco en el guion, retrocede un paso', MTw().presentacion.paso() === pasos.length - 3, String(MTw().presentacion.paso()));
-  D().body.focus(); D().dispatchEvent(new (ventana().KeyboardEvent)('keydown', { code: 'KeyG', key: 'g', altKey: true, bubbles: true })); await espera(150);
-  afirmar('presentación: Alt+G lleva el foco al guion', !!D().activeElement.closest('#guion-mesa'), D().activeElement.tagName);
-  // El guion se oculta y se vuelve a mostrar; la página recupera el espacio
-  [...D().querySelectorAll('#guion-mesa button')].find((b) => b.textContent.trim() === 'Ocultar guion').click(); await espera(250);
-  const mostrar = D().querySelector('.guion__mostrar');
-  afirmar('presentación: "Ocultar guion" deja solo un botón pequeño para volver a mostrarlo y libera el espacio', visible(mostrar) && !visible(D().querySelector('.guion__cuerpo')) && ventana().getComputedStyle(D().documentElement).getPropertyValue('--guion-alto').trim() === '0px');
-  mostrar.click(); await espera(250);
-  afirmar('presentación: "Mostrar guion" lo devuelve', visible(D().querySelector('.guion__cuerpo')) && !visible(mostrar));
-  // Atajo Alt+P
-  D().dispatchEvent(new (ventana().KeyboardEvent)('keydown', { code: 'KeyP', key: 'p', altKey: true, bubbles: true })); await espera(250);
-  afirmar('presentación: Alt+P desactiva el modo y todo vuelve a como estaba', !D().documentElement.dataset.presentacion && !visible(guion()) && parseFloat(ventana().getComputedStyle(D().documentElement).fontSize) === 16 && bp.getAttribute('aria-pressed') === 'false');
-  D().dispatchEvent(new (ventana().KeyboardEvent)('keydown', { code: 'KeyP', key: 'p', altKey: true, bubbles: true })); await espera(250);
-  afirmar('presentación: Alt+P lo vuelve a activar', D().documentElement.dataset.presentacion === 'activa' && visible(guion()));
-  afirmar('presentación: sin Alt, la tecla p no activa nada (no choca con quien escribe)', (() => { D().dispatchEvent(new (ventana().KeyboardEvent)('keydown', { code: 'KeyP', key: 'p', bubbles: true })); return D().documentElement.dataset.presentacion === 'activa'; })());
-  // Recordar el modo al recargar
+  afirmar('guion de los casos: cada paso lleva a una pantalla y a una sección que existen para su rol', malosPasos.length === 0, malosPasos.map((p) => p.hash + '/' + p.rol).join());
+  localStorage.setItem('mosaicotelar.presentacion', JSON.stringify({ activo: true, paso: 3, oculto: false }));
   await cargar('#/mi/resumen', 1280, 720); await espera(500);
-  afirmar('presentación: recargar la página no saca del modo (y recuerda el paso)', D().documentElement.dataset.presentacion === 'activa' && visible(guion()) && MTw().presentacion.paso() === pasos.length - 3);
+  afirmar('presentación retirada: un estado guardado antiguo no reactiva la barra y se borra del navegador', !D().documentElement.dataset.presentacion && !D().getElementById('guion-mesa') && localStorage.getItem('mosaicotelar.presentacion') === null);
 
-  /* ===== 2. Reinicio de un clic ===== */
+  /* ===== 2. Reinicio: empezar un ejemplo del tutorial deja todo limpio, de un clic ===== */
+  // Por qué: el «Empezar de nuevo» de un clic vivía en la barra del guion. Ahora lo hace el tutorial: cada ejemplo parte de los datos limpios.
   await cargar('#/', 1280, 720); await espera(500);
   MTw().store.cambiar((s) => { s.rol = 'docente'; });
   const notasAntes = MTw().db.lista('notas').length;
   MTw().db.crear('notas', { texto: 'Prueba de reinicio', autor: 'docente', fecha: new Date().toISOString() });
   await ir('#/portales/kinesis'); await espera(300);
-  MTw().presentacion.ir(5);                      // un paso a la mitad del guion
-  await espera(300);
-  const hechas = MTw().db.lista('notas').length === notasAntes + 1 && MTw().store.obtener().rol === 'orientacion';
-  D().getElementById('btn-reiniciar-mesa').click(); await espera(700);
-  afirmar('reinicio: había trabajo que borrar (una nota creada y un rol elegido)', hechas);
-  afirmar('reinicio: con UN solo clic, sin ventana de confirmación', !D().querySelector('dialog[open]'));
-  afirmar('reinicio: vuelven los datos de ejemplo', MTw().db.lista('notas').length === notasAntes, String(MTw().db.lista('notas').length));
-  afirmar('reinicio: el rol queda sin elegir', MTw().store.obtener().rol === '');
-  afirmar('reinicio: se vuelve al inicio y al primer paso del guion', ventana().location.hash === '#/' && MTw().presentacion.paso() === 0 && /Paso 1 de/.test(guion().innerText));
+  const hechas = MTw().db.lista('notas').length === notasAntes + 1;
+  await MTw().tutorial.iniciar({ rol: 'orientacion', caso: 2 }); await espera(700);
+  afirmar('reinicio: había trabajo que borrar (una nota creada y un portal abierto)', hechas);
+  afirmar('reinicio: empezar un ejemplo del tutorial borra lo creado, sin ventana de confirmación', !MTw().db.lista('notas').some((x) => x.texto === 'Prueba de reinicio') && !D().querySelector('dialog[open]'));
   afirmar('reinicio: se cierran los portales abiertos (marcos y vista dividida)', MTw().vivos.abiertos().length === 0 && MTw().vivos.lado() === null);
-  afirmar('reinicio: avisa que terminó', /Listo/.test(avisos()), avisos());
-  afirmar('reinicio: conserva el modo presentación', D().documentElement.dataset.presentacion === 'activa');
+  MTw().tutorial.salir(); await espera(200);
+  // ---- fin nikylibre ----
   // El reinicio del menú de rol (fuera del modo presentación) sigue pidiendo confirmación
   const confirmo = ventana().MT.barra.empezarDeNuevo(); await espera(300);
   afirmar('reinicio: desde el menú de rol sigue pidiendo confirmación', !!D().querySelector('dialog[open]'));
@@ -1149,11 +1118,18 @@ async function flujoDemostracion() {
     localStorage.clear(); if (rol) localStorage.setItem('mosaicotelar.v2', JSON.stringify({ rol }));
     if (pres) localStorage.setItem('mosaicotelar.presentacion', JSON.stringify({ activo: true, paso: 2 }));
     await cargar(ruta, 1280, 720); await espera(500);
-    [...D().querySelectorAll('a[href], button, input, select, textarea, summary')].filter((x) => visible(x) && !x.disabled && x.tabIndex < 0).forEach((x) => sinTab.push(ruta + ' ' + x.tagName + '.' + x.className));
-    if (pres) hayEnModo.push(visible(D().getElementById('btn-reiniciar-mesa')) && !D().getElementById('btn-reiniciar-mesa').disabled);
+    // ---- nikylibre ---- Por qué: con el modo presentación retirado, la portada (#/) con un estado antiguo guardado ya muestra sus pestañas,
+    // que usan tabindex móvil (WAI-ARIA tabs): solo la pestaña activa va en el orden de Tab y las demás se alcanzan con las flechas. Esas
+    // se excusan SOLO si su lista tiene una pestaña alcanzable (tabindex 0); si ninguna lo es, sigue contando como falla.
+    const tabMovil = (x) => x.getAttribute('role') === 'tab' && !!x.closest('[role="tablist"]') && [...x.closest('[role="tablist"]').querySelectorAll('[role="tab"]')].some((t) => t.tabIndex === 0);
+    // ---- fin nikylibre ----
+    [...D().querySelectorAll('a[href], button, input, select, textarea, summary')].filter((x) => visible(x) && !x.disabled && x.tabIndex < 0 && !tabMovil(x)).forEach((x) => sinTab.push(ruta + ' ' + x.tagName + '.' + x.className));
+    if (pres) hayEnModo.push(!D().getElementById('guion-mesa') && !D().documentElement.dataset.presentacion);   // ---- nikylibre: el estado antiguo ya no enciende la barra ----
   }
-  afirmar('teclado: ningún control visible queda fuera del orden de Tab (con y sin modo presentación)', sinTab.length === 0, sinTab.slice(0, 4).join(' | '));
-  afirmar('teclado: "Empezar de nuevo" del guion se alcanza con el teclado', hayEnModo.every(Boolean));
+  afirmar('teclado: ningún control visible queda fuera del orden de Tab (también con un estado antiguo de presentación guardado)', sinTab.length === 0, sinTab.slice(0, 4).join(' | '));
+  // ---- nikylibre ---- Por qué: la barra del guion (con su «Empezar de nuevo») se retiró; se comprueba que no reaparece con lo guardado.
+  afirmar('teclado: un estado guardado antiguo del modo presentación no hace aparecer la barra del guion', hayEnModo.every(Boolean));
+  // ---- fin nikylibre ----
   /* ===== 7. Texto legible en proyector (QA-07), sin solicitudes fallidas (QA-22) y limpieza de lo que guardan los portales ===== */
   localStorage.clear();
   await cargar('#/planes/formas', 1280, 720); await espera(500);
@@ -1500,11 +1476,13 @@ async function flujoEntrada() {
   D().getElementById('ent-camino').scrollIntoView(); W().scrollTo(0, D().getElementById('ent-camino').offsetTop); await espera(900);
   afirmar('entrada: sin calmado, las mascotas del camino aparecen una a una al desplazarse', oculto0 >= 1 && D().querySelectorAll('.ent-oculto').length < oculto0, oculto0 + ' -> ' + D().querySelectorAll('.ent-oculto').length);
 
-  // Modo presentación: el recorrido se omite (la exposición guiada no se altera), también al entrar con ?caso=
+  // ---- nikylibre ---- Por qué: el modo presentación se retiró. Un estado guardado antiguo ya no cambia la portada, y ?caso=2 abre el tutorial guiado.
   localStorage.clear(); localStorage.setItem('mosaicotelar.presentacion', JSON.stringify({ activo: true, paso: 0, oculto: false })); await cargar('#/', 1280, 800); await espera(600);
-  afirmar('entrada: en modo presentación no hay camino ni pestañas, pero sí la pregunta de rol', !D().getElementById('ent-pestanas') && !D().getElementById('ent-camino') && !!D().getElementById('ent-quien'));
+  afirmar('entrada: un estado guardado del modo presentación ya no oculta el camino de la portada', !D().documentElement.dataset.presentacion && !!D().getElementById('ent-camino'));
   localStorage.clear(); await cargar('&caso=2#/', 1280, 800); await espera(1500);
-  afirmar('entrada: entrar con ?caso=2 activa la presentación y no muestra el recorrido', MTw().presentacion.activo() && !D().getElementById('ent-pestanas'), 'activo=' + MTw().presentacion.activo());
+  afirmar('entrada: entrar con ?caso=2 abre el tutorial guiado en ese ejemplo (sin modo presentación)', MTw().tutorial.estado.activo && MTw().tutorial.estado.caso === 2 && !MTw().presentacion.activo() && !D().getElementById('guion-mesa'), JSON.stringify({ a: MTw().tutorial.estado.activo, c: MTw().tutorial.estado.caso }));
+  MTw().tutorial.salir();
+  // ---- fin nikylibre ----
   localStorage.clear(); await cargar('#/mi/resumen', 390, 844); await espera(500);
   afirmar('entrada: un enlace profundo (#/mi/...) no pasa por la portada', !D().querySelector('.ent-portada'));
   localStorage.clear();
@@ -1765,9 +1743,19 @@ async function flujoTutorial() {
   await MTw().tutorial.iniciar({ rol: 'docente', caso: 1 }); await espera(600);
   const cs = (sel) => W().getComputedStyle(D().querySelector(sel)).animationName;
   afirmar('tutorial: con el modo calmado la tarjeta y el anillo no se animan', cs('.tut') === 'none' && (!D().querySelector('.tut-foco') || cs('.tut-foco') === 'none'), cs('.tut'));
-  // El modo presentación y ?caso= siguen igual
-  localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=3'; await new Promise((r) => { f.onload = r; }); await espera(1200);
-  afirmar('tutorial: ?caso=3 sigue activando el modo presentación con su guion y no abre el tutorial', D().documentElement.dataset.presentacion === 'activa' && !!D().getElementById('guion-mesa') && !D().querySelector('.tut-sel') && MTw().casos.numero() === 3);
+  // ---- nikylibre ---- Por qué: el modo presentación se reemplazó por el tutorial (decisión del dueño, 9 nov). Los QR y enlaces que ya circulan
+  // con ?caso=N (y #/caso/N) deben seguir sirviendo: ahora abren el tutorial en ese ejemplo, como docente salvo que venga ?rol= válido.
+  const enTut = () => JSON.stringify({ a: MTw().tutorial.estado.activo, r: MTw().tutorial.estado.rol, c: MTw().tutorial.estado.caso, g: !!D().getElementById('guion-mesa'), p: D().documentElement.dataset.presentacion || null });
+  localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=3'; await new Promise((r) => { f.onload = r; }); await espera(1500);
+  afirmar('tutorial: ?caso=3 abre el tutorial guiado en el ejemplo 3 como docente, sin barra del guion ni modo presentación', enTut() === JSON.stringify({ a: true, r: 'docente', c: 3, g: false, p: null }) && MTw().casos.numero() === 3, enTut());
+  localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=4&rol=familia'; await new Promise((r) => { f.onload = r; }); await espera(1500);
+  afirmar('tutorial: ?caso=4&rol=familia abre el ejemplo 4 con el rol pedido', enTut() === JSON.stringify({ a: true, r: 'familia', c: 4, g: false, p: null }), enTut());
+  localStorage.clear(); f.src = '../index.html?sin-intro=1&caso=2&rol=nadie'; await new Promise((r) => { f.onload = r; }); await espera(1500);
+  afirmar('tutorial: un ?rol= que no existe cae en docente', enTut() === JSON.stringify({ a: true, r: 'docente', c: 2, g: false, p: null }), enTut());
+  W().location.hash = '#/caso/5'; await espera(1500);
+  afirmar('tutorial: escribir #/caso/5 con la página abierta abre el tutorial en el ejemplo 5', MTw().tutorial.estado.activo && MTw().tutorial.estado.caso === 5 && !D().getElementById('guion-mesa'), enTut());
+  MTw().tutorial.salir();
+  // ---- fin nikylibre ----
   localStorage.clear();
 }
 // ---- fin tutorial ----
@@ -2222,6 +2210,87 @@ async function flujoNikyEstados() {
 }
 // ---- fin niky estados ----
 
+// ---- nikylibre ---- Tarea libre de Niky: lo que la persona ESCRIBE en la caja viaja al servidor como «libre». Siempre con fetch simulado
+// (nunca sale una petición real) y con info.modo puesto a mano: así se prueba con y sin servidor en la misma página.
+async function flujoNikyLibre() {
+  const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
+  const antes = W().fetch; const modoAntes = MTw().ia.info.modo;
+  let pedidos = [];
+  const simular = (fuente) => { pedidos = []; W().fetch = async (url, op) => { pedidos.push({ url: String(url), cuerpo: op && op.body ? JSON.parse(op.body) : null }); return new (W().Response)(JSON.stringify({ fuente, texto: 'Respuesta de prueba para la caja libre.' }), { status: 200, headers: { 'Content-Type': 'application/json' } }); }; };
+  const escribir = async (txt) => {
+    const campo = D().querySelector('#slot-ia textarea'); campo.value = txt;
+    D().querySelector('#slot-ia .chat__form').dispatchEvent(new (W().Event)('submit', { bubbles: true, cancelable: true }));
+    await espera(900);
+  };
+  const ultimaEtiqueta = () => { const l = [...D().querySelectorAll('#slot-ia .msg--ia small')]; return l.length ? l[l.length - 1].textContent : ''; };
+  const aValeria = () => pedidos.filter((p) => /\/api\/valeria$/.test(p.url));
+  try {
+    localStorage.clear(); await cargar('#/', 1280, 800); await espera(500);
+    // 1. Con servidor: la caja libre manda {tarea:'libre'} sin ejemplo ni perfil, y la respuesta se rotula según su fuente.
+    MTw().ia.info.modo = 'servidor'; simular('gemini');
+    MTw().ia.panel.abrir(); await espera(200);
+    await escribir('Hola Niky, ¿qué puedes hacer hoy por mí?');
+    const p1 = aValeria()[0];
+    afirmar('nikylibre: con servidor, lo escrito en la caja viaja como tarea «libre», sin ejemplo ni perfil', aValeria().length === 1 && p1.cuerpo.tarea === 'libre' && !('ejemplo' in p1.cuerpo) && !('perfil' in p1.cuerpo) && /qué puedes hacer/.test(p1.cuerpo.texto), JSON.stringify(pedidos));
+    afirmar('nikylibre: una respuesta de gemini se rotula «Generada en vivo»', ultimaEtiqueta() === 'Generada en vivo', ultimaEtiqueta());
+    simular('filtro'); await escribir('Otra pregunta libre para Niky.');
+    afirmar('nikylibre: si el servidor responde «filtro», se muestra como aviso de privacidad', ultimaEtiqueta() === 'Aviso de privacidad, no es una respuesta', ultimaEtiqueta());
+    simular('gemini'); await escribir('x'.repeat(280) + ' y otro poco al final');
+    afirmar('nikylibre: el texto libre se recorta a 300 caracteres', aValeria().length === 1 && aValeria()[0].cuerpo.texto.length <= 300, String(aValeria()[0] && aValeria()[0].cuerpo.texto.length));
+    // 2. Una burbuja guía (tarea propia, como «que-es») no llama al servidor y usa su texto.
+    simular('gemini');
+    MTw().ia.panel.abrir({ texto: '¿Qué es esto?', tarea: 'que-es' }); await espera(900);
+    afirmar('nikylibre: una burbuja guía no llama al servidor y responde con su texto de ejemplo', aValeria().length === 0 && ultimaEtiqueta() === 'Respuesta de ejemplo', JSON.stringify(pedidos) + ' ' + ultimaEtiqueta());
+    // Un pedido de Kinesis o Wisfox (viaja como «general» con su pestaña) tampoco gasta cuota.
+    MTw().ia.panel.abrir({ texto: 'Necesito ayuda con esta pantalla.', tarea: 'general', sesion: { id: 'prueba-portal' } }); await espera(900);
+    afirmar('nikylibre: un pedido de un portal («general») sigue sin llamar al servidor', aValeria().length === 0, JSON.stringify(pedidos));
+    MTw().ia.panel.cerrar();
+    // 3. Dentro del tutorial guiado la caja libre sigue siendo «libre» y no lleva el código preparado del paso.
+    await MTw().tutorial.iniciar({ rol: 'docente', caso: 6 }); await espera(500);
+    afirmar('nikylibre: en el tutorial, «libre» no pide respuesta preparada', MTw().ia.codigoDeEjemplo('libre') === null && MTw().ia.codigoDeEjemplo('disenar') === 'docente-1');
+    simular('openclaw'); MTw().ia.panel.abrir(); await espera(200);
+    await escribir('Cuéntame algo sobre esta plataforma.');
+    const p3 = aValeria()[0];
+    afirmar('nikylibre: en el tutorial, la caja libre manda «libre» sin ejemplo ni perfil y openclaw sale como «Generada en vivo»', aValeria().length === 1 && p3.cuerpo.tarea === 'libre' && !('ejemplo' in p3.cuerpo) && !('perfil' in p3.cuerpo) && ultimaEtiqueta() === 'Generada en vivo', JSON.stringify(pedidos) + ' ' + ultimaEtiqueta());
+    MTw().ia.panel.cerrar(); MTw().tutorial.salir();
+    // 4. Sin servidor (GitHub Pages): nada sale y la respuesta es el texto de ejemplo de siempre.
+    MTw().ia.info.modo = 'simulado'; simular('gemini');
+    MTw().ia.panel.abrir(); await espera(200);
+    await escribir('Hola Niky, ¿qué puedes hacer hoy por mí?');
+    afirmar('nikylibre: sin servidor la caja libre no hace ninguna petición y responde con el texto de ejemplo', pedidos.length === 0 && ultimaEtiqueta() === 'Respuesta de ejemplo', JSON.stringify(pedidos) + ' ' + ultimaEtiqueta());
+    MTw().ia.panel.cerrar();
+    // 5. Niky en los recorridos de orientación, familia y coordinación (antes solo docente y estudiante la abrían en el tutorial).
+    const ultimoTexto = () => { const l = [...D().querySelectorAll('#slot-ia .msg--ia')]; return l.length ? l[l.length - 1].innerText : ''; };
+    const alPasoNiky = async (rol, caso) => {
+      await MTw().tutorial.iniciar({ rol, caso }); await espera(400);
+      const k = MTw().tutorial.estado.pasos.findIndex((x) => x.id === 'niky');
+      if (k > 0) { await MTw().tutorial.ir(k); await espera(1000); }
+      return k;
+    };
+    for (const rol of ['orientacion', 'familia', 'coordinacion']) {
+      simular('ejemplo');
+      const k = await alPasoNiky(rol, 1);
+      const slot = D().getElementById('slot-ia');
+      afirmar(`nikylibre: el recorrido de ${rol} trae el paso «Niky te ayuda» y, sin servidor, Niky responde con un texto de ejemplo del caso (Inglés, 8A-03) sin hacer peticiones`, k > 0 && !!slot && !slot.hidden && /Inglés|8A-03/.test(ultimoTexto()) && ultimaEtiqueta() === 'Respuesta de ejemplo' && pedidos.length === 0, JSON.stringify({ k, e: ultimaEtiqueta(), n: pedidos.length, t: ultimoTexto().slice(0, 60) }));
+    }
+    MTw().ia.info.modo = 'servidor';
+    // [rol, caso de la plataforma, código del catálogo, tarea que exige el catálogo]: los casos de la plataforma n se cruzan con los del servidor.
+    for (const [rol, caso, codigo, tarea] of [['orientacion', 1, 'orientacion-2', 'coordinar'], ['familia', 6, 'familia-1', 'familia'], ['coordinacion', 3, 'coordinacion-4', 'coordinar'], ['familia', 2, 'familia-3', 'ayuda']]) {
+      simular('ejemplo');
+      await alPasoNiky(rol, caso);
+      const c = aValeria()[0] && aValeria()[0].cuerpo;
+      afirmar(`nikylibre: con servidor, el paso de Niky de ${rol} (caso ${caso}) pide ${codigo} con la tarea del catálogo (${tarea}), sin perfil`, aValeria().length === 1 && c.ejemplo === codigo && c.tarea === tarea && !('perfil' in c) && ultimaEtiqueta() === 'Respuesta de ejemplo', JSON.stringify(pedidos));
+    }
+    simular('ejemplo');
+    await alPasoNiky('orientacion', 5);
+    afirmar('nikylibre: Ciencias sociales no está en el catálogo: el paso de Niky no llama al servidor y usa su texto propio', aValeria().length === 0 && /Ciencias sociales/.test(ultimoTexto()) && ultimaEtiqueta() === 'Respuesta de ejemplo', JSON.stringify(pedidos) + ' ' + ultimoTexto().slice(0, 60));
+    MTw().ia.panel.cerrar(); MTw().tutorial.salir();
+  } finally {
+    W().fetch = antes; MTw().ia.info.modo = modoAntes; localStorage.clear();
+  }
+}
+// ---- fin nikylibre ----
+
 (async () => {
   try {
     for (const ancho of ANCHOS) for (const [rol, ruta] of RUTAS) {
@@ -2263,6 +2332,9 @@ async function flujoNikyEstados() {
   // ---- niky estados ----
   try { await flujoNikyEstados(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'niky estados: ' + String(e && e.stack || e); }
   // ---- fin niky estados ----
+  // ---- nikylibre ----
+  try { await flujoNikyLibre(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'nikylibre: ' + String(e && e.stack || e); }
+  // ---- fin nikylibre ----
   document.getElementById('resultado').textContent = JSON.stringify(salida);
   document.title = 'listo';
   // auditar.py escucha en /__resultado: así no hace falta ninguna espera fija.
