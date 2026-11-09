@@ -141,7 +141,7 @@
 
   /* ---------------------------------------------------------------- el botón y la burbuja */
   const NOMBRE_BOTON = 'Hablar con Niky, la guía con IA';
-  let raiz = null; let boton = null; let burbuja = null; let temporizador = null; let calma = null;
+  let raiz = null; let mas = null; let menu = null; let bReducir = null; let bOcultar = null; let lengueta = null; let boton = null; let burbuja = null; let temporizador = null; let calma = null;
   let emocionBase = 'contento';
 
   function avatar(emocion) {
@@ -163,7 +163,20 @@
   }
 
   const ventanaAbierta = () => { const s = document.getElementById('slot-ia'); return !!s && !s.hidden; };
-  const bloqueado = () => ventanaAbierta() || document.documentElement.dataset.presentacion === 'activa' || document.documentElement.hasAttribute('data-amplio');
+  /* Donde Niky no aparece del todo: el carrusel de bienvenida, el tutorial guiado y el modo presentación son de quien los guía. Ahí se ignora
+     el estado guardado (visible, reducido u oculto) y no se toca; al salir, Niky vuelve a como estaba. El CSS hace lo mismo con estas señales. */
+  const enModoAjeno = () => {
+    const r = document.documentElement;
+    return r.classList.contains('carrusel-abierto') || r.dataset.presentacion === 'activa' || r.hasAttribute('data-tutorial') || !!document.querySelector('[data-tutorial="activo"]');
+  };
+  const bloqueado = () => ventanaAbierta() || enModoAjeno() || document.documentElement.hasAttribute('data-amplio') || estado !== 'visible';
+
+  /* ---- los tres estados del botón: visible (con burbujas), reducido (pequeño, sin burbujas) y oculto (solo una lengüeta al borde derecho).
+     Se recuerdan entre pantallas y visitas. Sin almacenamiento disponible (modo privado) vale «visible». */
+  const claveEstado = 'sinapsis.niky.estado';
+  const ESTADOS = ['visible', 'reducido', 'oculto'];
+  let estado = 'visible';
+  try { const g = localStorage.getItem(claveEstado); if (ESTADOS.includes(g)) estado = g; } catch (e) { /* sin almacenamiento: visible */ }
 
   const claveVistas = 'sinapsis.niky.burbujas';
   const vistas = new Set();
@@ -216,17 +229,54 @@
     temporizador = setTimeout(mostrarBurbuja, 1100);
   }
 
+  function aplicarEstado() {
+    if (!raiz) return;
+    raiz.dataset.estado = estado;
+    raiz.classList.toggle('niky--abierta', ventanaAbierta());   // con la ventana abierta el botón no se oculta ni se reduce
+    boton.setAttribute('aria-label', NOMBRE_BOTON + (estado === 'reducido' && !ventanaAbierta() ? ' (reducido; un toque lo agranda)' : '') + (boton.dataset.sinLeer ? ' ' + boton.dataset.sinLeer : ''));
+    bReducir.textContent = estado === 'reducido' ? 'Restaurar tamaño' : 'Reducir a Niky';
+    bOcultar.disabled = ventanaAbierta();
+    if (ventanaAbierta()) cerrarMenu(false);
+  }
+  function fijarEstado(nuevo) {
+    if (!ESTADOS.includes(nuevo)) return;
+    estado = nuevo;
+    try { localStorage.setItem(claveEstado, nuevo); } catch (e) { /* sin almacenamiento: vale esta visita */ }
+    aplicarEstado();
+    ocultarBurbuja(false);
+    if (nuevo === 'visible') programar();
+    if (nuevo === 'oculto' && lengueta && !enModoAjeno()) lengueta.focus();
+  }
+  function cerrarMenu(devolverFoco) {
+    if (!menu || menu.hidden) return;
+    menu.hidden = true; mas.setAttribute('aria-expanded', 'false');
+    if (devolverFoco) mas.focus();
+  }
+  function alternarMenu() {
+    if (menu.hidden) { ocultarBurbuja(false); aplicarEstado(); menu.hidden = false; mas.setAttribute('aria-expanded', 'true'); bReducir.focus(); } else cerrarMenu(true);
+  }
+
   function construir() {
     if (raiz) return;
     boton = h('button', { class: 'niky-boton', id: 'niky-fab', type: 'button', 'aria-label': NOMBRE_BOTON, 'aria-haspopup': 'dialog', 'aria-controls': 'slot-ia', 'aria-expanded': 'false',
-      onclick: () => MT.ia.panel.alternar() });
+      onclick: () => { if (estado === 'reducido' && !ventanaAbierta()) fijarEstado('visible'); else MT.ia.panel.alternar(); } });
     burbuja = h('div', { class: 'niky-burbuja', id: 'niky-burbuja', role: 'group', 'aria-label': 'Sugerencias de Niky', hidden: true });
     burbuja.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); ocultarBurbuja(true); } });
-    raiz = h('div', { class: 'niky', id: 'niky' }, burbuja, boton);
+    mas = h('button', { class: 'niky-mas', id: 'niky-mas', type: 'button', 'aria-label': 'Opciones del botón de Niky', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'niky-menu',
+      onclick: () => alternarMenu() }, h('span', { 'aria-hidden': 'true' }, '⋯'));
+    bReducir = h('button', { class: 'niky-menu__op', type: 'button', onclick: () => { fijarEstado(estado === 'reducido' ? 'visible' : 'reducido'); cerrarMenu(true); } });
+    bOcultar = h('button', { class: 'niky-menu__op', type: 'button', onclick: () => { cerrarMenu(false); fijarEstado('oculto'); } }, 'Ocultar a Niky');
+    menu = h('div', { class: 'niky-menu', id: 'niky-menu', role: 'group', 'aria-label': 'Tamaño de Niky', hidden: true }, bReducir, bOcultar);
+    menu.addEventListener('keydown', (e) => { if (e.key === 'Escape') { e.stopPropagation(); cerrarMenu(true); } });
+    lengueta = h('button', { class: 'niky-lengueta', id: 'niky-lengueta', type: 'button', 'aria-label': 'Mostrar a Niky', onclick: () => { fijarEstado('visible'); boton.focus(); } },
+      h('span', { 'aria-hidden': 'true' }, '‹'));
+    raiz = h('div', { class: 'niky', id: 'niky' }, burbuja, menu, h('div', { class: 'niky-fila' }, mas, boton), lengueta);
+    document.addEventListener('click', (e) => { if (menu && !menu.hidden && !menu.contains(e.target) && !mas.contains(e.target)) cerrarMenu(false); });
     // Justo antes de la ventana: el orden del teclado queda burbuja, botón, ventana.
     const ventana = document.getElementById('slot-ia');
     if (ventana && ventana.parentNode) ventana.parentNode.insertBefore(raiz, ventana); else document.body.append(raiz);
     pintarAvatar(emocionBase);
+    aplicarEstado();
 
     // La ventana la abren y cierran muchas partes (el botón, los casos, el modo presentación): se observa su atributo hidden
     // en vez de depender de quién la llamó, para que el botón diga siempre la verdad (aria-expanded) y la burbuja se aparte.
@@ -234,11 +284,12 @@
       new MutationObserver(() => {
         const abierta = ventanaAbierta();
         boton.setAttribute('aria-expanded', String(abierta));
+        aplicarEstado();
         if (abierta) { ocultarBurbuja(false); emocion('contento'); } else if (!bloqueado()) programar();
       }).observe(ventana, { attributes: true, attributeFilter: ['hidden'] });
     }
     // El modo presentación y el modo amplio lo esconden con CSS; aquí solo se retira la burbuja pendiente.
-    new MutationObserver(() => { if (bloqueado()) ocultarBurbuja(false); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-presentacion', 'data-amplio'] });
+    new MutationObserver(() => { if (bloqueado()) ocultarBurbuja(false); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-presentacion', 'data-amplio', 'data-tutorial', 'class'] });
 
     /* La cara del botón la mueve js/ia.js mientras conversa (piensa, celebra, duda). Aquí solo se cuida el contador de respuestas sin leer:
        un número discreto sobre el botón que cuenta las pestañas con respuesta nueva. Va dentro del propio botón para que el lector de
@@ -252,7 +303,9 @@
         const previa = boton.querySelector('.niky-boton__cuenta');
         if (previa) previa.remove();
         if (n > 0) boton.append(h('span', { class: 'niky-boton__cuenta', 'aria-hidden': 'true' }, String(n)));
-        boton.setAttribute('aria-label', NOMBRE_BOTON + (n > 0 ? ' (' + n + (n === 1 ? ' respuesta nueva' : ' respuestas nuevas') + ')' : ''));
+        boton.dataset.sinLeer = n > 0 ? '(' + n + (n === 1 ? ' respuesta nueva' : ' respuestas nuevas') + ')' : '';
+        if (!n) delete boton.dataset.sinLeer;
+        aplicarEstado();
       };
       MT.store.suscribir(contar);
       contar(MT.store.obtener());
@@ -297,6 +350,6 @@
   }
   window.addEventListener('message', alMensajeDePortal);
 
-  MT.niky = { CONTEXTOS, dondeEstoy, sugerencias, saludo, emocion, ocultarBurbuja, mostrarBurbuja };
+  MT.niky = { estado: () => estado, fijarEstado, CONTEXTOS, dondeEstoy, sugerencias, saludo, emocion, ocultarBurbuja, mostrarBurbuja };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', iniciar); else iniciar();
 })(window.MT = window.MT || {});
