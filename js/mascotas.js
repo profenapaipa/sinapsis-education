@@ -67,12 +67,12 @@
   //   cejas: [izquierda, derecha], cada una [dy del extremo de afuera, dy del extremo de adentro, curva]; negativo = más arriba
   const EMO = {
     contento:    { ojo: 'punto', r: 3.6, mira: [0, 0], cejas: null, boca: 'sonrisa', detalle: null },
-    curioso:     { ojo: 'punto', r: 4.3, mira: [1.7, -1.7], cejas: [[1, 0.5, -1], [-1.5, -3, -2.5]], boca: 'curiosa', detalle: 'brillo' },
+    curioso:     { ojo: 'punto', r: 4.3, mira: [1.7, -1.7], cejas: [[1.5, 1, 0], [-2, -4.5, -3.5]], boca: 'curiosa', detalle: 'brillo' },
     pensando:    { ojo: 'punto', r: 3.6, mira: [-1.8, -2], cejas: [[1.5, 1, 0], [-1, -3, -2]], boca: 'chica', detalle: 'gota' },
     celebra:     { ojo: 'arco', r: 3.6, mira: [0, 0], cejas: null, boca: 'abierta', detalle: 'destellos' },
     animo:       { ojo: 'punto', r: 4, mira: [0, 0], cejas: [[1.5, -1.5, -1.5], [1.5, -1.5, -1.5]], boca: 'grande', detalle: 'corazon' },
     sorprendido: { ojo: 'grande', r: 2.8, mira: [0, 0], cejas: [[-2.5, -2.5, -3.5], [-2.5, -2.5, -3.5]], boca: 'o', detalle: 'rayas' },
-    duda:        { ojo: 'punto', r: 3.3, mira: [-2, 1.2], cejas: [[-0.5, 1.5, 0], [-2, -3, -2.5]], boca: 'ondulada', detalle: 'pregunta' },
+    duda:        { ojo: 'punto', r: 3.3, mira: [-2, 1.2], cejas: [[2.5, 0, 0.5], [-3.5, -5, -3]], boca: 'ondulada', detalle: 'pregunta' },
   };
   const EMOCIONES = Object.keys(EMO);
 
@@ -151,13 +151,13 @@
       // Anteojos: dos aros redondos y separados, con un puente y lente casi transparente. La variante con ∞ está apagada (ver ANTEOJOS_INFINITO).
       const gafas = ANTEOJOS_INFINITO
         ? `<path class="m-gafa" d="M60 52 C56 41 33 41 33 52 C33 63 56 63 60 52 C64 41 87 41 87 52 C87 63 64 63 60 52 Z"/>`
-        : `<circle class="m-gafa" cx="46" cy="52" r="11"/><circle class="m-gafa" cx="74" cy="52" r="11"/><path class="m-d" d="M57 50 Q60 47.5 63 50"/>`;
+        : `<path class="m-gafa" d="M57 50 Q60 46.5 63 50" fill="none"/><circle class="m-gafa" cx="46" cy="52" r="11.5"/><circle class="m-gafa" cx="74" cy="52" r="11.5"/>`;
       return `<ellipse class="m-t m-piel" cx="60" cy="99" rx="25" ry="18"/>`
         + franjas + `<g transform="rotate(4 50 88)">${cola}</g>`
         + `<circle class="m-t m-piel" cx="31" cy="25" r="11.5"/><circle class="m-t m-piel" cx="89" cy="25" r="11.5"/>`
         + `<circle class="m-piel2" cx="31" cy="26" r="6"/><circle class="m-piel2" cx="89" cy="26" r="6"/>`
         + `<circle class="m-piel" cx="60" cy="52" r="31"/>` + LUZ
-        + `<ellipse class="m-crema" cx="60" cy="68" rx="14.5" ry="11"/>`
+        + `<ellipse class="m-crema" cx="60" cy="67.5" rx="16" ry="12.5"/>`
         + `<circle class="m-t" cx="60" cy="52" r="31" fill="none"/>`
         + gafas + p.cara + p.brazos;
     },
@@ -171,7 +171,7 @@
         .map(([x, y]) => `<circle class="m-piel2" cx="${x}" cy="${y}" r="1.9"/>`).join('');
       // El hilo sale de la punta del tentáculo izquierdo y cuelga en una vuelta. Va antes del brazo para que la punta lo agarre.
       const [x, y] = p.mano;
-      const lana = hilo(`M${x} ${y} c-1 6 -10 8 -14 3 c-3 -4 1 -9 6 -5`, 'var(--hilo-kinesis)');
+      const lana = `<path class="m-t" d="M${x} ${y} c-2 8 -14 10 -17 3 c-3 -6 3 -11 8 -6 c3 3 -1 7 -4 5" stroke-width="8"/><path d="M${x} ${y} c-2 8 -14 10 -17 3 c-3 -6 3 -11 8 -6 c3 3 -1 7 -4 5" stroke="var(--hilo-kinesis)" stroke-width="5"/>`;
       return `<ellipse class="m-t m-piel" cx="60" cy="90" rx="24" ry="12"/>` + tent + ventosas + sombra(85)
         + lana + `<ellipse class="m-t m-piel" cx="60" cy="50" rx="32" ry="33"/>` + LUZ
         + `<circle class="m-crema" cx="52" cy="29" r="3.2" opacity=".5"/><circle class="m-crema" cx="64" cy="25" r="2.4" opacity=".5"/><circle class="m-crema" cx="75" cy="31" r="3" opacity=".5"/>`
