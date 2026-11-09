@@ -282,3 +282,6 @@ html[data-movimiento="calmado"] .ent-flota { transform: none; }
 
 /* quien2: la línea bajo el botón principal dice qué pasa al tocarlo. */
 .ent-empezar-linea { margin: .1rem 0 .2rem; color: var(--tinta-suave); font-size: .95rem; }
+
+/* quien2: en pantallas angostas el texto del botón principal cabe en una línea (en dos, a 360x640 quedaba tras la barra inferior). */
+@media (max-width: 420px) { .ent-empezar { font-size: .95rem; padding-left: .8rem; padding-right: .8rem; } }
