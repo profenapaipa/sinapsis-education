@@ -474,7 +474,7 @@
       if (!rol) return elegirRol(main);
       const r = MT.roles.por(rol);
       const contenido = MT.comun.espacio(main, { nombre: 'Mi espacio', descripcion: r.nombre, ruta: 'mi', tabs: SECCIONES[rol].concat(MT.plan.PRO_NAV[rol] || []), sub, rolId: rol });
-      const franja = MT.guias.franjaDe(rol, sub); if (franja) contenido.append(franja);
+      const franja = MT.guias.franjaDe(rol, sub); if (franja && MT.comun.cabActual) MT.comun.cabActual.poner({ extra: franja }); // «Paso X de N» siempre bajo la línea de la cabecera
       const c = h('div', { class: 'espacio-cuerpo' }); contenido.append(c);
       const permitido = SECCIONES[rol].some((x) => x.id === sub);
       if (!permitido) { c.append(caja(h('p', { class: 'aviso' }, 'Esta sección no es de tu rol.'))); return; }

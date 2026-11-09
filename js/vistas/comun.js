@@ -31,6 +31,9 @@
   const mascotaPara = (o) => o.mascota || (o.portal ? MASCOTA_DE_PORTAL[o.portal] : null)
     || (o.rolId && MT.mascotas && MT.mascotas.paraRol ? MT.mascotas.paraRol(o.rolId) : 'sinapso');
 
+  // La emoción de la mascota de un rol: la que da la narrativa para 'rol:<id>' (si otro módulo la completó) y, si no hay, 'contento'.
+  const emocionDeRol = (rolId) => { const n = rolId && MT.narrativa && MT.narrativa.linea ? MT.narrativa.linea('rol:' + rolId) : null; return (n && n.emocion) || 'contento'; };
+
   function cabecera(inicial) {
     const masc = h('div', { class: 'cab-pantalla__masc companero-rol' });
     const ruta = h('nav', { class: 'cab-pantalla__ruta', 'aria-label': 'Dónde estoy' });
@@ -100,7 +103,7 @@
     const pronto = tabs.filter((t) => t.pro);
     const normales = tabs.filter((t) => !t.pro);
     const actual = normales.find((t) => t.id === sub) || {};
-    const cab = cabecera({ rolId, ruta: [{ t: nombre, href: '#/' + ruta }, { t: descripcion }, { t: actual.etiqueta || nombre }],
+    const cab = cabecera({ rolId, emocion: emocionDeRol(rolId), ruta: [{ t: nombre, href: '#/' + ruta }, { t: descripcion }, { t: actual.etiqueta || nombre }],
       volver: normales[0] && sub !== normales[0].id ? { href: '#/' + ruta, texto: 'Volver al inicio' } : null, titulo: actual.etiqueta || nombre });
     const contenido = h('div', { class: 'contenido' });
     main.append(h('div', { class: 'contenedor pantalla pantalla--espacio' }, cab.el, subnav({ nombre, tabs: normales, sub, ruta, pronto }), contenido));
@@ -108,9 +111,9 @@
     return contenido;
   }
 
-  function pagina(main, { etiqueta, titulo, descripcion, rol, accion, volver, ruta, mascota, voz }) {
+  function pagina(main, { etiqueta, titulo, descripcion, rol, accion, volver, ruta, mascota, voz, emocion }) {
     const rolId = rol || MT.store.obtener().rol || '';
-    const cab = cabecera({ rolId, mascota, voz, ruta: ruta || [{ t: MT.nombre, href: '#/' }, { t: etiqueta || titulo }],
+    const cab = cabecera({ rolId, mascota, voz, emocion: emocion || (rolId ? emocionDeRol(rolId) : 'curioso'), ruta: ruta || [{ t: MT.nombre, href: '#/' }, { t: etiqueta || titulo }],
       volver: volver === undefined ? { href: '#/', texto: 'Volver al inicio' } : volver, titulo, linea: descripcion || '', accion: accion || null });
     const c = h('div', { class: 'contenedor pantalla' }, cab.el);
     main.append(c);
