@@ -1,0 +1,40 @@
+/* Hilos de la neurodiversidad: tres tarjetas con la lana animada, la misma idea del pendón.
+   Por qué es SVG con CSS y no un GIF: se ve nítido a cualquier ancho (celular o pantalla grande),
+   pesa unos 30 KB en lugar de varios MB, toma los colores de los hilos y el modo oscuro del sitio
+   y se detiene solo cuando la persona pide menos movimiento. */
+.hilos-neuro { --hn-tarjeta: var(--hundido, #F0ECE4); max-width: 1080px; margin: 0 auto; padding: 0 16px; box-sizing: border-box; color: var(--tinta, #1A1714); }
+.hilos-neuro__lista { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 720px) { .hilos-neuro__lista { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; } }
+.hilos-neuro__tarjeta { background: var(--hn-tarjeta); border-radius: var(--radio, 14px); padding: 14px 16px 16px; display: grid; grid-template-columns: 38% minmax(0, 1fr); gap: 4px 14px; align-items: center; }
+@media (min-width: 720px) { .hilos-neuro__tarjeta { grid-template-columns: minmax(0, 1fr); gap: 6px; } }
+.hilos-neuro__arte { width: 100%; height: auto; display: block; grid-row: 1 / span 2; }
+@media (min-width: 720px) { .hilos-neuro__arte { grid-row: auto; margin-bottom: 4px; } }
+.hilos-neuro__titulo { margin: 0; font: 800 1.15rem/1.2 var(--fuente, system-ui, sans-serif); align-self: end; }
+.hilos-neuro__texto { margin: 0; font: 500 .98rem/1.4 var(--fuente, system-ui, sans-serif); color: var(--tinta-suave, #4A433A); align-self: start; }
+@media (min-width: 720px) { .hilos-neuro__titulo, .hilos-neuro__texto { align-self: auto; } }
+/* En pantallas muy angostas el dibujo va arriba del texto, para que el título no se corte. */
+@media (max-width: 359px) { .hilos-neuro__tarjeta { grid-template-columns: minmax(0, 1fr); } .hilos-neuro__arte { grid-row: auto; margin-bottom: 4px; } .hilos-neuro__titulo, .hilos-neuro__texto { align-self: auto; } }
+
+.hilos-neuro svg .h { fill: none; stroke-width: 6.5; stroke-linecap: round; stroke-linejoin: round; }
+.hilos-neuro svg .gris { fill: none; stroke: var(--tinta-suave, #B8B0A2); stroke-opacity: .45; stroke-width: 7; stroke-linecap: round; }
+.hilos-neuro svg .halo { fill: none; stroke: var(--hn-tarjeta); stroke-width: 9.5; stroke-linecap: round; stroke-linejoin: round; }
+.hilos-neuro svg .punta { fill: var(--hn-tarjeta); stroke-width: 4.5; transform-box: fill-box; transform-origin: center; }
+
+/* Cada hilo se dibuja y se queda quieto un momento; luego se borra y vuelve a empezar. */
+.hilos-neuro .traza { stroke-dasharray: 1; stroke-dashoffset: 1; animation: hn-traza 9s ease-in-out infinite; animation-delay: var(--ret, 0s); }
+.hilos-neuro .punta { opacity: 0; transform: scale(.2); animation: hn-punta 9s ease-in-out infinite; animation-delay: var(--ret, 0s); }
+@keyframes hn-traza { 0% { stroke-dashoffset: 1; opacity: 1; } 42% { stroke-dashoffset: 0; } 88% { stroke-dashoffset: 0; opacity: 1; } 96%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes hn-punta { 0%, 36% { opacity: 0; transform: scale(.2); } 46% { opacity: 1; transform: scale(1.15); } 52%, 88% { opacity: 1; transform: scale(1); } 96%, 100% { opacity: 0; transform: scale(1); } }
+.hilos-neuro .trenza { animation: hn-trenza 5s linear infinite; }
+@keyframes hn-trenza { to { transform: translateX(60px); } }
+
+/* Movimiento reducido: dibujado y quieto. Hace falta una regla propia porque calmado.css acorta las animaciones a su último cuadro,
+   y el último cuadro de estas es "borrado" (para volver a empezar); sin esto la pieza desaparecería. */
+html[data-movimiento="calmado"] .hilos-neuro .traza, html[data-movimiento="calmado"] .hilos-neuro .punta, html[data-movimiento="calmado"] .hilos-neuro .trenza { animation: none !important; }
+html[data-movimiento="calmado"] .hilos-neuro .traza { stroke-dashoffset: 0; opacity: 1; }
+html[data-movimiento="calmado"] .hilos-neuro .punta { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .hilos-neuro .traza, .hilos-neuro .punta, .hilos-neuro .trenza { animation: none !important; }
+  .hilos-neuro .traza { stroke-dashoffset: 0; opacity: 1; }
+  .hilos-neuro .punta { opacity: 1; transform: none; }
+}
