@@ -129,14 +129,15 @@
       // del lunes empieza en su guion y no debe verse alterada. Queda la portada, la pregunta de rol y «Saber más».
       const presentando = (MT.presentacion && MT.presentacion.activo()) || /[?&]caso=\d+/.test(location.search) || /^#\/caso\//.test(location.hash);
       const raiz = h('div', { class: 'entrada' });
-      raiz.append(
-        portada(E, T, presentando),
-        presentando ? null : camino(E, T),
-        presentando ? null : h('section', { class: 'ent-seccion ent-seccion--pestanas', id: 'ent-pestanas', 'aria-labelledby': 'ent-pest-t' },
-          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-pest-t' }, T.pestanas.titulo), E.pestanas(() => ir('ent-quien')))),
-        h('section', { class: 'ent-seccion ent-seccion--rol', id: 'ent-quien', tabindex: '-1', 'aria-labelledby': 'ent-rol-t' },
-          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-rol-t' }, T.rol.titulo), h('p', { class: 'bajada' }, T.rol.bajada), E.quienEres())),
-        saberMas(E, T));
+      // quien2: se filtran los null (Element.append(null) escribe el texto «null»: era el «nullnull» que se veía en modo presentación).
+      raiz.append(...[
+        portada(E, T, presentando),
+        presentando ? null : camino(E, T),
+        presentando ? null : h('section', { class: 'ent-seccion ent-seccion--pestanas', id: 'ent-pestanas', 'aria-labelledby': 'ent-pest-t' },
+          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-pest-t' }, T.pestanas.titulo), E.pestanas(() => ir('ent-quien')))),
+        h('section', { class: 'ent-seccion ent-seccion--rol', id: 'ent-quien', tabindex: '-1', 'aria-labelledby': 'ent-rol-t' },
+          h('div', { class: 'ent-ancho' }, h('h2', { id: 'ent-rol-t' }, T.rol.titulo), h('p', { class: 'bajada' }, T.rol.bajada), E.quienEres())),
+        saberMas(E, T)].filter(Boolean));
       main.append(raiz);
       conAparicion(raiz);
     },

@@ -263,3 +263,19 @@ html[data-movimiento="calmado"] .ent-flota { transform: none; }
 .ent-rol-niky .ent-rol__icono svg { width: 30px; height: 30px; }
 @media (prefers-reduced-motion: reduce) { .ent-proy { box-shadow: none; } }
 /* ---- fin portada3 ---- */
+
+/* ---- quien2 ---- «¿Quién eres?»: cinco roles por igual con insignia de color del espacio. */
+.ent-roles { grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr)); }
+.ent-rol { flex-direction: column; justify-content: center; text-align: center; gap: .6rem; min-height: 150px; border-top: 6px solid var(--hilo, var(--tinta)); }
+.ent-rol[data-espacio="kinesis"] { --hilo: var(--hilo-kinesis); }
+.ent-rol[data-espacio="wisfox"] { --hilo: var(--hilo-wisfox); }
+.ent-rol .ent-rol__icono { width: 60px; height: 60px; border-radius: 50%; background: var(--hilo); color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--hilo) 22%, transparent); }
+.ent-rol .ent-rol__icono svg { width: 30px; height: 30px; }
+.ent-rol .ent-rol__texto { display: grid; gap: .15rem; }
+.ent-rol .ent-rol__texto strong { font-family: var(--fuente-titulo); font-size: 1.15rem; }
+.ent-rol-directo { margin: .8rem 0 0; color: var(--tinta-suave); line-height: 1.8; }
+.ent-rol-directo a { font-weight: 700; color: var(--verde-texto); }
+@media (max-width: 480px) { .ent-roles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ent-rol { min-height: 132px; padding: .6rem; }
+  /* El último rol, si queda solo en su fila (estudiante), ocupa el ancho completo. */
+  .ent-roles > .ent-rol:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+/* ---- fin quien2 ---- */

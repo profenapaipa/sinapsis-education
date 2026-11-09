@@ -28,7 +28,7 @@
      todavía no ha visto. La tabla de aprobación del informe sale de aquí. */
   const TEXTOS = {
     portada: {
-      empezar: 'Empezar',                                                     // nuevo (rótulo del botón único)
+      empezar: 'Empezar el tutorial guiado',                                  // quien2: el botón principal lleva al tutorial (pedido del dueño)                                                     // nuevo (rótulo del botón único)
       yaSe: 'Ya sé quién soy: elegir mi rol',                                 // nuevo
       seguir: (rol) => 'Seguir como ' + rol.toLowerCase() + ': ir a mi guía', // nuevo
       // El descriptor («Educación inclusiva con tecnología») salió de la portada: se dice en voz alta y Sinapso ya da la bienvenida (MT.narrativa).
@@ -104,7 +104,10 @@
     },
     rol: {
       titulo: '¿Quién eres?',                                                 // aprobado (acortado de «¿Quién eres? Empieza por aquí»)
-      bajada: 'Elige y te llevamos a tu guía.',                               // adaptado de «Elige tu rol y te mostramos por dónde empezar»
+      bajada: 'Elige tu rol y el tutorial guiado te lleva paso a paso por la plataforma.', // quien2: borrador por aprobar
+      enEspacio: (espacio) => 'Tutorial en ' + espacio,                       // quien2
+      directo: '¿Prefieres explorar por tu cuenta? Entra directo a ',          // quien2
+      ejemplos: 'Ver todos los ejemplos',                                      // quien2                               // adaptado de «Elige tu rol y te mostramos por dónde empezar»
       acompana: (nombre) => 'Te acompaña ' + nombre,                          // nuevo
       coordinacion: 'Soy de coordinación',                                    // existente (roles.js)
       niky: 'Niky, la guía con IA, está disponible en cualquier camino. Hoy responde con ejemplos preparados.', // adaptado de «Hoy responde con ejemplos»
@@ -331,23 +334,29 @@
   }
 
   /* ---------------------------------------------------------------- ¿Quién eres? */
+  /* ---- quien2 ---- «¿Quién eres?» es la puerta del tutorial guiado (pedido del dueño, 9 nov 2026): los cinco roles por igual, y cada uno
+     abre el recorrido guiado en ese rol (MT.tutorial guarda el rol). Cada opción lleva una insignia con el color de su espacio (verde
+     Kinesis, ámbar Wisfox) y el ícono del rol; nada de mascotas repetidas. Quien prefiera explorar solo tiene un enlace directo a los portales. */
   function quienEres() {
     const R = TEXTOS.rol; const st = MT.store;
-    const elegir = (r) => { st.cambiar((s) => { s.rol = r.id; }); location.hash = '#/portales/' + MT.roles.por(r.id).marca; };
-    const opcion = (r, clase) => {
-      const id = mascotaDeRol(r.id);
-      return h('button', { class: 'ent-rol ' + (clase || ''), type: 'button', 'data-espacio': ESPACIO[id], onclick: () => elegir(r) },
-        // portada3: un ícono sencillo por rol; las mascotas se reservan para el tutorial (antes salían tres pulpos iguales).
-        h('span', { class: 'ent-rol__icono', 'aria-hidden': 'true' }, MT.ui.icono(r.icono)),
-        h('span', { class: 'ent-rol__texto' }, h('strong', null, r.boton), h('small', null, R.acompana(nombreDe(id)))));
+    const recorrer = (r) => {
+      st.cambiar((s) => { s.rol = r.id; });
+      if (MT.tutorial) MT.tutorial.iniciar({ rol: r.id }); else location.hash = '#/portales/' + r.marca;
     };
-    const principales = MT.roles.lista.filter((r) => r.id !== 'coordinacion');
-    const coord = MT.roles.por('coordinacion');
+    const opcion = (r) => {
+      const espacio = r.marca === 'wisfox' ? 'wisfox' : 'kinesis';
+      return h('button', { class: 'ent-rol', type: 'button', 'data-rol': r.id, 'data-espacio': espacio, onclick: () => recorrer(r) },
+        h('span', { class: 'ent-rol__icono', 'aria-hidden': 'true' }, MT.ui.icono(r.icono)),
+        h('span', { class: 'ent-rol__texto' }, h('strong', null, r.boton), h('small', null, R.enEspacio(r.espacio))));
+    };
     return h('div', { class: 'ent-rol-caja' },
-      h('div', { class: 'ent-roles' }, principales.map((r) => opcion(r))),
+      h('div', { class: 'ent-roles' }, MT.roles.lista.map(opcion)),
       h('div', { class: 'ent-rol-niky', 'data-espacio': ESPACIO.niky }, h('span', { class: 'ent-rol__icono ent-rol__icono--niky', 'aria-hidden': 'true' }, MT.ui.marca('valeria')), h('p', { class: 'suave' }, R.niky)),
-      h('p', { class: 'ent-rol-coord' }, h('button', { class: 'ent-enlace', type: 'button', onclick: () => elegir(coord) }, R.coordinacion)));
+      h('p', { class: 'ent-rol-directo' }, R.directo,
+        h('a', { href: '#/portales/kinesis' }, 'Kinesis'), ' · ', h('a', { href: '#/portales/wisfox' }, 'Wisfox'), ' · ',
+        h('button', { class: 'ent-enlace', type: 'button', onclick: () => MT.tutorial && MT.tutorial.abrir() }, R.ejemplos)));
   }
+  // ---- fin quien2 ----
 
   MT.entrada = { MARCA, TEXTOS, ESPACIO, ORDEN, mascotaDeRol, mascota, nombreDe, companera, pestanas, quienEres, datosDelCaso };
 })(window.MT = window.MT || {});
