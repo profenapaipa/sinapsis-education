@@ -28,6 +28,13 @@
 .menu-rol__nota { font-size: .8rem; margin: .6rem 0 0; }
 .menu-rol .btn { color: var(--tinta); border-color: var(--tinta); background: transparent; }
 
+/* Menú de roles del riel: a la derecha del riel en escritorio; sobre la barra inferior en el celular. */
+.menu-rol--riel { position: fixed; top: auto; right: auto; left: calc(var(--riel-ancho) + .6rem); bottom: .9rem; max-height: calc(100dvh - 1.8rem); overflow-y: auto; }
+.menu-rol__marca { margin-left: auto; flex: none; font: 800 .72rem var(--fuente); background: var(--tinta); color: var(--papel); border-radius: 99px; padding: .1rem .5rem; }
+.menu-rol--riel .menu-rol__lista button { gap: .6rem; }
+.menu-rol--riel .menu-rol__lista button svg { width: 32px; height: 32px; }
+.menu-rol--riel .menu-rol__lista button span:not(.menu-rol__marca) { flex: 1 1 auto; min-width: 0; }
+
 /* ---- La guía dentro de cada sección y las palabras del tema ---- */
 .franja-guia { display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: center; justify-content: space-between; background: var(--lino); border: 1px solid var(--linea); border-left: 6px solid var(--tinta); border-radius: var(--radio-chico); padding: .55rem .9rem; margin-bottom: 1rem; font-size: .92rem; }
 .franja-guia .acciones { margin: 0; }
@@ -43,6 +50,8 @@
 
 @media (max-width: 860px) {
   /* En el celular «Más» sube desde la barra inferior y ocupa el ancho, con sitio para el dedo. */
+  /* z-index por encima del botón flotante de Niky: si no, tapa el final de la nota. */
+  .menu-rol--riel { z-index: 90; left: .6rem; right: .6rem; width: auto; max-width: none; bottom: calc(5.4rem + env(safe-area-inset-bottom)); max-height: calc(100dvh - 7.5rem); }
   .menu-mas { left: .6rem; right: .6rem; width: auto; bottom: calc(5.4rem + env(safe-area-inset-bottom)); max-height: calc(100dvh - 7.5rem); }
 }
 

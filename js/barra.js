@@ -85,11 +85,14 @@
     // Niky: un único botón, siempre el mismo. Abre el panel lateral de la IA (el lugar fijo de Niky), que se trabaja aparte.
     const niky = h('button', { class: 'riel-ia', id: 'btn-ia', type: 'button', 'aria-expanded': 'false', 'aria-controls': 'slot-ia', 'data-espacio': 'valeria' }, marca('valeria'), 'Niky');
     niky.addEventListener('click', () => MT.ia.panel.alternar());
-    items.append(dinamico, niky);
+    // «Inicio» siempre a un toque (también en un portal inmersivo, donde solo se ven el riel y Niky). Es el mismo destino del logo, pero con ícono y
+    // nombre: quien llega por el QR no sabe que el logo es un botón. Clase riel-ctl y no riel-item para no alterar el conteo de ítems de portales.
+    const inicio = h('a', { href: '#/', class: 'riel-ctl', id: 'riel-inicio', 'data-ruta': 'inicio' }, icono('inicio'), 'Inicio');
+    items.append(inicio, dinamico, niky);
     menuMas = document.getElementById('menu-mas');
     botonMas = h('button', { class: 'riel-item', id: 'btn-mas', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'menu-mas' },
       MT.ui.svg('<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg>'), 'Más');
-    abajo.append(botonMas);
+    abajo.append(construirSelectorRol(), botonMas);
     document.getElementById('mas-paginas').replaceChildren(...PAGINAS_MAS.map((p) => h('li', null,
       h('a', Object.assign({ href: p.hash, 'data-ruta': p.ruta }, p.id ? { id: p.id } : {}), icono(p.icono), h('span', { class: 'mas-texto' }, p.etiqueta)))));
     botonMas.addEventListener('click', (e) => { e.stopPropagation(); alternar(botonMas, menuMas, null, true); });
@@ -104,7 +107,55 @@
     st.suscribir(pintarNavegacion);
   }
 
-  /* ---------------- Selector de rol ---------------- */
+  /* ---------------- Selector de rol del riel ---------------- */
+  /* Por qué: el botón «Rol: …» de la franja no se veía (y en un portal inmersivo la franja ni existe). El control del riel muestra la mascota del
+     rol activo y su nombre, así que el cambio de rol queda siempre a la vista; elegir uno lleva directo al portal de ese rol. */
+  let botonRol; let menuRolRiel; let rolDelBoton;
+  function pintarBotonRol() {
+    const rol = rolActual() || null;
+    if (rol === rolDelBoton && botonRol.childElementCount) return;   // sin repintar en cada cambio de datos: se perdería el foco
+    rolDelBoton = rol;
+    const r = rol ? MT.roles.por(rol) : null;
+    const mas = MT.mascotas;
+    botonRol.replaceChildren(mas.mascota(mas.paraRol(rol), { tamano: 40 }), h('span', { class: 'riel-ctl__texto' }, r ? r.nombre : 'Mi rol'));
+    botonRol.setAttribute('aria-label', r ? 'Cambiar de rol. Ahora: ' + r.nombre : 'Elegir mi rol');
+  }
+  function pintarMenuRolRiel() {
+    const mas = MT.mascotas;
+    menuRolRiel.replaceChildren(h('p', { class: 'etiqueta', id: 'menu-rol-riel-t' }, 'Ver la plataforma como'),
+      h('ul', { class: 'menu-rol__lista' }, MT.roles.lista.map((x) => h('li', null,
+        h('button', { type: 'button', 'data-rol': x.id, 'aria-pressed': String(x.id === rolActual()), onclick: () => { cerrar(false); elegirRol(x.id); } },
+          mas.mascota(mas.paraRol(x.id), { tamano: 32 }),
+          h('span', null, h('strong', null, x.nombre), h('small', null, x.lema)),
+          x.id === rolActual() ? h('span', { class: 'menu-rol__marca' }, 'Activo') : null)))),
+      h('p', { class: 'suave menu-rol__nota' }, 'Cambiar de rol no borra nada: solo cambia lo que ves.'));
+  }
+  function construirSelectorRol() {
+    botonRol = h('button', { class: 'riel-ctl riel-rol', id: 'riel-rol', type: 'button', 'aria-haspopup': 'true', 'aria-expanded': 'false', 'aria-controls': 'menu-rol-riel' });
+    menuRolRiel = h('div', { class: 'menu-rol menu-rol--riel', id: 'menu-rol-riel', hidden: true, role: 'group', 'aria-labelledby': 'menu-rol-riel-t' });
+    document.body.append(menuRolRiel);
+    botonRol.addEventListener('click', (e) => { e.stopPropagation(); alternar(botonRol, menuRolRiel, pintarMenuRolRiel, true); });
+    // Flechas arriba y abajo recorren los roles (Tab también funciona; las flechas son la costumbre de un menú).
+    menuRolRiel.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      const bs = [...menuRolRiel.querySelectorAll('button')]; const i = bs.indexOf(document.activeElement);
+      e.preventDefault(); bs[(i + (e.key === 'ArrowDown' ? 1 : bs.length - 1)) % bs.length].focus();
+    });
+    menuRolRiel.addEventListener('focusout', (e) => { if (abierto && abierto.menu === menuRolRiel && e.relatedTarget && !menuRolRiel.contains(e.relatedTarget) && e.relatedTarget !== botonRol) cerrar(false); });
+    pintarBotonRol();
+    st.suscribir(pintarBotonRol);
+    return botonRol;
+  }
+  // Para quien necesite abrirlo desde fuera (la portada, el tutorial).
+  function abrirRoles() { if (menuRolRiel && menuRolRiel.hidden) alternar(botonRol, menuRolRiel, pintarMenuRolRiel, true); }
+  // Elegir un rol aquí cambia de rol Y lleva a su portal: estudiante a Wisfox, el resto a Kinesis. No borra nada.
+  function elegirRol(id) {
+    st.cambiar((s) => { s.rol = id; });
+    const portal = portalDe(id) || 'kinesis';
+    if (location.hash === '#/portales/' + portal) MT.router.recargar(); else location.hash = '#/portales/' + portal;
+  }
+
+  /* ---------------- Selector de rol de la franja (acceso secundario) ---------------- */
   function cambiarRol(id) {
     const { id: ruta, sub } = MT.router.actual();
     st.cambiar((s) => { s.rol = id; });
@@ -160,5 +211,5 @@
 
   function pintarPlan() { const a = document.getElementById('plan-chip'); const t = a && a.querySelector('.mas-texto'); if (t) t.textContent = MT.plan.etiquetaPro ? MT.plan.etiquetaPlan() : ''; }
   function construir() { construirNavegacion(); construirRol(); pintarPlan(); st.suscribir(pintarPlan); actualizar(); }
-  MT.barra = { construir, actualizar, cerrar, empezarDeNuevo };
+  MT.barra = { construir, actualizar, cerrar, empezarDeNuevo, abrirRoles };
 })(window.MT = window.MT || {});
