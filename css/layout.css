@@ -152,7 +152,7 @@ main:focus { outline: none; }
   .riel a, .riel button, .riel .riel-ctl { flex: 1 1 0; width: auto; min-width: 0; padding: .35rem .3rem; font-size: .72rem; }
   .riel a svg, .riel button svg { width: 24px; height: 24px; }
   /* Cinco ítems en la barra: Inicio, Kinesis, Wisfox, rol y Más. La Guía pasa a «Más». */
-  .riel .riel-item--guia { display: none; }
+  .riel .riel-item--guia, .riel .riel-item--quienes { display: none; }
   .mas-solo-movil { display: list-item; }
   .riel .riel-rol { margin: 0; border-top: 0; border-radius: 12px; padding-top: .35rem; }
   .riel .riel-rol svg { width: 30px; height: 30px; }

@@ -50,11 +50,11 @@
     { ruta: 'hoja', hash: '#/hoja', etiqueta: 'Hoja de ruta', icono: 'estado' },
     { ruta: 'glosario', hash: '#/glosario', etiqueta: 'Glosario', icono: 'libro' },
     { ruta: 'piloto', hash: '#/piloto', etiqueta: 'Solicitar un piloto', icono: 'coordinacion' },
-    { ruta: 'identidad', hash: '#/identidad', etiqueta: 'Identidad', icono: 'identidad' },
+    { ruta: 'quienes', hash: '#/quienes', etiqueta: 'Quiénes somos', icono: 'identidad', soloMovil: true },   // quienes: Identidad vive dentro de esta página
     { ruta: 'creditos', hash: '#/creditos', etiqueta: 'Créditos', icono: 'familia' },
   ];
   // Las rutas que viven bajo «Más»: cuando se está en una, el botón «Más» se marca como actual.
-  const RUTAS_MAS = ['tutorial', 'mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'identidad', 'creditos'];
+  const RUTAS_MAS = ['tutorial', 'mapa', 'recorrido', 'planes', 'registro', 'hoja', 'glosario', 'piloto', 'quienes', 'identidad', 'creditos'];
 
   let dinamico; let botonMas; let menuMas;
 
@@ -70,6 +70,8 @@
         portal === principal ? { title: 'Tu portal' } : {}),
         marca(portal), PORTALES[portal].nombre, portal === principal ? h('span', { class: 'solo-lectores' }, ' (tu portal)') : null, h('i', { class: 'riel-vivo', 'aria-hidden': 'true' }))),
       h('a', { href: '#/guia', class: 'riel-item riel-item--guia', 'data-ruta': 'guia' }, icono('libro'), 'Guía'),
+      // ---- quienes ---- sección principal: en escritorio va en el riel; en el celular pasa a «Más» (la barra se queda en cinco ítems).
+      h('a', { href: '#/quienes', class: 'riel-item riel-item--quienes', 'data-ruta': 'quienes' }, icono('identidad'), 'Quiénes somos'),
     ];
   }
   let rolPintado;

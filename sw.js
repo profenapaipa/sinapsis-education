@@ -18,7 +18,7 @@
      comprueba que todo lo que carga index.html esté en la lista, así que un archivo nuevo sin registrar se detecta antes de publicar. */
 'use strict';
 
-const VERSION = 'v8';
+const VERSION = 'v9';
 const PREFIJO = 'mosaicotelar-';
 const CACHE = PREFIJO + VERSION;
 
@@ -57,6 +57,7 @@ const CASCARA = [
   'css/portales-vivos.css',
   'css/presentacion.css',
   'css/tutorial.css',
+  'css/quienes.css',
   'css/tokens.css',
   'css/vistas.css',
   'fonts/newsreader-italic.woff2',
@@ -104,6 +105,7 @@ const CASCARA = [
   'js/vistas/estado.js',
   'js/vistas/glosario.js',
   'js/vistas/identidad.js',
+  'js/vistas/quienes.js',
   'js/vistas/inicio.js',
   'js/vistas/mapa.js',
   'js/vistas/piloto.js',
