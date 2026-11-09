@@ -1410,7 +1410,7 @@ async function flujoEntrada() {
   const salidaK = D().querySelector('#ent-panel-kinesis .ent-demo__salida').innerText;
   afirmar('entrada: Kinesis: tocar un apoyo muestra el cambio en la actividad y su razón', /Cambio en la actividad/i.test(salidaK) && /Por qué/i.test(salidaK), salidaK);
   [...D().querySelectorAll('#ent-panel-kinesis .ent-demo__salida .btn')].find((b) => /Aprobar/.test(b.textContent)).click(); await espera(60);
-  afirmar('entrada: Kinesis: orientación puede aprobar y se dice que el estudiante ya puede recibirla (con su código, sin nombre)', /Aprobado: ahora P-\d\d puede recibir/.test(D().querySelector('#ent-panel-kinesis').innerText));
+  afirmar('entrada: Kinesis: orientación puede aprobar y se dice que el estudiante ya puede recibirla (con su código, sin nombre)', /Aprobado: ahora 8A-\d\d puede recibir/.test(D().querySelector('#ent-panel-kinesis').innerText));
   tabs()[2].click(); const opciones = [...D().querySelectorAll('#ent-panel-wisfox .ent-opcion')]; opciones[0].click(); await espera(60);
   const ret = D().querySelector('#ent-panel-wisfox .ent-demo__salida').innerText;
   afirmar('entrada: Wisfox: responder una pregunta da la retroalimentación (con la explicación) y marca cuál era la correcta', /Correcta|Todavía no/.test(ret) && ret.length > 25 && D().querySelectorAll('#ent-panel-wisfox .ent-opcion--bien').length === 1 && opciones.every((o) => o.disabled));
