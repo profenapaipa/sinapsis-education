@@ -1703,7 +1703,8 @@ async function flujoTutorial() {
   const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
   const tecla = (key) => D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true, cancelable: true }));
   const sig = () => D().querySelector('.tut__btn--principal');
-  localStorage.clear(); await cargar('#/tutorial', 1280, 800); await espera(600);
+  // dentro: #/tutorial lleva ahora al recorrido dentro de los portales; el motor del tutorial de la plataforma se prueba abriendo su selector directo.
+  localStorage.clear(); await cargar('#/', 1280, 800); await espera(500); MTw().tutorial.abrir(); await espera(600);
   afirmar('tutorial: #/tutorial abre «Elige un ejemplo» con 5 roles y 6 ejemplos (casos2: eran 5, se sumó Tecnología)', !!D().querySelector('.tut-sel[role="dialog"]') && D().querySelectorAll('.tut-chip').length === 5 && D().querySelectorAll('.tut-caso').length === 6);
   await cargar('#/', 1280, 800); await espera(300);
   afirmar('tutorial: la portada trae el botón «Ver el tutorial»', !!D().getElementById('btn-ver-tutorial'));
@@ -1751,7 +1752,7 @@ async function flujoTutorial() {
   await MTw().tutorial.iniciar({ rol: 'orientacion', caso: 5 }); await espera(500);
   const de = D().documentElement; const t = D().querySelector('.tut').getBoundingClientRect(); const riel = D().getElementById('riel').getBoundingClientRect();
   afirmar('tutorial: a 390 px no hay desborde horizontal y la tarjeta no tapa la barra inferior', de.scrollWidth <= 390 && t.bottom <= riel.top + 1 && t.left >= 0 && t.right <= 390, JSON.stringify({ sw: de.scrollWidth, tb: t.bottom, rt: riel.top }));
-  await cargar('#/tutorial', 390, 844); await espera(500);
+  await cargar('#/', 390, 844); await espera(400); MTw().tutorial.abrir(); await espera(500);
   const pn = D().querySelector('.tut-sel__panel').getBoundingClientRect();
   afirmar('tutorial: a 390 px la ventana «Elige un ejemplo» cabe en la pantalla', D().documentElement.scrollWidth <= 390 && pn.left >= 0 && pn.right <= 390);
   // Calmado: sin animaciones en la tarjeta ni en el anillo
