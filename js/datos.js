@@ -64,6 +64,12 @@
     { coincide: /una sola tarea/i, crear: () => ({ cambio: 'Las tarjetas se entregan de una en una.', porque: 'Su perfil pide una sola tarea a la vez.' }) },
     { coincide: /descansos/i, crear: () => ({ cambio: 'Se agrega una pausa activa de dos minutos a mitad de la actividad.', porque: 'Sus apoyos incluyen descansos activos.' }) },
     { coincide: /orales y escritas/i, crear: () => ({ cambio: 'Cada instrucción se dice en voz alta y también se escribe.', porque: 'Le sirve recibir la instrucción por dos canales.' }) },
+    // ---- casos2 ---- Reglas de los apoyos del caso de Tecnología (programación con Turtle): sin ellas el ajuste solo diría «se tiene en cuenta».
+    { coincide: /ejemplo que ya funciona/i, crear: () => ({ cambio: 'La actividad empieza con un programa que ya funciona, para ejecutarlo y cambiarlo.', porque: 'Su perfil indica que parte mejor de un ejemplo completo que de una hoja en blanco.' }) },
+    { coincide: /en pareja/i, crear: () => ({ cambio: 'Programa en pareja: una persona escribe y la otra revisa, y se turnan.', porque: 'Programar en pareja le da compañía y le ayuda a encontrar errores hablando.' }) },
+    { coincide: /por niveles/i, crear: () => ({ cambio: 'Los retos vienen por niveles: cada uno elige desde cuál empezar y puede subir cuando quiera.', porque: 'Los retos por niveles le dejan avanzar a su paso y sentir logros pequeños.' }) },
+    { coincide: /letra grande/i, crear: () => ({ cambio: 'El editor de código se abre con letra grande.', porque: 'Le sirve leer el código con letra más grande.' }) },
+    // ---- fin casos2 ----
     { coincide: /vocabulario/i, crear: () => ({ cambio: 'Se agrega un banco de palabras con su significado al lado.', porque: 'Su perfil pide vocabulario de apoyo.' }) },
   ];
 
