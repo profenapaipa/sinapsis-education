@@ -355,7 +355,8 @@
           const t = h('button', { class: 'pestana' + (x.nuevo ? ' pestana--nueva' : ''), type: 'button', role: 'tab', id: 'pestana-' + x.id, 'aria-selected': String(activa),
             'aria-controls': 'cuerpo-ia', tabindex: activa ? '0' : '-1', title: x.titulo + (ia.sesiones.length > 1 ? ' (Supr cierra la pestaña)' : ''), onclick: () => activarSesion(x.id) },
             h('span', { class: 'pestana__texto' }, x.titulo),
-            x.nuevo ? h('span', { class: 'pestana__punto', 'aria-label': 'respuesta nueva' }) : null);
+            x.nuevo ? h('span', { class: 'pestana__punto', 'aria-hidden': 'true' }) : null,
+            x.nuevo ? h('span', { class: 'solo-lectores' }, '(respuesta nueva)') : null);
           const c = ia.sesiones.length > 1
             ? h('button', { class: 'pestana__cerrar', type: 'button', 'aria-label': 'Cerrar la pestaña ' + x.titulo, tabindex: activa ? '0' : '-1', onclick: () => {
               const i = ia.sesiones.findIndex((y) => y.id === x.id); const vecina = ia.sesiones[i + 1] || ia.sesiones[i - 1];
