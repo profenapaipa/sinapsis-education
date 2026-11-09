@@ -432,9 +432,22 @@
     render(main, ctx) {
       // Detrás de la ventana se ve la portada: así, al cerrar, la persona no queda en una pantalla vacía.
       MT.router.rutas.inicio.render(main, ctx);
-      abrirSelector();
+      // ---- recorrido ---- #/tutorial/<rol> empieza directo en ese rol (entrada desde dentro de Kinesis y Wisfox); sin rol, el selector de siempre.
+      const m = /^#\/tutorial\/([a-z]+)/.exec(location.hash);
+      if (m && ROLES.includes(m[1])) iniciar({ rol: m[1] }); else abrirSelector();
     },
   });
+  // ---- recorrido ---- Kinesis y Wisfox (dentro del marco) piden abrir el recorrido sin recargar:
+  // window.parent.postMessage({ tipo: 'recorrido:abrir', portal: 'kinesis' | 'wisfox', rol: 'docente' | 'orientacion' | 'familia' | 'coordinacion' | 'estudiante' }, origen).
+  // Solo se atiende desde el origen de los portales o desde esta misma página, igual que niky:abrir; un rol inválido cae al de ese portal.
+  const ORIGEN_PORTALES = 'https://profenapaipa.github.io';
+  window.addEventListener('message', (e) => {
+    if (e.origin !== ORIGEN_PORTALES && e.origin !== location.origin) return;
+    const d = e.data;
+    if (!d || typeof d !== 'object' || d.tipo !== 'recorrido:abrir' || !['kinesis', 'wisfox'].includes(d.portal)) return;
+    iniciar({ rol: ROLES.includes(d.rol) ? d.rol : (d.portal === 'wisfox' ? 'estudiante' : 'docente') });
+  });
+
   if (/[?&]tutorial=1/.test(location.search)) {
     const q = new URLSearchParams(location.search); q.delete('tutorial');
     const resto = q.toString();

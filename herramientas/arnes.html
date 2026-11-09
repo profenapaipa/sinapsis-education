@@ -1597,6 +1597,24 @@ async function flujoMovil() {
    mensajes como un chat que sugiere en qué puede ayudar, según el portal». Tres cosas se cuidan aparte: que no robe el foco, que no desborde
    a 390 px ni tape la barra inferior, y que con el movimiento calmado aparezca quieta. */
 // ---- tutorial ---- (js/tutorial.js: 5 roles x 6 ejemplos sobre las pantallas reales)
+// ---- recorrido ---- entradas directas al tutorial desde dentro de Kinesis y Wisfox: #/tutorial/<rol> y el mensaje recorrido:abrir.
+// Se prueban aquí porque Kinesis y Wisfox viven en otro repositorio: lo único que la plataforma controla es esta puerta de entrada.
+async function flujoRecorrido() {
+  await ir('#/tutorial/orientacion'); await espera(900);
+  afirmar('recorrido: #/tutorial/<rol> empieza directo en ese rol, sin pasar por el selector', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'orientacion', JSON.stringify({ activo: MTw().tutorial.estado.activo, rol: MTw().tutorial.estado.rol }));
+  tecla('Escape'); await espera(250);
+  await ir('#/'); await espera(300);
+  W().postMessage({ tipo: 'recorrido:abrir', portal: 'wisfox', rol: 'estudiante' }, '*'); await espera(900);
+  afirmar('recorrido: el mensaje recorrido:abrir abre el recorrido del rol pedido', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'estudiante', JSON.stringify({ activo: MTw().tutorial.estado.activo, rol: MTw().tutorial.estado.rol }));
+  tecla('Escape'); await espera(250);
+  W().postMessage({ tipo: 'recorrido:abrir', portal: 'otro', rol: 'docente' }, '*'); await espera(500);
+  afirmar('recorrido: un mensaje con un portal que no es Kinesis ni Wisfox se ignora', !MTw().tutorial.estado.activo);
+  W().postMessage({ tipo: 'recorrido:abrir', portal: 'kinesis', rol: 'no-existe' }, '*'); await espera(900);
+  afirmar('recorrido: un rol inválido cae al rol del portal (docente en Kinesis)', MTw().tutorial.estado.activo && MTw().tutorial.estado.rol === 'docente', JSON.stringify({ rol: MTw().tutorial.estado.rol }));
+  tecla('Escape'); await espera(250);
+}
+// ---- fin recorrido ----
+
 async function flujoTutorial() {
   const D = () => doc(); const W = () => ventana(); const MTw = () => W().MT;
   const tecla = (key) => D().dispatchEvent(new (W().KeyboardEvent)('keydown', { key, bubbles: true, cancelable: true }));
@@ -2140,6 +2158,9 @@ async function flujoNikyEstados() {
   // ---- tutorial ----
   try { await flujoTutorial(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'tutorial: ' + String(e && e.stack || e); }
   // ---- fin tutorial ----
+  // ---- recorrido ----
+  try { await flujoRecorrido(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'recorrido: ' + String(e && e.stack || e); }
+  // ---- fin recorrido ----
   // ---- niky ----
   try { await flujoNiky(); } catch (e) { salida.fatal = (salida.fatal ? salida.fatal + ' | ' : '') + 'niky: ' + String(e && e.stack || e); }
   // ---- fin niky ----
